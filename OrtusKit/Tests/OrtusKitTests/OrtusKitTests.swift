@@ -116,3 +116,12 @@ final class MailTests: XCTestCase {
         XCTAssertThrowsError(try JMAP.answers(Data(#"{"methodResponses":[["error",{"type":"forbidden"},"x"]]}"#.utf8)))
     }
 }
+
+final class ChatTests: XCTestCase {
+    func testRoomsAndTitles() throws {
+        let json = #"{"rooms":[{"id":"r1","name":"flood-response-2026","kind":"channel","unread":3,"state":"join","federated":true},{"id":"r2","name":"","kind":"direct","unread":0,"with":["@u2:ministry.example"]}],"people":{"@u2:ministry.example":{"name":"Anna Kowalska","local":true}},"me":"@u1:ministry.example"}"#
+        let rooms = try JSONDecoder().decode(Rooms.self, from: Data(json.utf8))
+        XCTAssertEqual("# flood-response-2026", rooms.title(rooms.rooms[0]))
+        XCTAssertEqual("Anna Kowalska", rooms.title(rooms.rooms[1]))
+    }
+}

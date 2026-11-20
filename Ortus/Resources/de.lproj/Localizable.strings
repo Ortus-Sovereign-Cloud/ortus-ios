@@ -38,3 +38,7 @@
 "rsvp.yes" = "Ja";
 "rsvp.maybe" = "Vielleicht";
 "rsvp.no" = "Nein";
+"chat.all" = "Alle";
+"chat.unread %lld" = "Ungelesen %lld";
+"chat.external" = "Extern";
+"chat.message %@" = "Nachricht an %@";

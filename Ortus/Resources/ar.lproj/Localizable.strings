@@ -38,3 +38,7 @@
 "rsvp.yes" = "نعم";
 "rsvp.maybe" = "ربما";
 "rsvp.no" = "لا";
+"chat.all" = "الكل";
+"chat.unread %lld" = "غير مقروءة %lld";
+"chat.external" = "خارجي";
+"chat.message %@" = "رسالة إلى %@";
