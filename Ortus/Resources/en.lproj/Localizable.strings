@@ -25,3 +25,16 @@
 "tab.files" = "Files";
 "tab.more" = "More";
 "more.signOut" = "Sign out";
+"inbox.title" = "Inbox";
+"inbox.important" = "Important";
+"inbox.other" = "Other";
+"inbox.feeds" = "Feeds";
+"inbox.empty" = "Nothing here.";
+"thread.count %lld" = "%lld messages";
+"thread.reply %@" = "Reply to %@…";
+"thread.send" = "Send";
+"thread.sent" = "Sent.";
+"thread.verified" = "verified";
+"rsvp.yes" = "Yes";
+"rsvp.maybe" = "Maybe";
+"rsvp.no" = "No";

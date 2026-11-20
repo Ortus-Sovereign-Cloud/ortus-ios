@@ -6,7 +6,7 @@ struct MainTabs: View {
 
     var body: some View {
         TabView {
-            Placeholder(title: "tab.mail").tabItem { Label("tab.mail", systemImage: "tray") }
+            InboxView().tabItem { Label("tab.mail", systemImage: "tray") }
             Placeholder(title: "tab.chat").tabItem { Label("tab.chat", systemImage: "bubble.left") }
             Placeholder(title: "tab.calendar").tabItem { Label("tab.calendar", systemImage: "calendar") }
             Placeholder(title: "tab.files").tabItem { Label("tab.files", systemImage: "folder") }

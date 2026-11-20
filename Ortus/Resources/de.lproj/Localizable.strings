@@ -25,3 +25,16 @@
 "tab.files" = "Dateien";
 "tab.more" = "Mehr";
 "more.signOut" = "Abmelden";
+"inbox.title" = "Posteingang";
+"inbox.important" = "Wichtig";
+"inbox.other" = "Andere";
+"inbox.feeds" = "Feeds";
+"inbox.empty" = "Hier ist nichts.";
+"thread.count %lld" = "%lld Nachrichten";
+"thread.reply %@" = "Antwort an %@ …";
+"thread.send" = "Senden";
+"thread.sent" = "Gesendet.";
+"thread.verified" = "bestätigt";
+"rsvp.yes" = "Ja";
+"rsvp.maybe" = "Vielleicht";
+"rsvp.no" = "Nein";

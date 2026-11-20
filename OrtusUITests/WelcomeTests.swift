@@ -27,6 +27,20 @@ final class WelcomeTests: XCTestCase {
         XCTAssertTrue(app.tabBars.buttons["More"].waitForExistence(timeout: 20), app.staticTexts["error"].exists ? app.staticTexts["error"].label : "no tab bar")
         app.tabBars.buttons["More"].tap()
         XCTAssertTrue(app.staticTexts["iryna@ministry.example"].waitForExistence(timeout: 10))
+
+        // Her inbox: Anna's mail; the thread; a quick reply goes out.
+        app.tabBars.buttons["Mail"].tap()
+        let row = app.staticTexts["Gauge report and updated shelter agreement"]
+        XCTAssertTrue(row.waitForExistence(timeout: 20))
+        attach(app, "inbox")
+        row.tap()
+        XCTAssertTrue(app.staticTexts["Anna Kowalska"].waitForExistence(timeout: 10))
+        let reply = app.textFields["reply"]
+        reply.tap()
+        reply.typeText("Thanks, will review")
+        app.buttons["Send"].tap()
+        XCTAssertTrue(app.staticTexts["Sent."].waitForExistence(timeout: 20), app.staticTexts["note"].exists ? app.staticTexts["note"].label : "not sent")
+        attach(app, "thread")
     }
 
     /// The first screen in every language; Arabic right to left.

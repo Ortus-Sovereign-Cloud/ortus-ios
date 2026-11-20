@@ -25,3 +25,16 @@
 "tab.files" = "الملفات";
 "tab.more" = "المزيد";
 "more.signOut" = "تسجيل الخروج";
+"inbox.title" = "البريد الوارد";
+"inbox.important" = "مهم";
+"inbox.other" = "أخرى";
+"inbox.feeds" = "النشرات";
+"inbox.empty" = "لا شيء هنا.";
+"thread.count %lld" = "%lld رسائل";
+"thread.reply %@" = "الرد على %@…";
+"thread.send" = "إرسال";
+"thread.sent" = "أُرسلت.";
+"thread.verified" = "موثّق";
+"rsvp.yes" = "نعم";
+"rsvp.maybe" = "ربما";
+"rsvp.no" = "لا";

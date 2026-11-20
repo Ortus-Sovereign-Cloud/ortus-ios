@@ -25,3 +25,16 @@
 "tab.files" = "Файли";
 "tab.more" = "Більше";
 "more.signOut" = "Вийти";
+"inbox.title" = "Вхідні";
+"inbox.important" = "Важливі";
+"inbox.other" = "Інші";
+"inbox.feeds" = "Розсилки";
+"inbox.empty" = "Тут нічого немає.";
+"thread.count %lld" = "Повідомлень: %lld";
+"thread.reply %@" = "Відповісти: %@…";
+"thread.send" = "Надіслати";
+"thread.sent" = "Надіслано.";
+"thread.verified" = "перевірено";
+"rsvp.yes" = "Так";
+"rsvp.maybe" = "Можливо";
+"rsvp.no" = "Ні";

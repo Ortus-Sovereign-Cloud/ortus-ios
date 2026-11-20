@@ -25,3 +25,16 @@
 "tab.files" = "Pliki";
 "tab.more" = "Więcej";
 "more.signOut" = "Wyloguj";
+"inbox.title" = "Odebrane";
+"inbox.important" = "Ważne";
+"inbox.other" = "Inne";
+"inbox.feeds" = "Subskrypcje";
+"inbox.empty" = "Nic tu nie ma.";
+"thread.count %lld" = "Wiadomości: %lld";
+"thread.reply %@" = "Odpowiedz: %@…";
+"thread.send" = "Wyślij";
+"thread.sent" = "Wysłano.";
+"thread.verified" = "zweryfikowano";
+"rsvp.yes" = "Tak";
+"rsvp.maybe" = "Może";
+"rsvp.no" = "Nie";
