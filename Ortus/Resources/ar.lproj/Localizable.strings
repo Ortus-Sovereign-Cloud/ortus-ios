@@ -83,3 +83,5 @@
 "admin.asked" = "لدى أصحابها رابط في بريدهم الوارد.";
 "admin.retrying" = "تتم إعادة المحاولة.";
 "admin.invited" = "أُرسلت الدعوة.";
+"doc.comments" = "التعليقات";
+"doc.comment" = "أضف تعليقًا";

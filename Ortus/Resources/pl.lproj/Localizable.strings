@@ -83,3 +83,5 @@
 "admin.asked" = "Właściciele mają link w skrzynce.";
 "admin.retrying" = "Ponawiam.";
 "admin.invited" = "Wysłano zaproszenie.";
+"doc.comments" = "Komentarze";
+"doc.comment" = "Dodaj komentarz";

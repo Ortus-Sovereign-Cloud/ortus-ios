@@ -83,3 +83,5 @@
 "admin.asked" = "Les titulaires ont un lien dans leur boîte.";
 "admin.retrying" = "Nouvelle tentative.";
 "admin.invited" = "Invitation envoyée.";
+"doc.comments" = "Commentaires";
+"doc.comment" = "Ajouter un commentaire";

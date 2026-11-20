@@ -83,3 +83,5 @@
 "admin.asked" = "The owners have a reconnect link in their inbox.";
 "admin.retrying" = "Trying again.";
 "admin.invited" = "Invitation sent.";
+"doc.comments" = "Comments";
+"doc.comment" = "Add a comment";

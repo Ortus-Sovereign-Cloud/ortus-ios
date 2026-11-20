@@ -9,7 +9,13 @@ struct DriveView: View {
         NavigationStack {
             FolderView(parent: nil, title: String(localized: "tab.files"))
                 .navigationDestination(for: DriveItem.self) { item in
-                    if item.isFolder { FolderView(parent: item.id, title: item.name) } else { ShareView(item: item) }
+                    if item.isFolder {
+                        FolderView(parent: item.id, title: item.name)
+                    } else if item.mime == "application/vnd.ortus.doc" {
+                        DocView(doc: item.id)
+                    } else {
+                        ShareView(item: item)
+                    }
                 }
         }
     }

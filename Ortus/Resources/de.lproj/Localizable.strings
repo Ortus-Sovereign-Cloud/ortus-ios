@@ -83,3 +83,5 @@
 "admin.asked" = "Die Inhaber haben einen Link im Posteingang.";
 "admin.retrying" = "Wird erneut versucht.";
 "admin.invited" = "Einladung gesendet.";
+"doc.comments" = "Kommentare";
+"doc.comment" = "Kommentar hinzufügen";
