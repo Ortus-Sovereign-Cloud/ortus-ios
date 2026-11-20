@@ -42,6 +42,8 @@ struct MoreView: View {
                 }
                 Section {
                     NavigationLink { ForYouView() } label: { Label("foryou.title", systemImage: "checkmark.seal") }
+                    NavigationLink { NotificationsView() } label: { Label("notify.title", systemImage: "bell") }
+                    NavigationLink { SearchView() } label: { Label("search.title", systemImage: "magnifyingglass") }
                 }
                 Section {
                     Button("more.signOut", role: .destructive) { model.signOut() }

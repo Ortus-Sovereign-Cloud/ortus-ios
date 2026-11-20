@@ -64,3 +64,6 @@
 "foryou.signed" = "Підписано.";
 "foryou.done" = "Готово.";
 "foryou.sentBack" = "Повернуто з телефона.";
+"notify.title" = "Сповіщення";
+"search.title" = "Пошук";
+"search.prompt" = "Пошта, файли, події, люди";

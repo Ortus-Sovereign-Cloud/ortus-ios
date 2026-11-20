@@ -64,3 +64,6 @@
 "foryou.signed" = "تم التوقيع.";
 "foryou.done" = "تم.";
 "foryou.sentBack" = "أُعيد من هاتفي.";
+"notify.title" = "الإشعارات";
+"search.title" = "بحث";
+"search.prompt" = "البريد والملفات والأحداث والأشخاص";

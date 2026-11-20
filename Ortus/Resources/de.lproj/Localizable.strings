@@ -64,3 +64,6 @@
 "foryou.signed" = "Unterschrieben.";
 "foryou.done" = "Erledigt.";
 "foryou.sentBack" = "Vom Telefon zurückgegeben.";
+"notify.title" = "Benachrichtigungen";
+"search.title" = "Suche";
+"search.prompt" = "Mail, Dateien, Termine, Personen";

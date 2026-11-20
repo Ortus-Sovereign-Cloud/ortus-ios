@@ -64,3 +64,6 @@
 "foryou.signed" = "Signed.";
 "foryou.done" = "Done.";
 "foryou.sentBack" = "Sent back from my phone.";
+"notify.title" = "Notifications";
+"search.title" = "Search";
+"search.prompt" = "Mail, files, events, people";

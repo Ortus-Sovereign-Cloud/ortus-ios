@@ -64,3 +64,6 @@
 "foryou.signed" = "Podpisano.";
 "foryou.done" = "Gotowe.";
 "foryou.sentBack" = "Odesłano z telefonu.";
+"notify.title" = "Powiadomienia";
+"search.title" = "Szukaj";
+"search.prompt" = "Poczta, pliki, wydarzenia, osoby";

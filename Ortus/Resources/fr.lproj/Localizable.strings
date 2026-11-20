@@ -64,3 +64,6 @@
 "foryou.signed" = "Signé.";
 "foryou.done" = "Fait.";
 "foryou.sentBack" = "Renvoyé depuis mon téléphone.";
+"notify.title" = "Notifications";
+"search.title" = "Recherche";
+"search.prompt" = "Messages, fichiers, événements, personnes";
