@@ -43,3 +43,11 @@
 "chat.external" = "خارجي";
 "chat.message %@" = "رسالة إلى %@";
 "calendar.free" = "لا شيء مخطط.";
+"share.title" = "مشاركة";
+"share.address" = "العنوان";
+"share.add" = "إضافة";
+"share.link" = "الرابط";
+"share.until %@" = "عرض فقط · حتى %@";
+"share.copy" = "نسخ الرابط";
+"share.copied" = "نُسخ الرابط.";
+"share.makeLink" = "أنشئ رابط عرض فقط لمدة 30 يومًا";

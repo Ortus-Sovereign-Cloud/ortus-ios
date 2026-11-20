@@ -43,3 +43,11 @@
 "chat.external" = "Zewnętrzny";
 "chat.message %@" = "Wiadomość do %@";
 "calendar.free" = "Nic nie zaplanowano.";
+"share.title" = "Udostępnij";
+"share.address" = "Adres";
+"share.add" = "Dodaj";
+"share.link" = "Link";
+"share.until %@" = "Tylko podgląd · do %@";
+"share.copy" = "Kopiuj link";
+"share.copied" = "Skopiowano link.";
+"share.makeLink" = "Utwórz link tylko do podglądu na 30 dni";
