@@ -42,3 +42,4 @@
 "chat.unread %lld" = "Unread %lld";
 "chat.external" = "External";
 "chat.message %@" = "Message %@";
+"calendar.free" = "Nothing planned.";

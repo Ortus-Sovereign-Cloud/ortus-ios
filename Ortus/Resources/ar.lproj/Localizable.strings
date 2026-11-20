@@ -42,3 +42,4 @@
 "chat.unread %lld" = "غير مقروءة %lld";
 "chat.external" = "خارجي";
 "chat.message %@" = "رسالة إلى %@";
+"calendar.free" = "لا شيء مخطط.";

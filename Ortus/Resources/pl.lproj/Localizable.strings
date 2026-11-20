@@ -42,3 +42,4 @@
 "chat.unread %lld" = "Nieprzeczytane %lld";
 "chat.external" = "Zewnętrzny";
 "chat.message %@" = "Wiadomość do %@";
+"calendar.free" = "Nic nie zaplanowano.";

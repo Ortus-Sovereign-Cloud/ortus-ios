@@ -8,7 +8,7 @@ struct MainTabs: View {
         TabView {
             InboxView().tabItem { Label("tab.mail", systemImage: "tray") }
             ChatsView().tabItem { Label("tab.chat", systemImage: "bubble.left") }
-            Placeholder(title: "tab.calendar").tabItem { Label("tab.calendar", systemImage: "calendar") }
+            CalendarView().tabItem { Label("tab.calendar", systemImage: "calendar") }
             Placeholder(title: "tab.files").tabItem { Label("tab.files", systemImage: "folder") }
             MoreView().tabItem { Label("tab.more", systemImage: "square.grid.2x2") }
         }

@@ -42,3 +42,4 @@
 "chat.unread %lld" = "Непрочитані %lld";
 "chat.external" = "Зовнішній";
 "chat.message %@" = "Повідомлення в %@";
+"calendar.free" = "Нічого не заплановано.";
