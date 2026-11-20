@@ -51,3 +51,16 @@
 "share.copy" = "Link kopieren";
 "share.copied" = "Link kopiert.";
 "share.makeLink" = "Link nur zum Ansehen für 30 Tage erstellen";
+"foryou.title" = "Für Sie";
+"foryou.approvals %lld" = "Freigaben %lld";
+"foryou.tasks %lld" = "Aufgaben %lld";
+"foryou.nothing" = "Nichts wartet auf Sie.";
+"foryou.sign" = "Unterschreiben";
+"foryou.approve" = "Freigeben";
+"foryou.step %lld %lld" = "Sie sind Schritt %lld von %lld";
+"foryou.sendBack" = "Zurückgeben";
+"foryou.signWithKey" = "Mit eID unterschreiben";
+"foryou.approveButton" = "Freigeben";
+"foryou.signed" = "Unterschrieben.";
+"foryou.done" = "Erledigt.";
+"foryou.sentBack" = "Vom Telefon zurückgegeben.";

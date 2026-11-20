@@ -51,3 +51,16 @@
 "share.copy" = "Kopiuj link";
 "share.copied" = "Skopiowano link.";
 "share.makeLink" = "Utwórz link tylko do podglądu na 30 dni";
+"foryou.title" = "Dla Ciebie";
+"foryou.approvals %lld" = "Akceptacje %lld";
+"foryou.tasks %lld" = "Zadania %lld";
+"foryou.nothing" = "Nic na Ciebie nie czeka.";
+"foryou.sign" = "Podpis";
+"foryou.approve" = "Akceptacja";
+"foryou.step %lld %lld" = "Jesteś krokiem %lld z %lld";
+"foryou.sendBack" = "Odeślij";
+"foryou.signWithKey" = "Podpisz eID";
+"foryou.approveButton" = "Akceptuj";
+"foryou.signed" = "Podpisano.";
+"foryou.done" = "Gotowe.";
+"foryou.sentBack" = "Odesłano z telefonu.";

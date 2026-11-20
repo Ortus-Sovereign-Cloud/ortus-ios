@@ -51,3 +51,16 @@
 "share.copy" = "Копіювати посилання";
 "share.copied" = "Посилання скопійовано.";
 "share.makeLink" = "Створити посилання лише для перегляду на 30 днів";
+"foryou.title" = "Для вас";
+"foryou.approvals %lld" = "Погодження %lld";
+"foryou.tasks %lld" = "Завдання %lld";
+"foryou.nothing" = "Нічого на вас не чекає.";
+"foryou.sign" = "Підпис";
+"foryou.approve" = "Погодження";
+"foryou.step %lld %lld" = "Ви крок %lld з %lld";
+"foryou.sendBack" = "Повернути";
+"foryou.signWithKey" = "Підписати eID";
+"foryou.approveButton" = "Погодити";
+"foryou.signed" = "Підписано.";
+"foryou.done" = "Готово.";
+"foryou.sentBack" = "Повернуто з телефона.";

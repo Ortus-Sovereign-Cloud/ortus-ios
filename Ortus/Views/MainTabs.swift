@@ -41,6 +41,9 @@ struct MoreView: View {
                     }
                 }
                 Section {
+                    NavigationLink { ForYouView() } label: { Label("foryou.title", systemImage: "checkmark.seal") }
+                }
+                Section {
                     Button("more.signOut", role: .destructive) { model.signOut() }
                 }
             }

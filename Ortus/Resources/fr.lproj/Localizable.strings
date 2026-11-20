@@ -51,3 +51,16 @@
 "share.copy" = "Copier le lien";
 "share.copied" = "Lien copié.";
 "share.makeLink" = "Créer un lien en lecture seule pour 30 jours";
+"foryou.title" = "Pour vous";
+"foryou.approvals %lld" = "Validations %lld";
+"foryou.tasks %lld" = "Tâches %lld";
+"foryou.nothing" = "Rien ne vous attend.";
+"foryou.sign" = "Signer";
+"foryou.approve" = "Valider";
+"foryou.step %lld %lld" = "Vous êtes l'étape %lld sur %lld";
+"foryou.sendBack" = "Renvoyer";
+"foryou.signWithKey" = "Signer avec l'eID";
+"foryou.approveButton" = "Valider";
+"foryou.signed" = "Signé.";
+"foryou.done" = "Fait.";
+"foryou.sentBack" = "Renvoyé depuis mon téléphone.";

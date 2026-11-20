@@ -51,3 +51,16 @@
 "share.copy" = "نسخ الرابط";
 "share.copied" = "نُسخ الرابط.";
 "share.makeLink" = "أنشئ رابط عرض فقط لمدة 30 يومًا";
+"foryou.title" = "لك";
+"foryou.approvals %lld" = "الموافقات %lld";
+"foryou.tasks %lld" = "المهام %lld";
+"foryou.nothing" = "لا شيء ينتظرك.";
+"foryou.sign" = "توقيع";
+"foryou.approve" = "موافقة";
+"foryou.step %lld %lld" = "أنت الخطوة %lld من %lld";
+"foryou.sendBack" = "إعادة";
+"foryou.signWithKey" = "وقّع بالهوية الإلكترونية";
+"foryou.approveButton" = "وافق";
+"foryou.signed" = "تم التوقيع.";
+"foryou.done" = "تم.";
+"foryou.sentBack" = "أُعيد من هاتفي.";

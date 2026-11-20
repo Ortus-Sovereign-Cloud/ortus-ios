@@ -51,3 +51,16 @@
 "share.copy" = "Copy link";
 "share.copied" = "Link copied.";
 "share.makeLink" = "Make a view-only link for 30 days";
+"foryou.title" = "For you";
+"foryou.approvals %lld" = "Approvals %lld";
+"foryou.tasks %lld" = "Tasks %lld";
+"foryou.nothing" = "Nothing waits for you.";
+"foryou.sign" = "Sign";
+"foryou.approve" = "Approve";
+"foryou.step %lld %lld" = "You are step %lld of %lld";
+"foryou.sendBack" = "Send back";
+"foryou.signWithKey" = "Sign with eID";
+"foryou.approveButton" = "Approve";
+"foryou.signed" = "Signed.";
+"foryou.done" = "Done.";
+"foryou.sentBack" = "Sent back from my phone.";
