@@ -1,0 +1,67 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  kit:
+    # The shared code, on Linux (as the build machine runs it).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.1"
+      - run: cd OrtusKit && swift test
+
+  ios:
+    runs-on: macos-15
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: The Ortus program at its pinned parts
+        uses: actions/checkout@v4
+        with:
+          repository: Ortus-Sovereign-Cloud/ortus
+          path: program
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            program/target
+          key: ortus-macos-${{ hashFiles('program/pins.toml', 'program/Cargo.lock') }}
+          restore-keys: ortus-macos-
+      - name: Build Ortus
+        run: |
+          cd program
+          ci/fetch.sh
+          cargo build --release -p ortus
+      - name: Start Ortus and invite Iryna
+        run: ci/start-ortus.sh program/target/release/ortus
+      - name: Tests in the simulator
+        run: |
+          brew install xcodegen
+          xcodegen generate
+          set -o pipefail
+          xcodebuild test -project Ortus.xcodeproj -scheme Ortus \
+            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -resultBundlePath results.xcresult \
+            TEST_RUNNER_ORTUS_SERVER="$ORTUS_SERVER" TEST_RUNNER_ORTUS_CODE="$ORTUS_CODE" | tail -n 80
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: results
+          path: results.xcresult
