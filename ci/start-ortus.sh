@@ -4,12 +4,13 @@
 # (her invitation code) for the phone tests ($GITHUB_ENV when in Actions).
 set -euo pipefail
 binary="$1"
-port=8090
+free() { python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1])'; }
+port=$(free) smtp=$(free) submission=$(free) imap=$(free)
 data="$(mktemp -d)"
 token="$(openssl rand -hex 16)"
 export ORTUS_ROLES=all ORTUS_DATA_DIR="$data" ORTUS_WEB_IP=127.0.0.1 ORTUS_WEB_PORT=$port \
   ORTUS_PUBLIC_URL="http://127.0.0.1:$port" ORTUS_SETUP_TOKEN="$token" \
-  ORTUS_SMTP_LISTEN=127.0.0.1:2525 ORTUS_SUBMISSION_LISTEN=127.0.0.1:2587 ORTUS_IMAP_LISTEN=127.0.0.1:2143 \
+  ORTUS_SMTP_LISTEN=127.0.0.1:$smtp ORTUS_SUBMISSION_LISTEN=127.0.0.1:$submission ORTUS_IMAP_LISTEN=127.0.0.1:$imap \
   ORTUS_MEDIA_LISTEN=127.0.0.1:0 ORTUS_MAIL_HOSTNAME=mail.ministry.example
 nohup "$binary" serve > "$data/ortus.log" 2>&1 &
 for _ in $(seq 1 60); do curl -fs "http://127.0.0.1:$port/api/v1/health" > /dev/null && break; sleep 1; done
@@ -21,8 +22,8 @@ code="$(printf '%s' "$invited" | python3 -c 'import json,sys; print(json.load(sy
 # Mail for Iryna: the domain, then a message from Anna, as another server
 # would hand it over.
 api -X POST -H "Authorization: Bearer $session" "http://127.0.0.1:$port/api/v1/mail/admin/domains" -d '{"domain":"ministry.example"}' > /dev/null
-python3 - <<'MAIL'
-import smtplib
+SMTP_PORT=$smtp python3 - <<'MAIL'
+import os, smtplib
 message = """From: Anna Kowalska <anna@regional.example>\r
 To: iryna@ministry.example\r
 Subject: Gauge report and updated shelter agreement\r
@@ -30,7 +31,7 @@ Message-ID: <gauge-1@regional.example>\r
 \r
 Attached is today's gauge report and the updated shelter agreement.\r
 """
-with smtplib.SMTP("127.0.0.1", 2525) as s:
+with smtplib.SMTP("127.0.0.1", int(os.environ["SMTP_PORT"])) as s:
     s.sendmail("anna@regional.example", ["iryna@ministry.example"], message)
 MAIL
 echo "ortus: running at http://127.0.0.1:$port; Iryna's code is ready"
