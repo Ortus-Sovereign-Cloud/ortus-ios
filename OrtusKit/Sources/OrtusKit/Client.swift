@@ -11,6 +11,12 @@ public struct APIError: Error, Equatable, LocalizedError {
     public let code: String
     public let message: String
     public var errorDescription: String? { message }
+
+    public init(status: Int, code: String, message: String) {
+        self.status = status
+        self.code = code
+        self.message = message
+    }
 }
 
 /// Sends a request and gives back the status and body (stubbed in tests).

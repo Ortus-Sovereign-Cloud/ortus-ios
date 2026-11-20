@@ -88,3 +88,31 @@ final class ClientTests: XCTestCase {
         XCTAssertEqual("ortus", box.requests[1].value(forHTTPHeaderField: "X-Requested-With"))
     }
 }
+
+final class MailTests: XCTestCase {
+    func testInboxAsksAndReads() async throws {
+        let box = Recorded.Box()
+        let body = #"{"methodResponses":[["Mailbox/get",{"list":[{"id":"mb1","name":"Inbox","role":"inbox","unreadEmails":3}]},"b"]]}"#
+        let client = Client(server: URL(string: "https://ortus.example")!, token: "t", transport: Recorded(status: 200, body: body, seen: box))
+        // The second answer lacks the lists: nothing breaks, nothing shown.
+        let got = try await client.inbox(.important)
+        XCTAssertEqual([], got.emails)
+        let sent = try JSONSerialization.jsonObject(with: box.requests[1].httpBody!) as! [String: Any]
+        let calls = sent["methodCalls"] as! [[Any]]
+        XCTAssertEqual("Email/query", calls[0][0] as? String)
+        XCTAssertEqual("https://ortus.example/api/v1/mail/web/jmap", box.requests[1].url?.absoluteString)
+    }
+
+    func testEmailDecodes() throws {
+        let json = #"[{"id":"m1","threadId":"t1","subject":"Gauge report","from":[{"name":"Anna Kowalska","email":"anna@regional.example"}],"receivedAt":"2026-11-20T10:42:00Z","preview":"Attached","keywords":{"$seen":true},"ortusInvite":{"uid":"u","method":"REQUEST","summary":"Review","start":1795784400000,"end":1795786200000,"answer":"NEEDS-ACTION","cancelled":false,"inCalendar":true,"organizer":null}}]"#
+        let emails = try JMAP.decode(try JSONSerialization.jsonObject(with: Data(json.utf8)), as: [Email].self)
+        XCTAssertEqual("Anna Kowalska", emails[0].sender)
+        XCTAssertFalse(emails[0].unread)
+        XCTAssertEqual("NEEDS-ACTION", emails[0].ortusInvite?.answer)
+        XCTAssertNotNil(emails[0].date)
+    }
+
+    func testMethodErrors() {
+        XCTAssertThrowsError(try JMAP.answers(Data(#"{"methodResponses":[["error",{"type":"forbidden"},"x"]]}"#.utf8)))
+    }
+}

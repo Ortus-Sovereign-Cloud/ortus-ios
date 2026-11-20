@@ -16,11 +16,9 @@ jobs:
   kit:
     # The shared code, on Linux (as the build machine runs it).
     runs-on: ubuntu-latest
+    container: swift:6.1
     steps:
       - uses: actions/checkout@v4
-      - uses: swift-actions/setup-swift@v2
-        with:
-          swift-version: "6.1"
       - run: cd OrtusKit && swift test
 
   ios:
