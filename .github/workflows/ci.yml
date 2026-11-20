@@ -54,10 +54,12 @@ jobs:
           brew install xcodegen
           xcodegen generate
           set -o pipefail
-          xcodebuild test -project Ortus.xcodeproj -scheme Ortus \
+          # TEST_RUNNER_<name> in xcodebuild's environment reaches the
+          # tests as <name>.
+          TEST_RUNNER_ORTUS_SERVER="$ORTUS_SERVER" TEST_RUNNER_ORTUS_CODE="$ORTUS_CODE" \
+            xcodebuild test -project Ortus.xcodeproj -scheme Ortus \
             -destination 'platform=iOS Simulator,name=iPhone 16' \
-            -resultBundlePath results.xcresult \
-            TEST_RUNNER_ORTUS_SERVER="$ORTUS_SERVER" TEST_RUNNER_ORTUS_CODE="$ORTUS_CODE" | tail -n 80
+            -resultBundlePath results.xcresult | tail -n 80
       - if: always()
         uses: actions/upload-artifact@v4
         with:
