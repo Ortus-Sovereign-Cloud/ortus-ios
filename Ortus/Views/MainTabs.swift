@@ -44,6 +44,9 @@ struct MoreView: View {
                     NavigationLink { ForYouView() } label: { Label("foryou.title", systemImage: "checkmark.seal") }
                     NavigationLink { NotificationsView() } label: { Label("notify.title", systemImage: "bell") }
                     NavigationLink { SearchView() } label: { Label("search.title", systemImage: "magnifyingglass") }
+                    if model.me?.role == "admin" || model.me?.role == "owner" {
+                        NavigationLink { AdminView() } label: { Label("admin.title", systemImage: "shield") }
+                    }
                 }
                 Section {
                     Button("more.signOut", role: .destructive) { model.signOut() }
