@@ -15,6 +15,9 @@ keys() { grep -o '^"[^"]*"' "Ortus/Resources/$1.lproj/Localizable.strings" | sor
 for lang in pl uk de fr ar; do
   diff <(keys en) <(keys "$lang") > /dev/null || { echo "check: $lang texts differ from en" >&2; exit 1; }
 done
+for lang in en pl uk de fr ar; do
+  grep -q '^"NSFaceIDUsageDescription" = ' "Ortus/Resources/$lang.lproj/InfoPlist.strings" || { echo "check: $lang has no Face ID text" >&2; exit 1; }
+done
 (cd OrtusKit && swift test)
 if command -v xcodebuild > /dev/null && command -v xcodegen > /dev/null; then
   xcodegen generate
