@@ -70,8 +70,16 @@ struct JoinView: View {
                     .textContentType(.password)
                     .padding(12).background(Theme.surface2, in: RoundedRectangle(cornerRadius: 12))
                     .accessibilityIdentifier("password")
+                    .submitLabel(.go)
+                    .onSubmit {
+                        if !server.isEmpty, email.contains("@"), !password.isEmpty {
+                            Task { await model.signInWithPassword(server: server, email: email, password: password) }
+                        }
+                    }
             } else {
                 field("join.totp", $totp, id: "totp").keyboardType(Self.codeKeyboard).textContentType(Self.codeHint)
+                    .submitLabel(.go)
+                    .onSubmit { if totp.filter(\.isNumber).count >= 6 { Task { await model.signInWithCode(totp) } } }
             }
             if let error = model.error {
                 Text(error).foregroundStyle(.red).font(.callout).accessibilityIdentifier("error")
