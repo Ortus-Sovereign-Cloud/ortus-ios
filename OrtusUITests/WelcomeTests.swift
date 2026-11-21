@@ -68,6 +68,24 @@ final class WelcomeTests: XCTestCase {
         XCTAssertTrue(app.tabBars.buttons["More"].waitForExistence(timeout: 20), app.staticTexts["error"].exists ? app.staticTexts["error"].label : "not back in")
     }
 
+    /// An invitation page on the phone hands the app its link
+    /// (ortus://join): the app joins with it, and the phone becomes the key.
+    func testAnInvitationLinkOpensTheApp() throws {
+        try need("ORTUS_SERVER", "ORTUS_LINK_CODE")
+        let env = ProcessInfo.processInfo.environment
+        let app = app()
+        app.launchEnvironment["ORTUS_SERVER"] = ""
+        app.launchEnvironment["ORTUS_CODE"] = ""
+        app.launch()
+        XCTAssertTrue(app.textFields["code"].waitForExistence(timeout: 20))
+        var link = URLComponents()
+        link.scheme = "ortus"
+        link.host = "join"
+        link.queryItems = [URLQueryItem(name: "server", value: env["ORTUS_SERVER"]), URLQueryItem(name: "code", value: env["ORTUS_LINK_CODE"])]
+        app.open(link.url!)
+        XCTAssertTrue(app.buttons["makeKey"].waitForExistence(timeout: 30), app.staticTexts["error"].exists ? app.staticTexts["error"].label : "not joined")
+    }
+
     /// The owner signs in with a password and the authenticator's code.
     func testAPasswordAndACode() throws {
         try need("ORTUS_SERVER", "ORTUS_OWNER_TOTP")

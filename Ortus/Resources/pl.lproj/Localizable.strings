@@ -100,3 +100,5 @@
 "join.signIn" = "Zaloguj się";
 "join.wrong" = "Ten adres i hasło nie pasują do siebie.";
 "join.withCode" = "Użyj kodu z listu powitalnego";
+"join.scan" = "Zeskanuj kod QR zaproszenia";
+"join.badLink" = "To nie jest zaproszenie do Ortus.";

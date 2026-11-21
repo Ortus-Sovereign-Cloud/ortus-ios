@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Invitation links of these installations open the app (their
+       /.well-known/apple-app-site-association names it). -->
+  <key>com.apple.developer.associated-domains</key>
+  <array>
+    <string>applinks:ortus.cc</string>
+  </array>
+</dict>
+</plist>

@@ -180,3 +180,37 @@ final class AnswersTests: XCTestCase {
         XCTAssertThrowsError(try WebAuthn.checkedRPID("ple.org", publicURL: "https://ortus.example.org"))
     }
 }
+
+final class InvitationLinkTests: XCTestCase {
+    let code = "GrZQMSTSLFQ-bZjJLte7CE2wAbAZye7iS0osZU1a8os"
+
+    func testTheAppsOwnLink() {
+        let link = InvitationLink.parse("ortus://join?server=https%3A%2F%2FOrtus.cc&code=\(code)")
+        XCTAssertEqual(InvitationLink(server: "https://ortus.cc", code: code), link)
+        // A test installation on a port, over plain HTTP.
+        XCTAssertEqual("http://127.0.0.1:7900", InvitationLink.parse("ortus://join?server=http%3A%2F%2F127.0.0.1%3A7900&code=\(code)")?.server)
+    }
+
+    func testAnInvitationLinkOrItsQRCode() {
+        XCTAssertEqual(InvitationLink(server: "https://ortus.cc", code: code),
+                       InvitationLink.parse("  https://ortus.cc/welcome/accept#\(code)\n"))
+        XCTAssertEqual("https://work.ministry.example:8443",
+                       InvitationLink.parse("https://work.ministry.example:8443/welcome/accept#\(code)")?.server)
+    }
+
+    func testAnythingElseIsNot() {
+        for text in [
+            "",
+            "https://ortus.cc/welcome/accept",            // no code
+            "https://ortus.cc/sign-in#\(code)",            // another page
+            "https://ortus.cc/welcome/accept#short",       // not a code
+            "https://ortus.cc/welcome/accept#\(code)<script>",
+            "ortus://join?code=\(code)",                   // no installation
+            "ortus://join?server=ftp%3A%2F%2Fx&code=\(code)",
+            "ortus://other?server=https%3A%2F%2Fortus.cc&code=\(code)",
+            "mailto:someone@ortus.cc",
+        ] {
+            XCTAssertNil(InvitationLink.parse(text), text)
+        }
+    }
+}

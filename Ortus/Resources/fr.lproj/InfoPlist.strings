@@ -1,1 +1,2 @@
 "NSFaceIDUsageDescription" = "Face ID protège la clé que ce téléphone garde pour vous.";
+"NSCameraUsageDescription" = "L’appareil photo lit le code QR de votre invitation.";

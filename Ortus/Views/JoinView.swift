@@ -1,4 +1,6 @@
 import SwiftUI
+import VisionKit
+import OrtusKit
 
 /// First start: the installation's address and the code from the welcome
 /// letter (or the invitation link itself).
@@ -9,6 +11,7 @@ struct JoinView: View {
     @State private var code = ProcessInfo.processInfo.environment["ORTUS_CODE"] ?? ""
 
     @State private var withPassword = false
+    @State private var scanning = false
 
     /// AutoFill offers the code (from Passwords) in the app people use; UI
     /// tests type it, which the one-time-code field drops under XCUITest.
@@ -64,6 +67,15 @@ struct JoinView: View {
                     .textInputAutocapitalization(.characters).autocorrectionDisabled()
                     .padding(12).background(Theme.surface2, in: RoundedRectangle(cornerRadius: 12))
                     .accessibilityIdentifier("code")
+                // The invitation's QR code, read by the camera (where it can).
+                if DataScannerViewController.isSupported {
+                    Button { scanning = true } label: {
+                        Label("join.scan", systemImage: "qrcode.viewfinder").frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(model.busy)
+                    .accessibilityIdentifier("scan")
+                }
             } else if model.ticket == nil {
                 field("join.email", $email, id: "email").keyboardType(.emailAddress).textContentType(.username)
                 SecureField("join.password", text: $password)
@@ -121,6 +133,61 @@ struct JoinView: View {
             withPhone = model.hasKey(for: server)
         }
         .onChange(of: server) { withPhone = model.hasKey(for: server) }
+        // An invitation handed to the app fills in what it joins with.
+        .onChange(of: model.handed) {
+            if let handed = model.handed {
+                server = handed.server
+                code = handed.code
+                withPassword = false
+            }
+        }
+        .sheet(isPresented: $scanning) {
+            CodeScanner { text in
+                scanning = false
+                model.open(text)
+            }
+            .ignoresSafeArea()
+        }
+    }
+}
+
+/// The camera, reading an invitation's QR code.
+struct CodeScanner: UIViewControllerRepresentable {
+    let found: (String) -> Void
+
+    func makeUIViewController(context: Context) -> DataScannerViewController {
+        let scanner = DataScannerViewController(
+            recognizedDataTypes: [.barcode(symbologies: [.qr])],
+            qualityLevel: .balanced,
+            isHighlightingEnabled: true
+        )
+        scanner.delegate = context.coordinator
+        return scanner
+    }
+
+    func updateUIViewController(_ scanner: DataScannerViewController, context: Context) {
+        if !scanner.isScanning { try? scanner.startScanning() }
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator(found: found) }
+
+    @MainActor
+    final class Coordinator: NSObject, DataScannerViewControllerDelegate {
+        let found: (String) -> Void
+        private var done = false
+
+        init(found: @escaping (String) -> Void) { self.found = found }
+
+        /// The first QR code that is an Ortus invitation.
+        func dataScanner(_ scanner: DataScannerViewController, didAdd added: [RecognizedItem], allItems: [RecognizedItem]) {
+            for item in added {
+                guard !done, case .barcode(let code) = item, let text = code.payloadStringValue,
+                      InvitationLink.parse(text) != nil else { continue }
+                done = true
+                scanner.stopScanning()
+                found(text)
+            }
+        }
     }
 }
 

@@ -40,6 +40,8 @@ targets:
           CODE_SIGN_IDENTITY: "Apple Development"
           CODE_SIGNING_REQUIRED: "YES"
           DEVELOPMENT_TEAM: XD7JHZ5DB3
+          # Invitation links on ortus.cc open the app (universal links).
+          CODE_SIGN_ENTITLEMENTS: Ortus.entitlements
     info:
       path: Ortus/Info.plist
       properties:
@@ -54,6 +56,11 @@ targets:
         ITSAppUsesNonExemptEncryption: false
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         NSFaceIDUsageDescription: Face ID guards the key this phone keeps for you.
+        NSCameraUsageDescription: The camera reads the QR code of your invitation.
+        # ortus://join?server=…&code=…, which an invitation page offers on a phone.
+        CFBundleURLTypes:
+          - CFBundleURLName: cc.ortus.app.join
+            CFBundleURLSchemes: [ortus]
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
   OrtusUITests:

@@ -1,1 +1,2 @@
 "NSFaceIDUsageDescription" = "Face ID захищає ключ, який цей телефон зберігає для вас.";
+"NSCameraUsageDescription" = "Камера зчитує QR-код вашого запрошення.";

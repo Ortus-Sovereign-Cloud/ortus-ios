@@ -109,6 +109,21 @@ final class AppModel: ObservableObject {
         }
     }
 
+    /// The invitation the app was last handed (a link, a scanned code).
+    @Published var handed: InvitationLink?
+
+    /// An invitation handed to the app: when no one is signed in here, its
+    /// person joins at once; otherwise the phone stays with its account.
+    func open(_ text: String) {
+        guard let invitation = InvitationLink.parse(text) else {
+            if stage == .join { error = String(localized: "join.badLink") }
+            return
+        }
+        guard stage == .join, !busy else { return }
+        handed = invitation
+        Task { await join(server: invitation.server, code: invitation.code) }
+    }
+
     /// Makes the phone a passkey of the account (Face ID guards it). The
     /// key becomes the phone's only once the installation has taken it.
     func makeKey() async {
