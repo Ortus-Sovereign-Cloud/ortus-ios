@@ -20,7 +20,8 @@ concurrency:
 
 jobs:
   testflight:
-    runs-on: macos-15
+    # The App Store takes builds from Xcode 26 or later only.
+    runs-on: macos-26
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -34,6 +35,11 @@ jobs:
           printf '%s\n' "$ASC_KEY_P8" > "$key"
           chmod 600 "$key"
           echo "ASC_KEY_PATH=$key" >> "$GITHUB_ENV"
+      - name: The newest Xcode
+        run: |
+          xcode=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          sudo xcode-select -s "$xcode"
+          xcodebuild -version
       - name: Archive
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}

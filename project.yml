@@ -29,6 +29,8 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: cc.ortus.app
+        # iPhone only (portrait); on an iPad it runs as the iPhone app.
+        TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
       configs:
         # Store builds (ci/release.yml): signed by the team, the
