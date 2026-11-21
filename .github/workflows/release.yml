@@ -1,0 +1,74 @@
+name: release
+
+# A TestFlight build of the app. Run by hand (Actions → release → Run
+# workflow): with "upload" off it signs and exports only (a dry run that
+# publishes nothing); with it on, the build goes to App Store Connect.
+on:
+  workflow_dispatch:
+    inputs:
+      upload:
+        description: Upload to App Store Connect (TestFlight)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  testflight:
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: The API key
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+        run: |
+          test -n "$ASC_KEY_P8" && test -n "$ASC_KEY_ID" || { echo "release: the App Store Connect key is not set" >&2; exit 1; }
+          key="$RUNNER_TEMP/AuthKey_$ASC_KEY_ID.p8"
+          printf '%s\n' "$ASC_KEY_P8" > "$key"
+          chmod 600 "$key"
+          echo "ASC_KEY_PATH=$key" >> "$GITHUB_ENV"
+      - name: Archive
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          brew install xcodegen
+          xcodegen generate
+          set -o pipefail
+          # Every build a new number: the run number, after the ones made by hand.
+          xcodebuild archive -project Ortus.xcodeproj -scheme Ortus -configuration Release \
+            -destination generic/platform=iOS -archivePath "$RUNNER_TEMP/Ortus.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            CURRENT_PROJECT_VERSION="$((100 + GITHUB_RUN_NUMBER))" > archive.log 2>&1 || { tail -n 80 archive.log; exit 1; }
+          tail -n 5 archive.log
+      - name: Sign for the App Store${{ inputs.upload && ' and upload' || ' (dry run)' }}
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          DESTINATION: ${{ inputs.upload && 'upload' || 'export' }}
+        run: |
+          sed "s/DESTINATION/$DESTINATION/" ci/ExportOptions.plist > "$RUNNER_TEMP/ExportOptions.plist"
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/Ortus.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID" > export.log 2>&1 || { tail -n 80 export.log; exit 1; }
+          tail -n 5 export.log
+          ls -la "$RUNNER_TEMP/export"
+      - if: always()
+        name: Forget the key
+        run: rm -f "$RUNNER_TEMP"/AuthKey_*.p8
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-logs
+          path: |
+            archive.log
+            export.log
