@@ -200,7 +200,7 @@ final class AppModel: ObservableObject {
             // A phone that is not yet their key becomes it next.
             stage = PhoneKey.load(for: client.server) == nil ? .welcome : .signedIn
         } catch {
-            if (error as? APIError)?.code == "ticket_expired" { ticket = nil }
+            if (error as? APIError)?.code == "ticket_expired" { self.ticket = nil }
             self.error = say(error)
         }
     }
