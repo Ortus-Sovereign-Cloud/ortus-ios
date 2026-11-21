@@ -71,7 +71,7 @@ struct AdminView: View {
             note = String(localized: String.LocalizationValue(done))
             await load()
         } catch {
-            note = (error as? APIError)?.message ?? error.localizedDescription
+            note = model.say(error)
         }
     }
 

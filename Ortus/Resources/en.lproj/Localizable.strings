@@ -85,3 +85,11 @@
 "admin.invited" = "Invitation sent.";
 "doc.comments" = "Comments";
 "doc.comment" = "Add a comment";
+"error.network" = "Ortus cannot be reached. Check the connection and try again.";
+"error.generic" = "That did not work. Try again.";
+"key.noLock" = "Set a screen lock on this phone first: the key needs it.";
+"key.invalidated" = "This phone's key no longer works (its fingerprints or face changed). Make a new key.";
+"foryou.sentBackComment" = "Sent back from my phone.";
+"calendar.previous" = "Previous day";
+"calendar.next" = "Next day";
+"join.withPhone" = "Sign in with this phone";

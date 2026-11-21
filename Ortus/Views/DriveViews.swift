@@ -117,7 +117,7 @@ struct ShareView: View {
             email = ""
             await load()
         } catch {
-            note = (error as? APIError)?.message ?? error.localizedDescription
+            note = model.say(error)
         }
     }
 
@@ -126,7 +126,7 @@ struct ShareView: View {
             shares = try await model.client?.makeLink(item)
             await load()
         } catch {
-            note = (error as? APIError)?.message ?? error.localizedDescription
+            note = model.say(error)
         }
     }
 }

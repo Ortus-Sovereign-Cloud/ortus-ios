@@ -49,7 +49,7 @@ struct MoreView: View {
                     }
                 }
                 Section {
-                    Button("more.signOut", role: .destructive) { model.signOut() }
+                    Button("more.signOut", role: .destructive) { Task { await model.signOut() } }
                 }
             }
             .navigationTitle("tab.more")

@@ -5,6 +5,7 @@ import SwiftUI
 struct JoinView: View {
     @EnvironmentObject var model: AppModel
     @State private var server = ProcessInfo.processInfo.environment["ORTUS_SERVER"] ?? ""
+    @State private var withPhone = false
     @State private var code = ProcessInfo.processInfo.environment["ORTUS_CODE"] ?? ""
 
     var body: some View {
@@ -31,7 +32,23 @@ struct JoinView: View {
             }
             .buttonStyle(.borderedProminent).clipShape(RoundedRectangle(cornerRadius: 16))
             .disabled(model.busy || server.isEmpty || code.isEmpty)
+            // The phone is already their key: back in without a new invitation.
+            if withPhone {
+                Button {
+                    Task { await model.signInAgain(server: server) }
+                } label: {
+                    Text("join.withPhone").font(.headline).frame(maxWidth: .infinity).padding(16)
+                }
+                .buttonStyle(.bordered).clipShape(RoundedRectangle(cornerRadius: 16))
+                .disabled(model.busy || server.isEmpty)
+                .accessibilityIdentifier("withPhone")
+            }
         }
+        .onAppear {
+            if server.isEmpty, let last = model.lastServer { server = last.absoluteString }
+            withPhone = model.hasKey(for: server)
+        }
+        .onChange(of: server) { withPhone = model.hasKey(for: server) }
         .padding(24)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(Theme.background)
@@ -48,7 +65,9 @@ struct Mark: View {
             }
             Capsule().fill(Theme.teal).frame(width: 47, height: 5)
         }
-        .accessibilityHidden(true)
+        .accessibilityElement()
+        .accessibilityLabel("Ortus")
+        .accessibilityIdentifier("mark")
         .padding(.bottom, 16)
     }
 }

@@ -24,10 +24,21 @@ public protocol Transport: Sendable {
     func send(_ request: URLRequest) async throws -> (Int, Data)
 }
 
+/// URLSession without cookies or a disk cache: the session lives only in
+/// the Keychain (the server's Set-Cookie is never kept).
 public struct URLSessionTransport: Transport {
+    private static let session: URLSession = {
+        let config = URLSessionConfiguration.ephemeral
+        config.httpCookieAcceptPolicy = .never
+        config.httpShouldSetCookies = false
+        config.httpCookieStorage = nil
+        config.urlCache = nil
+        return URLSession(configuration: config)
+    }()
+
     public init() {}
     public func send(_ request: URLRequest) async throws -> (Int, Data) {
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await Self.session.data(for: request)
         return ((response as? HTTPURLResponse)?.statusCode ?? 0, data)
     }
 }
@@ -49,8 +60,9 @@ public final class Client: @unchecked Sendable {
         if text.isEmpty { return nil }
         if !text.contains("://") { text = "https://" + text }
         while text.hasSuffix("/") { text.removeLast() }
-        guard let url = URL(string: text), let scheme = url.scheme, ["http", "https"].contains(scheme), url.host != nil else { return nil }
-        return url
+        guard let url = URL(string: text), let scheme = url.scheme?.lowercased(), ["http", "https"].contains(scheme), url.host != nil else { return nil }
+        // An installation lives at its origin: "Ortus.Example:443/x" is https://ortus.example.
+        return URL(string: WebAuthn.origin(publicURL: url.absoluteString))
     }
 
     public func request(_ method: String, _ path: String, body: Data? = nil) -> URLRequest {
@@ -73,7 +85,7 @@ public final class Client: @unchecked Sendable {
         guard (200..<300).contains(status) else {
             let e = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
             let error = e?["error"] as? [String: Any] ?? e ?? [:]
-            throw APIError(status: status, code: error["code"] as? String ?? "http_\(status)", message: error["message"] as? String ?? "The server answered \(status).")
+            throw APIError(status: status, code: error["code"] as? String ?? "http_\(status)", message: error["message"] as? String ?? "")
         }
         return try JSONDecoder().decode(T.self, from: data.isEmpty ? Data("{}".utf8) : data)
     }

@@ -22,15 +22,32 @@ public enum WebAuthn {
 
     /// The relying party id of an installation: its host.
     public static func rpID(publicURL: String) -> String {
-        URL(string: publicURL)?.host ?? publicURL
+        (URL(string: publicURL)?.host ?? publicURL).lowercased()
     }
 
-    /// The origin of an installation: its public address as given, with
-    /// no trailing slash (what the installation checks).
+    /// The web origin of an address, as a browser writes it (and as the
+    /// installation compares it with its public_url): lower-case scheme and
+    /// host, the port only when not the scheme's own, no path.
     public static func origin(publicURL: String) -> String {
-        var text = publicURL
-        while text.hasSuffix("/") { text.removeLast() }
-        return text
+        guard let url = URL(string: publicURL.trimmingCharacters(in: .whitespaces)), let host = url.host else {
+            var text = publicURL
+            while text.hasSuffix("/") { text.removeLast() }
+            return text
+        }
+        let scheme = (url.scheme ?? "https").lowercased()
+        var origin = "\(scheme)://\(host.lowercased())"
+        if let port = url.port, !(scheme == "https" && port == 443), !(scheme == "http" && port == 80) { origin += ":\(port)" }
+        return origin
+    }
+
+    /// The relying party id the installation asks for, when it is the host
+    /// the phone talks to or a parent domain of it; otherwise the key would
+    /// sign for another site, and it is refused.
+    public static func checkedRPID(_ asked: String?, publicURL: String) throws -> String {
+        let host = rpID(publicURL: publicURL)
+        guard let rp = asked?.lowercased() else { return host }
+        if rp == host || host.hasSuffix("." + rp) { return rp }
+        throw APIError(status: 0, code: "bad_rp", message: "The server asked for a key of another site.")
     }
 
     /// The COSE form of a P-256 public key given as its X9.63 form

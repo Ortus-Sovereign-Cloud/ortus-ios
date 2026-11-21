@@ -57,11 +57,11 @@ struct ForYouView: View {
             // Signing: the phone's key again (Face ID), so the sign-in is
             // fresh, as signing asks.
             if review.signs { try await model.signInWithKey(client: client) }
-            try await client.decide(review, approve: approve, comment: approve ? "" : String(localized: "foryou.sentBack"))
+            try await client.decide(review, approve: approve, comment: approve ? "" : String(localized: "foryou.sentBackComment"))
             note = String(localized: review.signs ? "foryou.signed" : "foryou.done")
             await load()
         } catch {
-            note = (error as? APIError)?.message ?? error.localizedDescription
+            note = model.say(error)
         }
     }
 

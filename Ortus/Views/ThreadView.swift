@@ -57,7 +57,7 @@ struct ThreadView: View {
             try await client.rsvp(email, answer: answer)
             await load()
         } catch {
-            note = (error as? APIError)?.message ?? error.localizedDescription
+            note = model.say(error)
         }
     }
 
@@ -71,7 +71,7 @@ struct ThreadView: View {
             note = String(localized: "thread.sent")
             await load()
         } catch {
-            note = (error as? APIError)?.message ?? error.localizedDescription
+            note = model.say(error)
         }
     }
 }

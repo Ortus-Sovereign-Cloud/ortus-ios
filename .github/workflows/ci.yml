@@ -54,11 +54,25 @@ jobs:
           brew install xcodegen
           xcodegen generate
           set -o pipefail
+          # An iPhone simulator of the newest installed iOS (the runner's
+          # set changes): the first available, or a new one.
+          udid=$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          d = json.load(sys.stdin)["devices"]
+          ios = sorted((k for k in d if "iOS" in k), key=lambda k: [int(x) for x in k.rsplit("iOS-", 1)[-1].split("-")])
+          phones = [x["udid"] for k in reversed(ios) for x in d[k] if x["name"].startswith("iPhone")]
+          print(phones[0] if phones else "")')
+          if [ -z "$udid" ]; then
+            runtime=$(xcrun simctl list runtimes available -j | python3 -c 'import json,sys; r=[x for x in json.load(sys.stdin)["runtimes"] if x["platform"]=="iOS"]; print(r[-1]["identifier"])')
+            type=$(xcrun simctl list devicetypes -j | python3 -c 'import json,sys; t=[x for x in json.load(sys.stdin)["devicetypes"] if x["name"].startswith("iPhone")]; print(t[-1]["identifier"])')
+            udid=$(xcrun simctl create ortus-test "$type" "$runtime")
+          fi
+          echo "simulator: $udid"
           # TEST_RUNNER_<name> in xcodebuild's environment reaches the
           # tests as <name>.
-          TEST_RUNNER_ORTUS_SERVER="$ORTUS_SERVER" TEST_RUNNER_ORTUS_CODE="$ORTUS_CODE" TEST_RUNNER_ORTUS_ADMIN_CODE="$ORTUS_ADMIN_CODE" \
+          TEST_RUNNER_CI=true TEST_RUNNER_ORTUS_SERVER="$ORTUS_SERVER" TEST_RUNNER_ORTUS_CODE="$ORTUS_CODE" TEST_RUNNER_ORTUS_ADMIN_CODE="$ORTUS_ADMIN_CODE" \
             xcodebuild test -project Ortus.xcodeproj -scheme Ortus \
-            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -destination "id=$udid" \
             -resultBundlePath results.xcresult | tail -n 80
       - if: always()
         uses: actions/upload-artifact@v4

@@ -87,7 +87,7 @@ extension Client {
     public func jmap(_ calls: [[Any]]) async throws -> [String: Any] {
         let body = try JSONSerialization.data(withJSONObject: ["using": JMAP.using, "methodCalls": calls])
         let (status, data) = try await transport.send(request("POST", "/mail/web/jmap", body: body))
-        guard (200..<300).contains(status) else { throw APIError(status: status, code: "http_\(status)", message: "The server answered \(status).") }
+        guard (200..<300).contains(status) else { throw APIError(status: status, code: "http_\(status)", message: "") }
         return try JMAP.answers(data)
     }
 
@@ -158,6 +158,7 @@ extension Client {
 
     /// Answers the invitation in a message: accepted, tentative or declined.
     public func rsvp(_ email: Email, answer: String) async throws {
-        let _: [String: String?] = try await call("POST", "/mail/messages/\(email.id)/rsvp", json: ["answer": answer])
+        struct Ignored: Decodable {}
+        let _: Ignored = try await call("POST", "/mail/messages/\(email.id)/rsvp", json: ["answer": answer])
     }
 }

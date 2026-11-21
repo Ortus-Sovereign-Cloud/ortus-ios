@@ -85,3 +85,11 @@
 "admin.invited" = "Wysłano zaproszenie.";
 "doc.comments" = "Komentarze";
 "doc.comment" = "Dodaj komentarz";
+"error.network" = "Nie można połączyć się z Ortus. Sprawdź połączenie i spróbuj ponownie.";
+"error.generic" = "To się nie udało. Spróbuj ponownie.";
+"key.noLock" = "Najpierw ustaw blokadę ekranu w tym telefonie: klucz jej wymaga.";
+"key.invalidated" = "Klucz tego telefonu już nie działa (zmieniono odciski palców lub twarz). Utwórz nowy klucz.";
+"foryou.sentBackComment" = "Odesłane z mojego telefonu.";
+"calendar.previous" = "Poprzedni dzień";
+"calendar.next" = "Następny dzień";
+"join.withPhone" = "Zaloguj się tym telefonem";

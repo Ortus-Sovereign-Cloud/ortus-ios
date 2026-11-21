@@ -125,3 +125,58 @@ final class ChatTests: XCTestCase {
         XCTAssertEqual("Anna Kowalska", rooms.title(rooms.rooms[1]))
     }
 }
+
+/// Answers each request in turn with the next body (shaped like the
+/// installation's real answers), and keeps the requests.
+struct Scripted: Transport {
+    let bodies: [String]
+    let seen: Recorded.Box
+    func send(_ request: URLRequest) async throws -> (Int, Data) {
+        seen.requests.append(request)
+        let i = min(seen.requests.count - 1, bodies.count - 1)
+        return (200, Data(bodies[i].utf8))
+    }
+}
+
+final class AnswersTests: XCTestCase {
+    func testInboxListsAndCounts() async throws {
+        let box = Recorded.Box()
+        let boxes = #"{"methodResponses":[["Mailbox/get",{"list":[{"id":"mb1","name":"Inbox","role":"inbox","unreadEmails":3}]},"b"]]}"#
+        let lists = #"{"methodResponses":[["Email/query",{"ids":["m1"]},"q"],["Email/get",{"list":[{"id":"m1","threadId":"t1","subject":"Gauge report","from":[{"name":"Anna Kowalska","email":"anna@regional.example"}],"receivedAt":"2026-11-20T10:42:00Z","preview":"Attached","keywords":{}}]},"l"],["Email/query",{"total":2,"ids":[]},"u-important"],["Email/query",{"total":0,"ids":[]},"u-other"],["Email/query",{"total":5,"ids":[]},"u-feeds"]]}"#
+        let client = Client(server: URL(string: "https://ortus.example")!, token: "t", transport: Scripted(bodies: [boxes, lists], seen: box))
+        let got = try await client.inbox(.important)
+        XCTAssertEqual(["Gauge report"], got.emails.map(\.subject))
+        XCTAssertTrue(got.emails[0].unread)
+        XCTAssertEqual(2, got.unread[.important])
+        XCTAssertEqual(5, got.unread[.feeds])
+    }
+
+    func testRSVPTakesTheRealAnswer() async throws {
+        let box = Recorded.Box()
+        // As ortus-mail answers: numbers and a bool beside strings.
+        let answer = #"{"uid":"u1","method":"REQUEST","summary":"Logistics stand-up","start":1795784400000,"end":1795786200000,"answer":"ACCEPTED","cancelled":false,"inCalendar":true,"organizer":"marek@ministry.example"}"#
+        let client = Client(server: URL(string: "https://ortus.example")!, token: "t", transport: Scripted(bodies: [answer], seen: box))
+        let email = try JMAP.decode(try JSONSerialization.jsonObject(with: Data(#"[{"id":"m1","threadId":"t1","subject":"Logistics stand-up","from":[{"name":"Marek","email":"marek@ministry.example"}],"receivedAt":"2026-11-20T10:42:00Z","preview":"","keywords":{}}]"#.utf8)), as: [Email].self)[0]
+        try await client.rsvp(email, answer: "accepted")
+        let sent = try JSONSerialization.jsonObject(with: box.requests[0].httpBody!) as! [String: Any]
+        XCTAssertEqual("accepted", sent["answer"] as? String)
+    }
+
+    func testNoticesReadAll() async throws {
+        let box = Recorded.Box()
+        let client = Client(server: URL(string: "https://ortus.example")!, token: "t", transport: Scripted(bodies: [#"{"unread":0}"#], seen: box))
+        try await client.markNoticesRead()
+        let sent = try JSONSerialization.jsonObject(with: box.requests[0].httpBody!) as! [String: Any]
+        XCTAssertEqual(true, sent["all"] as? Bool)
+    }
+
+    func testOriginsAndRelyingParty() throws {
+        // As the installation's public_url reads: lower case, no default port, no path.
+        XCTAssertEqual("https://ortus.example", Client.serverURL(from: "HTTPS://Ortus.Example:443/inbox")?.absoluteString)
+        XCTAssertEqual("http://10.0.2.2:7878", WebAuthn.origin(publicURL: "http://10.0.2.2:7878/"))
+        XCTAssertEqual("example.org", try WebAuthn.checkedRPID("example.org", publicURL: "https://ortus.example.org"))
+        XCTAssertEqual("ortus.example.org", try WebAuthn.checkedRPID(nil, publicURL: "https://Ortus.example.org"))
+        XCTAssertThrowsError(try WebAuthn.checkedRPID("bank.example", publicURL: "https://ortus.example.org"))
+        XCTAssertThrowsError(try WebAuthn.checkedRPID("ple.org", publicURL: "https://ortus.example.org"))
+    }
+}

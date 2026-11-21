@@ -85,3 +85,11 @@
 "admin.invited" = "Einladung gesendet.";
 "doc.comments" = "Kommentare";
 "doc.comment" = "Kommentar hinzufügen";
+"error.network" = "Ortus ist nicht erreichbar. Prüfen Sie die Verbindung und versuchen Sie es erneut.";
+"error.generic" = "Das hat nicht geklappt. Versuchen Sie es erneut.";
+"key.noLock" = "Richten Sie zuerst eine Displaysperre ein: Der Schlüssel braucht sie.";
+"key.invalidated" = "Der Schlüssel dieses Telefons funktioniert nicht mehr (Fingerabdrücke oder Gesicht wurden geändert). Erstellen Sie einen neuen Schlüssel.";
+"foryou.sentBackComment" = "Von meinem Telefon zurückgeschickt.";
+"calendar.previous" = "Vorheriger Tag";
+"calendar.next" = "Nächster Tag";
+"join.withPhone" = "Mit diesem Telefon anmelden";

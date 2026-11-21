@@ -85,3 +85,11 @@
 "admin.invited" = "Invitation envoyée.";
 "doc.comments" = "Commentaires";
 "doc.comment" = "Ajouter un commentaire";
+"error.network" = "Ortus est injoignable. Vérifiez la connexion et réessayez.";
+"error.generic" = "Cela n'a pas fonctionné. Réessayez.";
+"key.noLock" = "Définissez d'abord un verrouillage de l'écran sur ce téléphone : la clé en a besoin.";
+"key.invalidated" = "La clé de ce téléphone ne fonctionne plus (empreintes ou visage modifiés). Créez une nouvelle clé.";
+"foryou.sentBackComment" = "Renvoyé depuis mon téléphone.";
+"calendar.previous" = "Jour précédent";
+"calendar.next" = "Jour suivant";
+"join.withPhone" = "Se connecter avec ce téléphone";

@@ -31,7 +31,7 @@ extension Client {
 
     public func markNoticesRead() async throws {
         struct Ignored: Decodable {}
-        let _: Ignored = try await call("POST", "/notifications/read", json: [:])
+        let _: Ignored = try await call("POST", "/notifications/read", json: ["all": true])
     }
 
     public func search(_ words: String) async throws -> [SearchHit] {

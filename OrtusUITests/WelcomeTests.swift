@@ -5,6 +5,15 @@ import XCTest
 final class WelcomeTests: XCTestCase {
     override func setUp() { continueAfterFailure = false }
 
+    /// The step's values from CI; in CI their absence fails (not a skip).
+    private func need(_ names: String...) throws {
+        let env = ProcessInfo.processInfo.environment
+        guard names.allSatisfy({ !(env[$0] ?? "").isEmpty }) else {
+            if env["CI"] == "true" { XCTFail("\(names) are not set"); throw XCTSkip("failed") }
+            throw XCTSkip("no Ortus to talk to")
+        }
+    }
+
     private func app(_ language: String = "en") -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = ["-reset", "-AppleLanguages", "(\(language))", "-AppleLocale", language]
@@ -17,7 +26,7 @@ final class WelcomeTests: XCTestCase {
     /// S3.2: she installs the app, it takes the code from her welcome
     /// letter, and the phone becomes her key (she then signs in with it).
     func testThePhoneBecomesTheKey() throws {
-        guard ProcessInfo.processInfo.environment["ORTUS_CODE"] != nil else { throw XCTSkip("no Ortus to talk to") }
+        try need("ORTUS_SERVER", "ORTUS_CODE")
         let app = app()
         app.launch()
         app.buttons["Continue"].tap()
@@ -49,11 +58,19 @@ final class WelcomeTests: XCTestCase {
         attach(app, "s1.9-approvals")
         app.buttons["decide"].tap()
         XCTAssertTrue(app.staticTexts["Signed."].waitForExistence(timeout: 20), app.staticTexts["note"].exists ? app.staticTexts["note"].label : "not signed")
+
+        // Signing out ends the session; the phone signs her in again on its own.
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.buttons["Sign out"].tap()
+        XCTAssertTrue(app.buttons["withPhone"].waitForExistence(timeout: 20))
+        app.buttons["withPhone"].tap()
+        XCTAssertTrue(app.tabBars.buttons["More"].waitForExistence(timeout: 20), app.staticTexts["error"].exists ? app.staticTexts["error"].label : "not back in")
     }
 
     /** S2.4: the IT administrator fixes the failed mailbox imports from the phone. */
     func testAnAdministratorFixesImports() throws {
-        guard let code = ProcessInfo.processInfo.environment["ORTUS_ADMIN_CODE"] else { throw XCTSkip("no Ortus to talk to") }
+        try need("ORTUS_SERVER", "ORTUS_ADMIN_CODE")
+        let code = ProcessInfo.processInfo.environment["ORTUS_ADMIN_CODE"]!
         let app = app()
         app.launchEnvironment["ORTUS_CODE"] = code
         app.launch()
@@ -84,11 +101,14 @@ final class WelcomeTests: XCTestCase {
             app.launchEnvironment["ORTUS_CODE"] = ""
             app.launch()
             XCTAssertTrue(app.staticTexts[title].waitForExistence(timeout: 10), language)
+            // The mark sits at the start: the left in five languages, the
+            // right in Arabic.
+            let mark = app.otherElements["mark"].frame
             if language == "ar" {
-                let field = app.textFields["server"].frame
-                // Right to left: the field's text starts at the right edge.
-                XCTAssertGreaterThan(field.maxX, app.frame.width - 40)
+                XCTAssertGreaterThan(mark.midX, app.frame.midX, "right to left")
                 attach(app, "join-ar")
+            } else {
+                XCTAssertLessThan(mark.midX, app.frame.midX, language)
             }
             app.terminate()
         }

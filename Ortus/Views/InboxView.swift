@@ -67,7 +67,7 @@ struct InboxView: View {
             unread = got.unread
             error = nil
         } catch {
-            self.error = (error as? APIError)?.message ?? error.localizedDescription
+            self.error = model.say(error)
         }
     }
 }
