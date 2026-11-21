@@ -76,6 +76,9 @@ jobs:
             udid=$(xcrun simctl create ortus-test "$type" "$runtime")
           fi
           echo "simulator: $udid"
+          # Booted and settled first: a cold simulator can time out the
+          # first test's launch.
+          xcrun simctl bootstatus "$udid" -b
           # TEST_RUNNER_<name> in xcodebuild's environment reaches the
           # tests as <name>.
           TEST_RUNNER_CI=true TEST_RUNNER_ORTUS_SERVER="$ORTUS_SERVER" TEST_RUNNER_ORTUS_CODE="$ORTUS_CODE" TEST_RUNNER_ORTUS_LINK_CODE="$ORTUS_LINK_CODE" TEST_RUNNER_ORTUS_ADMIN_CODE="$ORTUS_ADMIN_CODE" TEST_RUNNER_ORTUS_OWNER_TOTP="$ORTUS_OWNER_TOTP" TEST_RUNNER_ORTUS_IMPORT_PASSWORDS="$ORTUS_IMPORT_PASSWORDS" TEST_RUNNER_ORTUS_OWNER_SESSION="$ORTUS_OWNER_SESSION" \
