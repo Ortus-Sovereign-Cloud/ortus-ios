@@ -1,3 +1,4 @@
+import CryptoKit
 import XCTest
 
 /// The phone steps against a real Ortus (started by CI, which passes its
@@ -65,6 +66,42 @@ final class WelcomeTests: XCTestCase {
         XCTAssertTrue(app.buttons["withPhone"].waitForExistence(timeout: 20))
         app.buttons["withPhone"].tap()
         XCTAssertTrue(app.tabBars.buttons["More"].waitForExistence(timeout: 20), app.staticTexts["error"].exists ? app.staticTexts["error"].label : "not back in")
+    }
+
+    /// The owner signs in with a password and the authenticator's code.
+    func testAPasswordAndACode() throws {
+        try need("ORTUS_SERVER", "ORTUS_OWNER_TOTP")
+        let app = app()
+        app.launchEnvironment["ORTUS_CODE"] = ""
+        app.launch()
+        app.buttons["togglePassword"].tap()
+        app.textFields["email"].tap()
+        app.textFields["email"].typeText("taras@ministry.example")
+        app.secureTextFields["password"].tap()
+        app.secureTextFields["password"].typeText("flood-plan-2026-ministry")
+        app.buttons["signIn"].tap()
+        XCTAssertTrue(app.textFields["totp"].waitForExistence(timeout: 20), app.staticTexts["error"].exists ? app.staticTexts["error"].label : "no code step")
+        app.textFields["totp"].tap()
+        app.textFields["totp"].typeText(Self.totp(ProcessInfo.processInfo.environment["ORTUS_OWNER_TOTP"]!))
+        app.buttons["signInCode"].tap()
+        // Not yet her key: the phone offers to become it.
+        XCTAssertTrue(app.buttons["makeKey"].waitForExistence(timeout: 20), app.staticTexts["error"].exists ? app.staticTexts["error"].label : "not signed in")
+    }
+
+    private static func totp(_ secret: String) -> String {
+        let alphabet = Array("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567")
+        var bits = 0, value = 0
+        var key = Data()
+        for c in secret.uppercased() where c != "=" {
+            value = (value << 5) | (alphabet.firstIndex(of: c) ?? 0)
+            bits += 5
+            if bits >= 8 { key.append(UInt8((value >> (bits - 8)) & 0xff)); bits -= 8 }
+        }
+        var counter = UInt64(Date().timeIntervalSince1970 / 30).bigEndian
+        let mac = Array(HMAC<Insecure.SHA1>.authenticationCode(for: Data(bytes: &counter, count: 8), using: SymmetricKey(data: key)))
+        let o = Int(mac[19] & 15)
+        let n = (UInt32(mac[o] & 0x7f) << 24) | (UInt32(mac[o + 1]) << 16) | (UInt32(mac[o + 2]) << 8) | UInt32(mac[o + 3])
+        return String(format: "%06d", n % 1_000_000)
     }
 
     /** S2.4: the IT administrator fixes the failed mailbox imports from the phone. */
