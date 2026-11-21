@@ -82,7 +82,8 @@ final class WelcomeTests: XCTestCase {
         link.scheme = "ortus"
         link.host = "join"
         link.queryItems = [URLQueryItem(name: "server", value: env["ORTUS_SERVER"]), URLQueryItem(name: "code", value: env["ORTUS_LINK_CODE"])]
-        app.open(link.url!)
+        // As a tapped link: through the system, which hands it to the app.
+        XCUIDevice.shared.system.open(link.url!)
         // iOS may ask before handing an app a link of its own scheme.
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
         if springboard.buttons["Open"].waitForExistence(timeout: 5) { springboard.buttons["Open"].tap() }

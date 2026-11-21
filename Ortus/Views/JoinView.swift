@@ -12,6 +12,9 @@ struct JoinView: View {
 
     @State private var withPassword = false
     @State private var scanning = false
+    /// The code field takes the keyboard when it appears (it replaces the
+    /// password field, which had it).
+    @FocusState private var codeFocused: Bool
 
     /// AutoFill offers the code (from Passwords) in the app people use; UI
     /// tests type it, which the one-time-code field drops under XCUITest.
@@ -90,6 +93,7 @@ struct JoinView: View {
                     }
             } else {
                 field("join.totp", $totp, id: "totp").keyboardType(Self.codeKeyboard).textContentType(Self.codeHint)
+                    .focused($codeFocused)
                     .submitLabel(.go)
                     .onSubmit { if totp.filter(\.isNumber).count >= 6 { Task { await model.signInWithCode(totp) } } }
             }
@@ -134,6 +138,9 @@ struct JoinView: View {
             withPhone = model.hasKey(for: server)
         }
         .onChange(of: server) { withPhone = model.hasKey(for: server) }
+        .onChange(of: model.ticket) {
+            if model.ticket != nil { codeFocused = true }
+        }
         // An invitation handed to the app fills in what it joins with.
         .onChange(of: model.handed) {
             if let handed = model.handed {
