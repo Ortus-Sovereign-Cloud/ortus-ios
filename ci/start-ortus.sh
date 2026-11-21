@@ -66,7 +66,7 @@ with smtplib.SMTP("127.0.0.1", int(os.environ["SMTP_PORT"])) as s:
 OLD
 done
 api -X POST -H "Authorization: Bearer $session" "http://127.0.0.1:$port/api/v1/mail/admin/imports" \
-  -d "{\"host\":\"127.0.0.1\",\"port\":$imaps,\"security\":\"tls\",\"accounts\":[{\"login\":\"olha.old@ministry.example\",\"password\":\"not-it\",\"to\":\"iryna@ministry.example\"},{\"login\":\"petro.old@ministry.example\",\"password\":\"not-it-either\",\"to\":\"taras@ministry.example\"}]}" > /dev/null
+  -d "{\"host\":\"127.0.0.1\",\"port\":$imaps,\"security\":\"tls\",\"accounts\":[{\"login\":\"olha.old@ministry.example\",\"password\":\"not-it\",\"to\":\"taras@ministry.example\"},{\"login\":\"petro.old@ministry.example\",\"password\":\"not-it-either\",\"to\":\"taras@ministry.example\"}]}" > /dev/null
 admin="$(api -X POST -H "Authorization: Bearer $session" "http://127.0.0.1:$port/api/v1/admin/users" -d '{"email":"oksana@ministry.example","name":"Oksana Lysenko","role":"admin"}' | python3 -c 'import json,sys; print(json.load(sys.stdin)["link"].split("#")[-1])')"
 # The owner signs in with a password and an authenticator app as well
 # (the phones' password sign-in): its secret goes to the tests.
