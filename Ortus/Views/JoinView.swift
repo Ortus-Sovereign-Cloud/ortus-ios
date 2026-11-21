@@ -59,7 +59,7 @@ struct JoinView: View {
             Text("join.title").font(.largeTitle.bold()).foregroundStyle(Theme.text)
             Text("join.lead").foregroundStyle(Theme.text2)
             TextField("join.server", text: $server)
-                .textContentType(.URL).keyboardType(.URL).textInputAutocapitalization(.never).autocorrectionDisabled()
+                .textContentType(.URL).keyboardType(server.contains("@") ? .emailAddress : .URL).textInputAutocapitalization(.never).autocorrectionDisabled()
                 .padding(12).background(Theme.surface2, in: RoundedRectangle(cornerRadius: 12))
                 .accessibilityIdentifier("server")
             if !withPassword {
@@ -129,6 +129,7 @@ struct JoinView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(Theme.background)
         .onAppear {
+            if server.isEmpty, let managed = model.managedServer { server = managed }
             if server.isEmpty, let last = model.lastServer { server = last.absoluteString }
             withPhone = model.hasKey(for: server)
         }

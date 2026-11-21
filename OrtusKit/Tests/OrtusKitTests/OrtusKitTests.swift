@@ -198,6 +198,13 @@ final class InvitationLinkTests: XCTestCase {
                        InvitationLink.parse("https://work.ministry.example:8443/welcome/accept#\(code)")?.server)
     }
 
+    func testTheSharedAppLink() {
+        XCTAssertEqual(InvitationLink(server: "https://work.ministry.gov:8443", code: code),
+                       InvitationLink.parse("https://join.ortus.cc/i#s=https%3A%2F%2Fwork.ministry.gov%3A8443&c=\(code)"))
+        XCTAssertNil(InvitationLink.parse("https://join.ortus.cc/i#s=ftp%3A%2F%2Fx&c=\(code)"))
+        XCTAssertNil(InvitationLink.parse("https://join.ortus.cc/i#c=\(code)"))
+    }
+
     func testAnythingElseIsNot() {
         for text in [
             "",
@@ -212,5 +219,21 @@ final class InvitationLinkTests: XCTestCase {
         ] {
             XCTAssertNil(InvitationLink.parse(text), text)
         }
+    }
+}
+
+final class DiscoveryTests: XCTestCase {
+    func testWhereToAsk() {
+        XCTAssertEqual(["https://ministry.gov/.well-known/ortus", "https://ortus.ministry.gov/.well-known/ortus"],
+                       Discovery.candidates(for: " Olena@Ministry.gov ").map(\.absoluteString))
+        XCTAssertEqual([], Discovery.candidates(for: "not an address"))
+        XCTAssertEqual([], Discovery.candidates(for: "a@b"))
+        XCTAssertEqual([], Discovery.candidates(for: "a@evil.example/x"))
+    }
+
+    func testTheAnswer() {
+        XCTAssertEqual("https://work.ministry.gov", Discovery.server(fromAnswer: Data(#"{"server":"https://Work.Ministry.gov/"}"#.utf8))?.absoluteString)
+        XCTAssertNil(Discovery.server(fromAnswer: Data(#"{"server":"http://work.ministry.gov"}"#.utf8)), "https only")
+        XCTAssertNil(Discovery.server(fromAnswer: Data("<html>".utf8)))
     }
 }

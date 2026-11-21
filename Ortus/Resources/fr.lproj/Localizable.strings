@@ -1,6 +1,6 @@
 "join.title" = "Rejoindre votre organisation";
 "join.lead" = "Saisissez l'adresse Ortus de votre organisation et le code de votre lettre de bienvenue.";
-"join.server" = "Adresse, par ex. ortus.ministry.gov";
+"join.server" = "Adresse ou votre courriel professionnel, comme ortus.ministry.gov";
 "join.code" = "Code de la lettre de bienvenue";
 "join.continue" = "Continuer";
 "join.badServer" = "Ce n'est pas une adresse.";
@@ -102,3 +102,4 @@
 "join.withCode" = "Utiliser le code de ma lettre de bienvenue";
 "join.scan" = "Scanner le code QR de l’invitation";
 "join.badLink" = "Ce n’est pas une invitation Ortus.";
+"join.notFound" = "Aucun Ortus trouvé pour ce courriel. Saisissez l’adresse de votre lettre de bienvenue.";

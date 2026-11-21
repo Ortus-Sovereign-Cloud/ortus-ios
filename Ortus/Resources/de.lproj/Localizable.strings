@@ -1,6 +1,6 @@
 "join.title" = "Ihrer Organisation beitreten";
 "join.lead" = "Geben Sie die Ortus-Adresse Ihrer Organisation und den Code aus Ihrem Willkommensbrief ein.";
-"join.server" = "Adresse, z. B. ortus.ministry.gov";
+"join.server" = "Adresse oder Ihre dienstliche E-Mail, z. B. ortus.ministry.gov";
 "join.code" = "Code aus dem Willkommensbrief";
 "join.continue" = "Weiter";
 "join.badServer" = "Das ist keine Adresse.";
@@ -102,3 +102,4 @@
 "join.withCode" = "Den Code aus meinem Willkommensbrief verwenden";
 "join.scan" = "QR-Code der Einladung scannen";
 "join.badLink" = "Das ist keine Ortus-Einladung.";
+"join.notFound" = "Für diese E-Mail wurde kein Ortus gefunden. Geben Sie die Adresse aus Ihrem Willkommensbrief ein.";

@@ -28,6 +28,13 @@ final class AppModel: ObservableObject {
         }
     }
 
+    /// The installation an organisation's device management set for this
+    /// app (managed app configuration, key "server"), if it set one.
+    var managedServer: String? {
+        (UserDefaults.standard.dictionary(forKey: "com.apple.configuration.managed")?["server"] as? String)
+            .flatMap { $0.trimmingCharacters(in: .whitespaces).isEmpty ? nil : $0 }
+    }
+
     /// The installation this phone last used (kept after signing out).
     var lastServer: URL? { Keychain.get("server").flatMap { URL(string: String(decoding: $0, as: UTF8.self)) } }
 
@@ -88,6 +95,18 @@ final class AppModel: ObservableObject {
     /// installation: signs in, then the phone becomes the key.
     func join(server typed: String, code: String) async {
         error = nil
+        // A work email instead of the address: the organisation names its installation.
+        var typed = typed
+        if typed.contains("@") {
+            busy = true
+            let found = await Discovery.find(email: typed)
+            busy = false
+            guard let found else {
+                error = String(localized: "join.notFound")
+                return
+            }
+            typed = found.absoluteString
+        }
         guard let server = server(from: typed) else {
             error = String(localized: "join.badServer")
             return

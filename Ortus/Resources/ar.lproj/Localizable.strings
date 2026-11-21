@@ -1,6 +1,6 @@
 "join.title" = "انضم إلى مؤسستك";
 "join.lead" = "اكتب عنوان Ortus لمؤسستك والرمز من رسالة الترحيب.";
-"join.server" = "العنوان، مثل ortus.ministry.gov";
+"join.server" = "العنوان أو بريدك المهني، مثل ortus.ministry.gov";
 "join.code" = "الرمز من رسالة الترحيب";
 "join.continue" = "متابعة";
 "join.badServer" = "هذا ليس عنوانًا.";
@@ -102,3 +102,4 @@
 "join.withCode" = "استخدم الرمز من رسالة الترحيب";
 "join.scan" = "مسح رمز QR للدعوة";
 "join.badLink" = "هذه ليست دعوة Ortus.";
+"join.notFound" = "لم يُعثر على Ortus لهذا البريد. اكتب العنوان من رسالة الترحيب.";

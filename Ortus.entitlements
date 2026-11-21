@@ -7,6 +7,11 @@
   <key>com.apple.developer.associated-domains</key>
   <array>
     <string>applinks:ortus.cc</string>
+    <!-- The shared app link of every installation's invitations. -->
+    <string>applinks:join.ortus.cc</string>
   </array>
+  <!-- An organisation's device management may add its own domains. -->
+  <key>com.apple.developer.associated-domains.mdm-managed</key>
+  <true/>
 </dict>
 </plist>
