@@ -88,9 +88,17 @@ final class WelcomeTests: XCTestCase {
         // which then ignores it). The keyboard covers the button on a short
         // screen, so the button is the fallback.
         let code = Self.totp(ProcessInfo.processInfo.environment["ORTUS_OWNER_TOTP"]!)
-        field.typeText(code)
-        let typed = NSPredicate(format: "value == %@", code)
-        XCTAssertEqual(XCTWaiter().wait(for: [expectation(for: typed, evaluatedWith: field)], timeout: 10), .completed, "the code is in the field")
+        // The simulator can drop keys typed before its keyboard is up: wait
+        // for it, and type again (after clearing) until the field holds the code.
+        _ = app.keyboards.element.waitForExistence(timeout: 10)
+        var held = ""
+        for _ in 0..<3 {
+            field.typeText(code)
+            held = field.value as? String ?? ""
+            if held == code { break }
+            field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: held.count + 2))
+        }
+        XCTAssertEqual(code, held, "the code is in the field")
         field.typeText("\n")
         if !app.buttons["makeKey"].waitForExistence(timeout: 5), app.buttons["signInCode"].isHittable {
             app.buttons["signInCode"].tap()
