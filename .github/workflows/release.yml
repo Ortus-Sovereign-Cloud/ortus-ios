@@ -67,7 +67,8 @@ jobs:
             -allowProvisioningUpdates \
             -authenticationKeyPath "$ASC_KEY_PATH" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID" > export.log 2>&1 || { tail -n 80 export.log; exit 1; }
           tail -n 5 export.log
-          ls -la "$RUNNER_TEMP/export"
+          # An upload leaves nothing on disk; an export leaves the .ipa.
+          ls -la "$RUNNER_TEMP/export" 2>/dev/null || true
       - if: always()
         name: Forget the key
         run: rm -f "$RUNNER_TEMP"/AuthKey_*.p8
