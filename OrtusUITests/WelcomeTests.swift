@@ -81,9 +81,20 @@ final class WelcomeTests: XCTestCase {
         app.secureTextFields["password"].typeText("flood-plan-2026-ministry")
         app.buttons["signIn"].tap()
         XCTAssertTrue(app.textFields["totp"].waitForExistence(timeout: 20), app.staticTexts["error"].exists ? app.staticTexts["error"].label : "no code step")
-        app.textFields["totp"].tap()
-        // The code, then Return (the keyboard covers the button on a short screen).
-        app.textFields["totp"].typeText(Self.totp(ProcessInfo.processInfo.environment["ORTUS_OWNER_TOTP"]!) + "\n")
+        let field = app.textFields["totp"]
+        field.tap()
+        // The code first; Return only once the field holds all of it (typed
+        // together, Return could come before the last digit reached the app,
+        // which then ignores it). The keyboard covers the button on a short
+        // screen, so the button is the fallback.
+        let code = Self.totp(ProcessInfo.processInfo.environment["ORTUS_OWNER_TOTP"]!)
+        field.typeText(code)
+        let typed = NSPredicate(format: "value == %@", code)
+        XCTAssertEqual(XCTWaiter().wait(for: [expectation(for: typed, evaluatedWith: field)], timeout: 10), .completed, "the code is in the field")
+        field.typeText("\n")
+        if !app.buttons["makeKey"].waitForExistence(timeout: 5), app.buttons["signInCode"].isHittable {
+            app.buttons["signInCode"].tap()
+        }
         // Not yet her key: the phone offers to become it.
         XCTAssertTrue(app.buttons["makeKey"].waitForExistence(timeout: 20), app.staticTexts["error"].exists ? app.staticTexts["error"].label : "not signed in")
     }
