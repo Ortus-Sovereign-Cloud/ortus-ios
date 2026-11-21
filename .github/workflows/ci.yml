@@ -26,10 +26,14 @@ jobs:
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
+      - name: The program commit the tests run against
+        id: pin
+        run: echo "ortus=$(sed -n 's/^ortus = "\([0-9a-f]\{40\}\)"$/\1/p' pins.toml)" >> "$GITHUB_OUTPUT"
       - name: The Ortus program at its pinned parts
         uses: actions/checkout@v4
         with:
           repository: Ortus-Sovereign-Cloud/ortus
+          ref: ${{ steps.pin.outputs.ortus }}
           path: program
       - uses: actions/setup-node@v4
         with:
@@ -70,7 +74,7 @@ jobs:
           echo "simulator: $udid"
           # TEST_RUNNER_<name> in xcodebuild's environment reaches the
           # tests as <name>.
-          TEST_RUNNER_CI=true TEST_RUNNER_ORTUS_SERVER="$ORTUS_SERVER" TEST_RUNNER_ORTUS_CODE="$ORTUS_CODE" TEST_RUNNER_ORTUS_ADMIN_CODE="$ORTUS_ADMIN_CODE" TEST_RUNNER_ORTUS_OWNER_TOTP="$ORTUS_OWNER_TOTP" \
+          TEST_RUNNER_CI=true TEST_RUNNER_ORTUS_SERVER="$ORTUS_SERVER" TEST_RUNNER_ORTUS_CODE="$ORTUS_CODE" TEST_RUNNER_ORTUS_ADMIN_CODE="$ORTUS_ADMIN_CODE" TEST_RUNNER_ORTUS_OWNER_TOTP="$ORTUS_OWNER_TOTP" TEST_RUNNER_ORTUS_IMPORT_PASSWORDS="$ORTUS_IMPORT_PASSWORDS" \
             xcodebuild test -project Ortus.xcodeproj -scheme Ortus \
             -destination "id=$udid" \
             -resultBundlePath results.xcresult > xcodebuild.log 2>&1 || status=$?

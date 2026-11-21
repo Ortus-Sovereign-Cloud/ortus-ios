@@ -106,7 +106,7 @@ final class WelcomeTests: XCTestCase {
 
     /** S2.4: the IT administrator fixes the failed mailbox imports from the phone. */
     func testAnAdministratorFixesImports() throws {
-        try need("ORTUS_SERVER", "ORTUS_ADMIN_CODE")
+        try need("ORTUS_SERVER", "ORTUS_ADMIN_CODE", "ORTUS_IMPORT_PASSWORDS")
         let code = ProcessInfo.processInfo.environment["ORTUS_ADMIN_CODE"]!
         let app = app()
         app.launchEnvironment["ORTUS_CODE"] = code
@@ -119,14 +119,38 @@ final class WelcomeTests: XCTestCase {
         tap(app, "admin")
         // The import fails on its own; pull to look again until it shows.
         let ask = app.buttons["askOwners"]
-        for _ in 0..<12 where !ask.exists {
+        let both = app.staticTexts["2 mailboxes failed"]
+        for _ in 0..<12 where !both.exists {
             app.swipeDown()
-            _ = ask.waitForExistence(timeout: 5)
+            _ = both.waitForExistence(timeout: 5)
         }
-        XCTAssertTrue(ask.exists)
+        XCTAssertTrue(both.exists, "two failures")
         attach(app, "s2.4-admin")
         ask.tap()
         XCTAssertTrue(app.staticTexts["The owners have a reconnect link in their inbox."].waitForExistence(timeout: 20))
+        // He puts in the right passwords and retries both.
+        let right = Dictionary(uniqueKeysWithValues: ProcessInfo.processInfo.environment["ORTUS_IMPORT_PASSWORDS"]!.split(separator: ",").map { pair -> (String, String) in
+            let parts = pair.split(separator: "=", maxSplits: 1).map(String.init)
+            return (parts[0], parts[1])
+        })
+        for login in right.keys.sorted() {
+            let field = app.secureTextFields["password-\(login)"]
+            XCTAssertTrue(field.waitForExistence(timeout: 10), login)
+            field.tap()
+            field.typeText(right[login]!)
+            tap(app, "retry-\(login)")
+            XCTAssertTrue(app.staticTexts["Trying again."].waitForExistence(timeout: 20), login)
+        }
+        // Both copy: nothing fails again (a wrong password fails in seconds).
+        let normal = app.staticTexts["All systems normal"]
+        for _ in 0..<12 where !normal.exists {
+            app.swipeDown()
+            _ = normal.waitForExistence(timeout: 5)
+        }
+        XCTAssertTrue(normal.exists, "the imports still fail")
+        sleep(15)
+        app.swipeDown()
+        XCTAssertTrue(normal.waitForExistence(timeout: 10), "an import failed again")
     }
 
     /// The first screen in every language; Arabic right to left.
