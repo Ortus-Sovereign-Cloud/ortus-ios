@@ -41,15 +41,15 @@ struct MoreView: View {
                     }
                 }
                 Section {
-                    NavigationLink { ForYouView() } label: { Label("foryou.title", systemImage: "checkmark.seal") }
+                    NavigationLink { ForYouView() } label: { Label("foryou.title", systemImage: "checkmark.seal") }.accessibilityIdentifier("foryou")
                     NavigationLink { NotificationsView() } label: { Label("notify.title", systemImage: "bell") }
                     NavigationLink { SearchView() } label: { Label("search.title", systemImage: "magnifyingglass") }
                     if model.me?.role == "admin" || model.me?.role == "owner" {
-                        NavigationLink { AdminView() } label: { Label("admin.title", systemImage: "shield") }
+                        NavigationLink { AdminView() } label: { Label("admin.title", systemImage: "shield") }.accessibilityIdentifier("admin")
                     }
                 }
                 Section {
-                    Button("more.signOut", role: .destructive) { Task { await model.signOut() } }
+                    Button("more.signOut", role: .destructive) { Task { await model.signOut() } }.accessibilityIdentifier("signOut")
                 }
             }
             .navigationTitle("tab.more")

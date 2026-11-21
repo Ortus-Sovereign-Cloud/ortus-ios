@@ -54,7 +54,7 @@ final class WelcomeTests: XCTestCase {
 
         // S1.9: she signs the flood plan on her phone, with its key.
         app.tabBars.buttons["More"].tap()
-        app.buttons["For you"].tap()
+        tap(app, "foryou")
         XCTAssertTrue(app.staticTexts["Flood response plan 2026"].waitForExistence(timeout: 20))
         attach(app, "s1.9-approvals")
         app.buttons["decide"].tap()
@@ -62,7 +62,7 @@ final class WelcomeTests: XCTestCase {
 
         // Signing out ends the session; the phone signs her in again on its own.
         app.navigationBars.buttons.element(boundBy: 0).tap()
-        app.buttons["Sign out"].tap()
+        tap(app, "signOut")
         XCTAssertTrue(app.buttons["withPhone"].waitForExistence(timeout: 20))
         app.buttons["withPhone"].tap()
         XCTAssertTrue(app.tabBars.buttons["More"].waitForExistence(timeout: 20), app.staticTexts["error"].exists ? app.staticTexts["error"].label : "not back in")
@@ -116,7 +116,7 @@ final class WelcomeTests: XCTestCase {
         app.buttons["makeKey"].tap()
         XCTAssertTrue(app.tabBars.buttons["More"].waitForExistence(timeout: 20))
         app.tabBars.buttons["More"].tap()
-        app.buttons["Admin"].tap()
+        tap(app, "admin")
         // The import fails on its own; pull to look again until it shows.
         let ask = app.buttons["askOwners"]
         for _ in 0..<12 where !ask.exists {
@@ -149,6 +149,18 @@ final class WelcomeTests: XCTestCase {
             }
             app.terminate()
         }
+    }
+
+    /// Taps the element with this identifier, whatever kind it is, scrolling
+    /// the list to it when it is below the screen.
+    private func tap(_ app: XCUIApplication, _ id: String) {
+        let element = app.descendants(matching: .any)[id].firstMatch
+        for _ in 0..<4 where !element.exists || !element.isHittable {
+            if element.waitForExistence(timeout: 5), element.isHittable { break }
+            app.swipeUp()
+        }
+        XCTAssertTrue(element.exists, "\(id) is not on screen")
+        element.tap()
     }
 
     private func attach(_ app: XCUIApplication, _ name: String) {

@@ -73,9 +73,14 @@ jobs:
           TEST_RUNNER_CI=true TEST_RUNNER_ORTUS_SERVER="$ORTUS_SERVER" TEST_RUNNER_ORTUS_CODE="$ORTUS_CODE" TEST_RUNNER_ORTUS_ADMIN_CODE="$ORTUS_ADMIN_CODE" TEST_RUNNER_ORTUS_OWNER_TOTP="$ORTUS_OWNER_TOTP" \
             xcodebuild test -project Ortus.xcodeproj -scheme Ortus \
             -destination "id=$udid" \
-            -resultBundlePath results.xcresult | tail -n 200
+            -resultBundlePath results.xcresult > xcodebuild.log 2>&1 || status=$?
+          # Every test's result and every error, whatever the log's length.
+          grep -E "error:|Test Case .*(passed|failed)|Executed|\*\* TEST" xcodebuild.log | cut -c1-600
+          exit "${status:-0}"
       - if: always()
         uses: actions/upload-artifact@v4
         with:
           name: results
-          path: results.xcresult
+          path: |
+            results.xcresult
+            xcodebuild.log
