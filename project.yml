@@ -44,6 +44,9 @@ targets:
       path: Ortus/Info.plist
       properties:
         CFBundleDisplayName: Ortus
+        # From the build settings (XcodeGen would write 1.0 and 1).
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         CFBundleDevelopmentRegion: en
         CFBundleLocalizations: [en, pl, uk, de, fr, ar]
         UILaunchScreen: {}
