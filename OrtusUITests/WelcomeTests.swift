@@ -82,7 +82,10 @@ final class WelcomeTests: XCTestCase {
         app.buttons["signIn"].tap()
         XCTAssertTrue(app.textFields["totp"].waitForExistence(timeout: 20), app.staticTexts["error"].exists ? app.staticTexts["error"].label : "no code step")
         app.textFields["totp"].tap()
-        app.textFields["totp"].typeText(Self.totp(ProcessInfo.processInfo.environment["ORTUS_OWNER_TOTP"]!))
+        // The number pad's keys, as a person types the code.
+        let code = Self.totp(ProcessInfo.processInfo.environment["ORTUS_OWNER_TOTP"]!)
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5), "no keyboard")
+        for digit in code { app.keyboards.keys[String(digit)].tap() }
         let button = app.buttons["signInCode"]
         XCTAssertTrue(button.isEnabled, "the code field holds \(app.textFields["totp"].value ?? "nothing"); screen:\n\(app.debugDescription)")
         button.tap()
