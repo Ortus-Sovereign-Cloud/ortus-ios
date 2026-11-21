@@ -106,7 +106,7 @@ final class WelcomeTests: XCTestCase {
 
     /** S2.4: the IT administrator fixes the failed mailbox imports from the phone. */
     func testAnAdministratorFixesImports() throws {
-        try need("ORTUS_SERVER", "ORTUS_ADMIN_CODE", "ORTUS_IMPORT_PASSWORDS")
+        try need("ORTUS_SERVER", "ORTUS_ADMIN_CODE", "ORTUS_IMPORT_PASSWORDS", "ORTUS_OWNER_SESSION")
         let code = ProcessInfo.processInfo.environment["ORTUS_ADMIN_CODE"]!
         let app = app()
         app.launchEnvironment["ORTUS_CODE"] = code
@@ -148,9 +148,29 @@ final class WelcomeTests: XCTestCase {
             _ = normal.waitForExistence(timeout: 5)
         }
         XCTAssertTrue(normal.exists, "the imports still fail")
-        sleep(15)
-        app.swipeDown()
-        XCTAssertTrue(normal.waitForExistence(timeout: 10), "an import failed again")
+        // And the mail came: both accounts copied, each with its old mail
+        // (asked of the server, as the owner).
+        var states = ""
+        for _ in 0..<90 {
+            states = try Self.importStates()
+            if states == "olha.old@ministry.example:done:1,petro.old@ministry.example:done:1" { break }
+            sleep(1)
+        }
+        XCTAssertEqual("olha.old@ministry.example:done:1,petro.old@ministry.example:done:1", states)
+    }
+
+    /// Each import account as login:state:copied, from the server.
+    private static func importStates() throws -> String {
+        let env = ProcessInfo.processInfo.environment
+        var request = URLRequest(url: URL(string: env["ORTUS_SERVER"]! + "/api/v1/mail/admin/imports")!)
+        request.setValue("Bearer \(env["ORTUS_OWNER_SESSION"]!)", forHTTPHeaderField: "Authorization")
+        let done = DispatchSemaphore(value: 0)
+        var body = Data()
+        URLSession.shared.dataTask(with: request) { data, _, _ in body = data ?? Data(); done.signal() }.resume()
+        done.wait()
+        struct Imports: Decodable { struct Import: Decodable { let accounts: [Account] }; struct Account: Decodable { let login: String; let state: String; let copied: Int? }; let imports: [Import] }
+        let imports = try JSONDecoder().decode(Imports.self, from: body)
+        return imports.imports.flatMap(\.accounts).map { "\($0.login):\($0.state):\(min($0.copied ?? 0, 1))" }.sorted().joined(separator: ",")
     }
 
     /// The first screen in every language; Arabic right to left.

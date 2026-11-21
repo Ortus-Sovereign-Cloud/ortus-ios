@@ -83,7 +83,7 @@ TOTP
 api -X POST -H "Authorization: Bearer $session" "http://127.0.0.1:$port/api/v1/me/totp/confirm" -d "{\"code\":\"$now\"}" > /dev/null
 echo "ortus: running at http://127.0.0.1:$port; Iryna's code is ready"
 if [ -n "${GITHUB_ENV:-}" ]; then
-  { echo "ORTUS_SERVER=http://127.0.0.1:$port"; echo "ORTUS_CODE=$code"; echo "ORTUS_ADMIN_CODE=$admin"; echo "ORTUS_OWNER_TOTP=$totp"; echo "ORTUS_IMPORT_PASSWORDS=$passwords"; } >> "$GITHUB_ENV"
+  { echo "ORTUS_SERVER=http://127.0.0.1:$port"; echo "ORTUS_CODE=$code"; echo "ORTUS_ADMIN_CODE=$admin"; echo "ORTUS_OWNER_TOTP=$totp"; echo "ORTUS_IMPORT_PASSWORDS=$passwords"; echo "ORTUS_OWNER_SESSION=$session"; } >> "$GITHUB_ENV"
 else
-  echo "export ORTUS_SERVER=http://127.0.0.1:$port ORTUS_CODE=$code ORTUS_ADMIN_CODE=$admin ORTUS_OWNER_TOTP=$totp ORTUS_IMPORT_PASSWORDS=$passwords"
+  echo "export ORTUS_SERVER=http://127.0.0.1:$port ORTUS_CODE=$code ORTUS_ADMIN_CODE=$admin ORTUS_OWNER_TOTP=$totp ORTUS_IMPORT_PASSWORDS=$passwords ORTUS_OWNER_SESSION=$session"
 fi
