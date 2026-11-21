@@ -86,7 +86,8 @@ final class WelcomeTests: XCTestCase {
         // iOS may ask before handing an app a link of its own scheme.
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
         if springboard.buttons["Open"].waitForExistence(timeout: 5) { springboard.buttons["Open"].tap() }
-        XCTAssertTrue(app.buttons["makeKey"].waitForExistence(timeout: 30), app.staticTexts["error"].exists ? app.staticTexts["error"].label : "not joined")
+        XCTAssertTrue(app.buttons["makeKey"].waitForExistence(timeout: 30),
+                      app.staticTexts["error"].exists ? app.staticTexts["error"].label : "not joined; screen:\n\(app.debugDescription)\nsystem:\n\(springboard.debugDescription)")
     }
 
     /// The owner signs in with a password and the authenticator's code.
@@ -126,7 +127,7 @@ final class WelcomeTests: XCTestCase {
             if held == code { break }
             if !held.isEmpty { field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: held.count)) }
         }
-        XCTAssertEqual(code, held, "the code is in the field")
+        XCTAssertEqual(code, held, "the code is in the field; screen:\n\(app.debugDescription)")
         field.typeText("\n")
         if !app.buttons["makeKey"].waitForExistence(timeout: 5), app.buttons["signInCode"].isHittable {
             app.buttons["signInCode"].tap()

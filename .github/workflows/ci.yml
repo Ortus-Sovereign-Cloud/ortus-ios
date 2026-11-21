@@ -55,6 +55,10 @@ jobs:
         run: ci/start-ortus.sh program/target/release/ortus
       - name: Tests in the simulator
         run: |
+          # The software keyboard, as on a phone: with the simulator's
+          # hardware keyboard, SwiftUI fields drop typed text now and then.
+          xcrun simctl shutdown all || true
+          defaults write com.apple.iphonesimulator ConnectHardwareKeyboard -bool false
           brew install xcodegen
           xcodegen generate
           set -o pipefail
