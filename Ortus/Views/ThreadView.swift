@@ -10,6 +10,7 @@ struct ThreadView: View {
     @State private var reply = ""
     @State private var note: String?
     @State private var sending = false
+    @FocusState private var typing: Bool
 
     var body: some View {
         VStack(spacing: 0) {
@@ -28,6 +29,7 @@ struct ThreadView: View {
                 TextField(String(localized: "thread.reply \(emails.last?.sender ?? "")"), text: $reply, axis: .vertical)
                     .padding(12).background(Theme.surface, in: RoundedRectangle(cornerRadius: 16))
                     .accessibilityIdentifier("reply")
+                    .focused($typing)
                 Button {
                     Task { await send() }
                 } label: {
@@ -68,6 +70,8 @@ struct ThreadView: View {
         do {
             try await client.reply(to: last, text: reply)
             reply = ""
+            // Sent: the keyboard goes, the tab bar is back.
+            typing = false
             note = String(localized: "thread.sent")
             await load()
         } catch {

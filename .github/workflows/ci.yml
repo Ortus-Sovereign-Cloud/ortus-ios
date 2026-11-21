@@ -75,7 +75,7 @@ jobs:
             -destination "id=$udid" \
             -resultBundlePath results.xcresult > xcodebuild.log 2>&1 || status=$?
           # Every test's result and every error, whatever the log's length.
-          grep -E "error:|Test Case .*(passed|failed)|Executed|\*\* TEST" xcodebuild.log | cut -c1-600
+          grep -E "error:|Test Case .*(passed|failed)|Executed|\*\* TEST" xcodebuild.log | cut -c1-20000
           exit "${status:-0}"
       - if: always()
         uses: actions/upload-artifact@v4

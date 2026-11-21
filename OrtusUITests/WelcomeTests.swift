@@ -83,7 +83,9 @@ final class WelcomeTests: XCTestCase {
         XCTAssertTrue(app.textFields["totp"].waitForExistence(timeout: 20), app.staticTexts["error"].exists ? app.staticTexts["error"].label : "no code step")
         app.textFields["totp"].tap()
         app.textFields["totp"].typeText(Self.totp(ProcessInfo.processInfo.environment["ORTUS_OWNER_TOTP"]!))
-        app.buttons["signInCode"].tap()
+        let button = app.buttons["signInCode"]
+        XCTAssertTrue(button.isEnabled, "the code field holds \(app.textFields["totp"].value ?? "nothing"); screen:\n\(app.debugDescription)")
+        button.tap()
         // Not yet her key: the phone offers to become it.
         XCTAssertTrue(app.buttons["makeKey"].waitForExistence(timeout: 20), app.staticTexts["error"].exists ? app.staticTexts["error"].label : "not signed in")
     }
@@ -159,7 +161,7 @@ final class WelcomeTests: XCTestCase {
             if element.waitForExistence(timeout: 5), element.isHittable { break }
             app.swipeUp()
         }
-        XCTAssertTrue(element.exists, "\(id) is not on screen")
+        XCTAssertTrue(element.exists, "\(id) is not on screen:\n\(app.debugDescription)")
         element.tap()
     }
 
