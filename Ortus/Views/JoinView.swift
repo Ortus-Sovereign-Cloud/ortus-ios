@@ -12,6 +12,17 @@ struct JoinView: View {
 
     /// AutoFill offers the code (from Passwords) in the app people use; UI
     /// tests type it, which the one-time-code field drops under XCUITest.
+    /// The number pad for the code; debug builds (the UI tests, on a
+    /// simulator with a hardware keyboard, which drops typing into a number
+    /// pad field) the plain keyboard.
+    private static var codeKeyboard: UIKeyboardType {
+        #if DEBUG
+        return .default
+        #else
+        return .numberPad
+        #endif
+    }
+
     private static var codeHint: UITextContentType? {
         #if DEBUG
         return nil
@@ -60,7 +71,7 @@ struct JoinView: View {
                     .padding(12).background(Theme.surface2, in: RoundedRectangle(cornerRadius: 12))
                     .accessibilityIdentifier("password")
             } else {
-                field("join.totp", $totp, id: "totp").keyboardType(.numberPad).textContentType(Self.codeHint)
+                field("join.totp", $totp, id: "totp").keyboardType(Self.codeKeyboard).textContentType(Self.codeHint)
             }
             if let error = model.error {
                 Text(error).foregroundStyle(.red).font(.callout).accessibilityIdentifier("error")
