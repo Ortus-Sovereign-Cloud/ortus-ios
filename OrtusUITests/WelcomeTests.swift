@@ -83,6 +83,9 @@ final class WelcomeTests: XCTestCase {
         link.host = "join"
         link.queryItems = [URLQueryItem(name: "server", value: env["ORTUS_SERVER"]), URLQueryItem(name: "code", value: env["ORTUS_LINK_CODE"])]
         app.open(link.url!)
+        // iOS may ask before handing an app a link of its own scheme.
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        if springboard.buttons["Open"].waitForExistence(timeout: 5) { springboard.buttons["Open"].tap() }
         XCTAssertTrue(app.buttons["makeKey"].waitForExistence(timeout: 30), app.staticTexts["error"].exists ? app.staticTexts["error"].label : "not joined")
     }
 
@@ -109,12 +112,19 @@ final class WelcomeTests: XCTestCase {
         // The simulator can drop keys typed before its keyboard is up: wait
         // for it, and type again (after clearing) until the field holds the code.
         _ = app.keyboards.element.waitForExistence(timeout: 10)
+        let focused = NSPredicate(format: "hasKeyboardFocus == true")
         var held = ""
         for _ in 0..<3 {
+            // Typing goes nowhere until the field has the focus.
+            if !((field.value(forKey: "hasKeyboardFocus") as? Bool) ?? false) {
+                field.tap()
+                _ = XCTWaiter().wait(for: [expectation(for: focused, evaluatedWith: field)], timeout: 5)
+            }
             field.typeText(code)
-            held = field.value as? String ?? ""
+            let value = field.value as? String ?? ""
+            held = value == field.placeholderValue ? "" : value
             if held == code { break }
-            field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: held.count + 2))
+            if !held.isEmpty { field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: held.count)) }
         }
         XCTAssertEqual(code, held, "the code is in the field")
         field.typeText("\n")
