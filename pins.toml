@@ -1,3 +1,3 @@
 # The Ortus program commit the phone tests run against (built on the CI
 # runner from its own pins). Change it only to a commit whose CI is green.
-ortus = "22223568c9b5dae698fec7b5c65d1b2f95218930"
+ortus = "558512704b001bc606ce6a01ff2930c84fb79e52"
