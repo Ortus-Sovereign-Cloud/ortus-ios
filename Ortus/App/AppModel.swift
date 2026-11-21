@@ -155,6 +155,56 @@ final class AppModel: ObservableObject {
         self.me = signedIn
     }
 
+    /// The ticket between the password and the one-time code.
+    @Published var ticket: String?
+    private var pending: Client?
+
+    /// Signing in with a password: then the code from the authenticator
+    /// app (a password alone never signs in to Ortus).
+    func signInWithPassword(server typed: String, email: String, password: String) async {
+        error = nil
+        guard let server = server(from: typed) else {
+            error = String(localized: "join.badServer")
+            return
+        }
+        busy = true
+        defer { busy = false }
+        let client = Client(server: server)
+        do {
+            struct Next: Decodable { let ticket: String? }
+            let next: Next = try await client.call("POST", "/session/password", json: ["email": email.trimmingCharacters(in: .whitespaces), "password": password])
+            guard let t = next.ticket else { throw APIError(status: 0, code: "no_ticket", message: "") }
+            pending = client
+            ticket = t
+        } catch let e as APIError where e.status == 401 {
+            error = String(localized: "join.wrong")
+        } catch {
+            self.error = say(error)
+        }
+    }
+
+    func signInWithCode(_ code: String) async {
+        guard let client = pending, let ticket else { return }
+        error = nil
+        busy = true
+        defer { busy = false }
+        do {
+            let me: Me = try await client.call("POST", "/session/code", json: ["ticket": ticket, "code": code.filter(\.isNumber)])
+            guard let session = me.session_token else { throw APIError(status: 0, code: "no_session", message: "") }
+            client.token = session
+            self.client = client
+            self.me = me
+            keep(server: client.server, token: session)
+            self.ticket = nil
+            pending = nil
+            // A phone that is not yet their key becomes it next.
+            stage = PhoneKey.load(for: client.server) == nil ? .welcome : .signedIn
+        } catch {
+            if (error as? APIError)?.code == "ticket_expired" { ticket = nil }
+            self.error = say(error)
+        }
+    }
+
     /// Back in with the phone's key, after signing out or a session that ended.
     func signInAgain(server typed: String) async {
         error = nil

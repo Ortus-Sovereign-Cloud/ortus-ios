@@ -42,9 +42,22 @@ api -X POST -H "Authorization: Bearer $session" "http://127.0.0.1:$port/api/v1/d
 # fails), and an IT administrator who fixes it from the phone.
 api -X POST -H "Authorization: Bearer $session" "http://127.0.0.1:$port/api/v1/mail/admin/imports" -d '{"host":"127.0.0.1","port":1,"security":"tls","accounts":[{"login":"iryna.old","password":"wrong","to":"iryna@ministry.example"}]}' > /dev/null
 admin="$(api -X POST -H "Authorization: Bearer $session" "http://127.0.0.1:$port/api/v1/admin/users" -d '{"email":"oksana@ministry.example","name":"Oksana Lysenko","role":"admin"}' | python3 -c 'import json,sys; print(json.load(sys.stdin)["link"].split("#")[-1])')"
+# The owner signs in with a password and an authenticator app as well
+# (the phones' password sign-in): its secret goes to the tests.
+api -X PUT -H "Authorization: Bearer $session" "http://127.0.0.1:$port/api/v1/me/password" -d '{"password":"flood-plan-2026-ministry"}' > /dev/null
+totp="$(api -X POST -H "Authorization: Bearer $session" "http://127.0.0.1:$port/api/v1/me/totp" | python3 -c 'import json,sys; print(json.load(sys.stdin)["secret"])')"
+now="$(python3 - "$totp" <<'TOTP'
+import base64, hashlib, hmac, struct, sys, time
+key = base64.b32decode(sys.argv[1].upper() + "=" * (-len(sys.argv[1]) % 8))
+mac = hmac.new(key, struct.pack(">Q", int(time.time()) // 30), hashlib.sha1).digest()
+o = mac[-1] & 15
+print("%06d" % ((struct.unpack(">I", mac[o:o + 4])[0] & 0x7FFFFFFF) % 1000000))
+TOTP
+)"
+api -X POST -H "Authorization: Bearer $session" "http://127.0.0.1:$port/api/v1/me/totp/confirm" -d "{\"code\":\"$now\"}" > /dev/null
 echo "ortus: running at http://127.0.0.1:$port; Iryna's code is ready"
 if [ -n "${GITHUB_ENV:-}" ]; then
-  { echo "ORTUS_SERVER=http://127.0.0.1:$port"; echo "ORTUS_CODE=$code"; echo "ORTUS_ADMIN_CODE=$admin"; } >> "$GITHUB_ENV"
+  { echo "ORTUS_SERVER=http://127.0.0.1:$port"; echo "ORTUS_CODE=$code"; echo "ORTUS_ADMIN_CODE=$admin"; echo "ORTUS_OWNER_TOTP=$totp"; } >> "$GITHUB_ENV"
 else
-  echo "export ORTUS_SERVER=http://127.0.0.1:$port ORTUS_CODE=$code ORTUS_ADMIN_CODE=$admin"
+  echo "export ORTUS_SERVER=http://127.0.0.1:$port ORTUS_CODE=$code ORTUS_ADMIN_CODE=$admin ORTUS_OWNER_TOTP=$totp"
 fi

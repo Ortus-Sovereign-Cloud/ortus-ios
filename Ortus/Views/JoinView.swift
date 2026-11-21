@@ -8,6 +8,27 @@ struct JoinView: View {
     @State private var withPhone = false
     @State private var code = ProcessInfo.processInfo.environment["ORTUS_CODE"] ?? ""
 
+    @State private var withPassword = false
+    @State private var email = ""
+    @State private var password = ""
+    @State private var totp = ""
+
+    private func field(_ title: LocalizedStringKey, _ text: Binding<String>, id: String) -> some View {
+        TextField(title, text: text)
+            .textInputAutocapitalization(.never).autocorrectionDisabled()
+            .padding(12).background(Theme.surface2, in: RoundedRectangle(cornerRadius: 12))
+            .accessibilityIdentifier(id)
+    }
+
+    private func primary(_ title: LocalizedStringKey, disabled: Bool, id: String, _ action: @escaping () async -> Void) -> some View {
+        Button { Task { await action() } } label: {
+            Text(title).font(.headline).frame(maxWidth: .infinity).padding(16)
+        }
+        .buttonStyle(.borderedProminent).clipShape(RoundedRectangle(cornerRadius: 16))
+        .disabled(model.busy || disabled)
+        .accessibilityIdentifier(id)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Mark()
@@ -17,21 +38,33 @@ struct JoinView: View {
                 .textContentType(.URL).keyboardType(.URL).textInputAutocapitalization(.never).autocorrectionDisabled()
                 .padding(12).background(Theme.surface2, in: RoundedRectangle(cornerRadius: 12))
                 .accessibilityIdentifier("server")
-            TextField("join.code", text: $code)
-                .textInputAutocapitalization(.characters).autocorrectionDisabled()
-                .padding(12).background(Theme.surface2, in: RoundedRectangle(cornerRadius: 12))
-                .accessibilityIdentifier("code")
+            if !withPassword {
+                TextField("join.code", text: $code)
+                    .textInputAutocapitalization(.characters).autocorrectionDisabled()
+                    .padding(12).background(Theme.surface2, in: RoundedRectangle(cornerRadius: 12))
+                    .accessibilityIdentifier("code")
+            } else if model.ticket == nil {
+                field("join.email", $email, id: "email").keyboardType(.emailAddress).textContentType(.username)
+                SecureField("join.password", text: $password)
+                    .textContentType(.password)
+                    .padding(12).background(Theme.surface2, in: RoundedRectangle(cornerRadius: 12))
+                    .accessibilityIdentifier("password")
+            } else {
+                field("join.totp", $totp, id: "totp").keyboardType(.numberPad).textContentType(.oneTimeCode)
+            }
             if let error = model.error {
                 Text(error).foregroundStyle(.red).font(.callout).accessibilityIdentifier("error")
             }
             Spacer()
-            Button {
-                Task { await model.join(server: server, code: code) }
-            } label: {
-                Text("join.continue").font(.headline).frame(maxWidth: .infinity).padding(16)
+            if !withPassword {
+                primary("join.continue", disabled: server.isEmpty || code.isEmpty, id: "Continue") { await model.join(server: server, code: code) }
+            } else if model.ticket == nil {
+                primary("join.signIn", disabled: server.isEmpty || !email.contains("@") || password.isEmpty, id: "signIn") {
+                    await model.signInWithPassword(server: server, email: email, password: password)
+                }
+            } else {
+                primary("join.signIn", disabled: totp.filter(\.isNumber).count < 6, id: "signInCode") { await model.signInWithCode(totp) }
             }
-            .buttonStyle(.borderedProminent).clipShape(RoundedRectangle(cornerRadius: 16))
-            .disabled(model.busy || server.isEmpty || code.isEmpty)
             // The phone is already their key: back in without a new invitation.
             if withPhone {
                 Button {
@@ -43,15 +76,22 @@ struct JoinView: View {
                 .disabled(model.busy || server.isEmpty)
                 .accessibilityIdentifier("withPhone")
             }
+            Button(withPassword ? "join.withCode" : "join.withPassword") {
+                withPassword.toggle()
+                model.ticket = nil
+                model.error = nil
+            }
+            .frame(maxWidth: .infinity)
+            .accessibilityIdentifier("togglePassword")
         }
+        .padding(24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(Theme.background)
         .onAppear {
             if server.isEmpty, let last = model.lastServer { server = last.absoluteString }
             withPhone = model.hasKey(for: server)
         }
         .onChange(of: server) { withPhone = model.hasKey(for: server) }
-        .padding(24)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(Theme.background)
     }
 }
 

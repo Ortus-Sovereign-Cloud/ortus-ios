@@ -93,3 +93,10 @@
 "calendar.previous" = "Vorheriger Tag";
 "calendar.next" = "Nächster Tag";
 "join.withPhone" = "Mit diesem Telefon anmelden";
+"join.withPassword" = "Mit Passwort anmelden";
+"join.email" = "Ihre Adresse";
+"join.password" = "Passwort";
+"join.totp" = "Code aus Ihrer Authenticator-App";
+"join.signIn" = "Anmelden";
+"join.wrong" = "Adresse und Passwort passen nicht zusammen.";
+"join.withCode" = "Den Code aus meinem Willkommensbrief verwenden";

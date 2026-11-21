@@ -93,3 +93,10 @@
 "calendar.previous" = "اليوم السابق";
 "calendar.next" = "اليوم التالي";
 "join.withPhone" = "سجّل الدخول بهذا الهاتف";
+"join.withPassword" = "سجّل الدخول بكلمة مرور";
+"join.email" = "عنوانك";
+"join.password" = "كلمة المرور";
+"join.totp" = "الرمز من تطبيق المصادقة";
+"join.signIn" = "تسجيل الدخول";
+"join.wrong" = "هذا العنوان وكلمة المرور غير متطابقين.";
+"join.withCode" = "استخدم الرمز من رسالة الترحيب";

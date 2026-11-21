@@ -93,3 +93,10 @@
 "calendar.previous" = "Poprzedni dzień";
 "calendar.next" = "Następny dzień";
 "join.withPhone" = "Zaloguj się tym telefonem";
+"join.withPassword" = "Zaloguj się hasłem";
+"join.email" = "Twój adres";
+"join.password" = "Hasło";
+"join.totp" = "Kod z aplikacji uwierzytelniającej";
+"join.signIn" = "Zaloguj się";
+"join.wrong" = "Ten adres i hasło nie pasują do siebie.";
+"join.withCode" = "Użyj kodu z listu powitalnego";
