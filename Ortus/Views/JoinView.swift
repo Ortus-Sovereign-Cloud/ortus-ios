@@ -9,6 +9,16 @@ struct JoinView: View {
     @State private var code = ProcessInfo.processInfo.environment["ORTUS_CODE"] ?? ""
 
     @State private var withPassword = false
+
+    /// AutoFill offers the code (from Passwords) in the app people use; UI
+    /// tests type it, which the one-time-code field drops under XCUITest.
+    private static var codeHint: UITextContentType? {
+        #if DEBUG
+        return nil
+        #else
+        return .oneTimeCode
+        #endif
+    }
     @State private var email = ""
     @State private var password = ""
     @State private var totp = ""
@@ -50,7 +60,7 @@ struct JoinView: View {
                     .padding(12).background(Theme.surface2, in: RoundedRectangle(cornerRadius: 12))
                     .accessibilityIdentifier("password")
             } else {
-                field("join.totp", $totp, id: "totp").keyboardType(.numberPad).textContentType(.oneTimeCode)
+                field("join.totp", $totp, id: "totp").keyboardType(.numberPad).textContentType(Self.codeHint)
             }
             if let error = model.error {
                 Text(error).foregroundStyle(.red).font(.callout).accessibilityIdentifier("error")
