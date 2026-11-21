@@ -51,6 +51,15 @@ final class AppModel: ObservableObject {
     /// What to tell the person about a failure, in their language: the
     /// installation's own message, or one of the app's.
     func say(_ error: Error) -> String {
+        #if DEBUG
+        // Test builds say what failed, so CI shows it.
+        return sayPlain(error) + " (\(String(describing: error)))"
+        #else
+        return sayPlain(error)
+        #endif
+    }
+
+    private func sayPlain(_ error: Error) -> String {
         if let e = error as? APIError {
             if e.status > 0, !e.message.isEmpty { return e.message }
             switch e.code {

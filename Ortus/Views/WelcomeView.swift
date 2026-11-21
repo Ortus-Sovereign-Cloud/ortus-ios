@@ -7,6 +7,9 @@ struct WelcomeView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
+          // The steps scroll on a short screen; the button stays in reach.
+          ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
             Mark()
             Text("welcome.title \(model.me?.name.components(separatedBy: " ").first ?? "")")
                 .font(.largeTitle.bold()).foregroundStyle(Theme.text)
@@ -25,7 +28,9 @@ struct WelcomeView: View {
             if let error = model.error {
                 Text(error).foregroundStyle(.red).font(.callout).accessibilityIdentifier("error")
             }
-            Spacer()
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+          }
             Button {
                 Task { await model.makeKey() }
             } label: {
