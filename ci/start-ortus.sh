@@ -34,9 +34,17 @@ Attached is today's gauge report and the updated shelter agreement.\r
 with smtplib.SMTP("127.0.0.1", int(os.environ["SMTP_PORT"])) as s:
     s.sendmail("anna@regional.example", ["iryna@ministry.example"], message)
 MAIL
+# S1.9: Taras sends a decision to Iryna to sign (a route with one signing step).
+doc="$(api -X POST -H "Authorization: Bearer $session" "http://127.0.0.1:$port/api/v1/docs/documents" -d '{"parent":"","name":"Flood response plan 2026"}' | python3 -c 'import json,sys; print(json.load(sys.stdin)["id"])')"
+api -X POST -H "Authorization: Bearer $session" "http://127.0.0.1:$port/api/v1/drive/items/$doc/shares" -d '{"email":"iryna@ministry.example","role":"view"}' > /dev/null
+api -X POST -H "Authorization: Bearer $session" "http://127.0.0.1:$port/api/v1/docs/documents/$doc/reviews" -d '{"steps":[{"email":"iryna@ministry.example","title":"Director signs","kind":"sign"}],"note":"Please sign today."}' > /dev/null
+# S2.4: a mailbox import from an old server that does not answer (it
+# fails), and an IT administrator who fixes it from the phone.
+api -X POST -H "Authorization: Bearer $session" "http://127.0.0.1:$port/api/v1/mail/admin/imports" -d '{"host":"127.0.0.1","port":1,"security":"tls","accounts":[{"login":"iryna.old","password":"wrong","to":"iryna@ministry.example"}]}' > /dev/null
+admin="$(api -X POST -H "Authorization: Bearer $session" "http://127.0.0.1:$port/api/v1/admin/users" -d '{"email":"oksana@ministry.example","name":"Oksana Lysenko","role":"admin"}' | python3 -c 'import json,sys; print(json.load(sys.stdin)["link"].split("#")[-1])')"
 echo "ortus: running at http://127.0.0.1:$port; Iryna's code is ready"
 if [ -n "${GITHUB_ENV:-}" ]; then
-  { echo "ORTUS_SERVER=http://127.0.0.1:$port"; echo "ORTUS_CODE=$code"; } >> "$GITHUB_ENV"
+  { echo "ORTUS_SERVER=http://127.0.0.1:$port"; echo "ORTUS_CODE=$code"; echo "ORTUS_ADMIN_CODE=$admin"; } >> "$GITHUB_ENV"
 else
-  echo "export ORTUS_SERVER=http://127.0.0.1:$port ORTUS_CODE=$code"
+  echo "export ORTUS_SERVER=http://127.0.0.1:$port ORTUS_CODE=$code ORTUS_ADMIN_CODE=$admin"
 fi

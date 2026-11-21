@@ -4,8 +4,9 @@ import LocalAuthentication
 import Security
 
 /// The phone's own passkey: a P-256 key in the Secure Enclave, used only
-/// after Face ID (or the passcode). On the simulator, which has no Secure
-/// Enclave, a software key in the Keychain stands in.
+/// after Face ID (or the passcode). On the simulator (whose Secure Enclave
+/// has no Face ID or passcode enrolled in CI), a software key in the
+/// Keychain stands in.
 final class PhoneKey {
     let credentialID: Data
     private let sign: (Data) throws -> Data
@@ -21,10 +22,18 @@ final class PhoneKey {
 
     private static let account = "phone-key"
 
+    private static var enclave: Bool {
+        #if targetEnvironment(simulator)
+        return false
+        #else
+        return SecureEnclave.isAvailable
+        #endif
+    }
+
     /// A new key (replacing an older one).
     static func make() throws -> PhoneKey {
         let id = Data((0..<16).map { _ in UInt8.random(in: 0...255) })
-        if SecureEnclave.isAvailable {
+        if enclave {
             var error: Unmanaged<CFError>?
             guard let access = SecAccessControlCreateWithFlags(nil, kSecAttrAccessibleWhenUnlockedThisDeviceOnly, [.privateKeyUsage, .userPresence], &error) else {
                 throw error!.takeRetainedValue() as Error
@@ -43,7 +52,7 @@ final class PhoneKey {
         guard let stored = Keychain.get(account), stored.count > 16 else { return nil }
         let id = stored.prefix(16)
         let rest = stored.dropFirst(16)
-        if SecureEnclave.isAvailable, let key = try? SecureEnclave.P256.Signing.PrivateKey(dataRepresentation: rest, authenticationContext: LAContext()) {
+        if enclave, let key = try? SecureEnclave.P256.Signing.PrivateKey(dataRepresentation: rest, authenticationContext: LAContext()) {
             return PhoneKey(credentialID: id, publicKeyX963: key.publicKey.x963Representation) { try key.signature(for: $0).derRepresentation }
         }
         if let key = try? P256.Signing.PrivateKey(rawRepresentation: rest) {

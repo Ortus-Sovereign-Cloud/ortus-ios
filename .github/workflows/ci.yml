@@ -56,7 +56,7 @@ jobs:
           set -o pipefail
           # TEST_RUNNER_<name> in xcodebuild's environment reaches the
           # tests as <name>.
-          TEST_RUNNER_ORTUS_SERVER="$ORTUS_SERVER" TEST_RUNNER_ORTUS_CODE="$ORTUS_CODE" \
+          TEST_RUNNER_ORTUS_SERVER="$ORTUS_SERVER" TEST_RUNNER_ORTUS_CODE="$ORTUS_CODE" TEST_RUNNER_ORTUS_ADMIN_CODE="$ORTUS_ADMIN_CODE" \
             xcodebuild test -project Ortus.xcodeproj -scheme Ortus \
             -destination 'platform=iOS Simulator,name=iPhone 16' \
             -resultBundlePath results.xcresult | tail -n 80

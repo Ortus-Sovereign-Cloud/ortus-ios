@@ -41,6 +41,38 @@ final class WelcomeTests: XCTestCase {
         app.buttons["Send"].tap()
         XCTAssertTrue(app.staticTexts["Sent."].waitForExistence(timeout: 20), app.staticTexts["note"].exists ? app.staticTexts["note"].label : "not sent")
         attach(app, "thread")
+
+        // S1.9: she signs the flood plan on her phone, with its key.
+        app.tabBars.buttons["More"].tap()
+        app.buttons["For you"].tap()
+        XCTAssertTrue(app.staticTexts["Flood response plan 2026"].waitForExistence(timeout: 20))
+        attach(app, "s1.9-approvals")
+        app.buttons["decide"].tap()
+        XCTAssertTrue(app.staticTexts["Signed."].waitForExistence(timeout: 20), app.staticTexts["note"].exists ? app.staticTexts["note"].label : "not signed")
+    }
+
+    /** S2.4: the IT administrator fixes the failed mailbox imports from the phone. */
+    func testAnAdministratorFixesImports() throws {
+        guard let code = ProcessInfo.processInfo.environment["ORTUS_ADMIN_CODE"] else { throw XCTSkip("no Ortus to talk to") }
+        let app = app()
+        app.launchEnvironment["ORTUS_CODE"] = code
+        app.launch()
+        app.buttons["Continue"].tap()
+        XCTAssertTrue(app.buttons["makeKey"].waitForExistence(timeout: 20))
+        app.buttons["makeKey"].tap()
+        XCTAssertTrue(app.tabBars.buttons["More"].waitForExistence(timeout: 20))
+        app.tabBars.buttons["More"].tap()
+        app.buttons["Admin"].tap()
+        // The import fails on its own; pull to look again until it shows.
+        let ask = app.buttons["askOwners"]
+        for _ in 0..<12 where !ask.exists {
+            app.swipeDown()
+            _ = ask.waitForExistence(timeout: 5)
+        }
+        XCTAssertTrue(ask.exists)
+        attach(app, "s2.4-admin")
+        ask.tap()
+        XCTAssertTrue(app.staticTexts["The owners have a reconnect link in their inbox."].waitForExistence(timeout: 20))
     }
 
     /// The first screen in every language; Arabic right to left.
