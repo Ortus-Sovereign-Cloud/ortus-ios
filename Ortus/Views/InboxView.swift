@@ -54,7 +54,10 @@ struct InboxView: View {
     }
 
     private func chip(_ c: JMAP.Category) -> String {
-        let name = String(localized: String.LocalizationValue("inbox.\(c.rawValue)"))
+        // The key built first: an interpolation inside a LocalizationValue
+        // is a format argument, so "inbox.%@" would be looked up instead.
+        let key = "inbox." + c.rawValue
+        let name = String(localized: String.LocalizationValue(stringLiteral: key))
         let n = unread[c] ?? 0
         return n > 0 ? "\(name) \(n.formatted())" : name
     }

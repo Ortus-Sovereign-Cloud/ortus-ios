@@ -40,6 +40,9 @@ final class WelcomeTests: XCTestCase {
 
         // Her inbox: Anna's mail; the thread; a quick reply goes out.
         app.tabBars.buttons["Mail"].tap()
+        // The inbox's tabs in words, not their keys.
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Important'")).firstMatch.waitForExistence(timeout: 20), "the Important tab")
+        XCTAssertFalse(app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'inbox.'")).firstMatch.exists, "a tab shows its key")
         let row = app.staticTexts["Gauge report and updated shelter agreement"]
         XCTAssertTrue(row.waitForExistence(timeout: 20))
         attach(app, "inbox")
