@@ -48,6 +48,8 @@ final class WelcomeTests: XCTestCase {
         attach(app, "inbox")
         row.tap()
         XCTAssertTrue(app.staticTexts["Anna Kowalska"].waitForExistence(timeout: 10))
+        // Counts read as words do: never "1 messages".
+        XCTAssertFalse(app.staticTexts["1 messages"].exists, "a singular count")
         let reply = app.textFields["reply"]
         reply.tap()
         reply.typeText("Thanks, will review")

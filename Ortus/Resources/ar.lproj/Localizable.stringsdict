@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>thread.count %lld</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@n@</string>
+		<key>n</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>zero</key>
+			<string>لا رسائل</string>
+			<key>one</key>
+			<string>رسالة واحدة</string>
+			<key>two</key>
+			<string>رسالتان</string>
+			<key>few</key>
+			<string>%lld رسائل</string>
+			<key>many</key>
+			<string>%lld رسالة</string>
+			<key>other</key>
+			<string>%lld رسالة</string>
+		</dict>
+	</dict>
+	<key>admin.things %lld</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@n@</string>
+		<key>n</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>zero</key>
+			<string>لا شيء يحتاجك</string>
+			<key>one</key>
+			<string>أمر واحد يحتاجك</string>
+			<key>two</key>
+			<string>أمران يحتاجانك</string>
+			<key>few</key>
+			<string>%lld أمور تحتاجك</string>
+			<key>many</key>
+			<string>%lld أمرًا يحتاجك</string>
+			<key>other</key>
+			<string>%lld أمر يحتاجك</string>
+		</dict>
+	</dict>
+	<key>admin.failed %lld</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@n@</string>
+		<key>n</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>zero</key>
+			<string>لم يفشل أي صندوق بريد</string>
+			<key>one</key>
+			<string>فشل صندوق بريد واحد</string>
+			<key>two</key>
+			<string>فشل صندوقا بريد</string>
+			<key>few</key>
+			<string>فشلت %lld صناديق بريد</string>
+			<key>many</key>
+			<string>فشل %lld صندوق بريد</string>
+			<key>other</key>
+			<string>فشل %lld صندوق بريد</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

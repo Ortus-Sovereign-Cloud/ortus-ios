@@ -56,7 +56,8 @@ final class StoreScreenshots: XCTestCase {
 
         // 1. Mail: the inbox, then a thread.
         app.tabBars.buttons["Mail"].tap()
-        let thread = app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Gauge readings'")).firstMatch
+        // A conversation (three messages), not a calendar invitation.
+        let thread = app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Sandbag stock'")).firstMatch
         XCTAssertTrue(thread.waitForExistence(timeout: 20))
         shot(app, "1-mail")
         thread.tap()
@@ -78,9 +79,5 @@ final class StoreScreenshots: XCTestCase {
         app.tabBars.buttons["Calendar"].tap()
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Readiness review' OR label CONTAINS 'Sandbag move' OR label CONTAINS 'Town hall'")).firstMatch.waitForExistence(timeout: 20))
         shot(app, "5-calendar")
-
-        // 4. Files.
-        app.tabBars.buttons["Files"].tap()
-        shot(app, "6-files")
     }
 }
