@@ -57,12 +57,19 @@ final class WelcomeTests: XCTestCase {
 
         // Her reply is in Sent, with whom it went to.
         app.navigationBars.buttons.element(boundBy: 0).tap()
-        app.buttons["folders"].tap()
+        // Back in the inbox (the screen slides back first).
+        XCTAssertTrue(app.navigationBars["Inbox"].waitForExistence(timeout: 10), "back in the inbox")
+        let folders = app.buttons["folders"]
+        XCTAssertTrue(folders.waitForExistence(timeout: 10))
+        for _ in 0..<20 where !folders.isHittable { usleep(250_000) }
+        folders.tap()
+        XCTAssertTrue(app.buttons["Sent"].waitForExistence(timeout: 10))
         app.buttons["Sent"].tap()
         XCTAssertTrue(app.navigationBars["Sent"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Gauge report'")).firstMatch.waitForExistence(timeout: 20), "the reply in Sent")
         attach(app, "sent")
         app.buttons["folders"].tap()
+        XCTAssertTrue(app.buttons["Inbox"].waitForExistence(timeout: 10))
         app.buttons["Inbox"].tap()
 
         // S1.9: she signs the flood plan on her phone, with its key.
