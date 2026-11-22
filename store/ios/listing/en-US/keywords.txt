@@ -1,0 +1,1 @@
+mail,chat,calendar,files,approvals,workspace,sovereign,self-hosted,secure,email,meetings,tasks

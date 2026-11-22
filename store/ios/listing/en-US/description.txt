@@ -1,0 +1,24 @@
+Ortus Workspace is the iPhone app for Ortus, the workspace an organisation runs on its own servers: mail, chat, calendar, files, documents, tasks and approvals in one place, with nothing going to anyone else's cloud.
+
+EVERYTHING STAYS WITH YOUR ORGANISATION
+The app talks only to your organisation's Ortus server. There is no analytics, no advertising and no tracking, and nothing is sent to the app's publisher.
+
+MAIL
+• Your inbox sorted into Important, Other and Feeds
+• Threads, quick replies and new messages, with names suggested as you type
+• See whether mail to people outside was delivered
+• Sent, Archive and Trash
+
+CHAT AND CALLS
+• Your channels and direct messages
+• Join a channel's call, even on networks that allow only web traffic
+
+CALENDAR, FILES AND TASKS
+• Your day and week, and invitations to answer
+• Files and documents shared with you
+• Approvals and signatures waiting for you, signed with your phone's own key
+
+SIGN IN WITHOUT A PASSWORD
+Scan the code from your welcome letter, or choose "Sign in on your phone" on the web. Your iPhone then becomes your key, protected by Face ID; there is no password to steal.
+
+You need an account at an organisation that runs Ortus.

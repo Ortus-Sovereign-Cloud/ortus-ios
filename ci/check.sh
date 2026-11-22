@@ -18,6 +18,14 @@ done
 for lang in en pl uk de fr ar; do
   grep -q '^"NSFaceIDUsageDescription" = ' "Ortus/Resources/$lang.lproj/InfoPlist.strings" || { echo "check: $lang has no Face ID text" >&2; exit 1; }
 done
+# The App Store listing in every language, within Apple's limits.
+for loc in en-US pl uk de-DE fr-FR ar-SA; do
+  for f in name:30 subtitle:30 promotional_text:170 keywords:100 description:4000 release_notes:4000; do
+    file="store/ios/listing/$loc/${f%%:*}.txt"
+    [ -s "$file" ] || { echo "check: $file is missing" >&2; exit 1; }
+    [ "$(tr -d '\n' < "$file" | wc -m)" -le "${f##*:}" ] || { echo "check: $file is over ${f##*:} characters" >&2; exit 1; }
+  done
+done
 (cd OrtusKit && swift test)
 if command -v xcodebuild > /dev/null && command -v xcodegen > /dev/null; then
   xcodegen generate

@@ -1,0 +1,105 @@
+name: screenshots
+
+# The App Store screenshots (6.9" iPhone, English): an Ortus at the pinned
+# program commit, filled with the sample organisation (tools/sample-org.mjs),
+# the app signed in as its owner, StoreScreenshots taking each screen. Run
+# by hand; the PNGs are the artifact.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  shots:
+    runs-on: macos-26
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: The program commit
+        id: pin
+        run: echo "ortus=$(sed -n 's/^ortus = "\([0-9a-f]\{40\}\)"$/\1/p' pins.toml)" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          repository: Ortus-Sovereign-Cloud/ortus
+          ref: ${{ steps.pin.outputs.ortus }}
+          path: program
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            program/target
+          key: ortus-macos-${{ hashFiles('program/pins.toml', 'program/Cargo.lock') }}
+          restore-keys: ortus-macos-
+      - name: Build Ortus
+        run: |
+          cd program
+          ci/fetch.sh
+          cargo build --release -p ortus
+      - name: Start Ortus with the sample organisation
+        run: |
+          token=$(openssl rand -hex 16)
+          data=$(mktemp -d)
+          ORTUS_ROLES=web,worker ORTUS_DATA_DIR="$data" ORTUS_WEB_IP=127.0.0.1 ORTUS_WEB_PORT=7900 \
+            ORTUS_PUBLIC_URL=http://127.0.0.1:7900 ORTUS_SETUP_TOKEN="$token" \
+            nohup program/target/release/ortus serve > "$data/ortus.log" 2>&1 &
+          for _ in $(seq 1 60); do curl -fs http://127.0.0.1:7900/api/v1/health > /dev/null && break; sleep 1; done
+          node program/tools/sample-org.mjs http://127.0.0.1:7900 "$token" ministry.example > sample.txt
+          # The owner signs in (the next authenticator code) and makes a
+          # phone sign-in code for the app.
+          sleep $(( 31 - $(date +%s) % 30 ))
+          code=$(node --input-type=module -e '
+            import { createHmac } from "node:crypto";
+            import { readFileSync } from "node:fs";
+            const text = readFileSync("sample.txt", "utf8");
+            const pass = /password: (.*)/.exec(text)[1].trim(), secret = /authenticator secret: (.*)/.exec(text)[1].trim();
+            const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"; let bits = "";
+            for (const c of secret.replace(/=+$/, "").toUpperCase()) bits += abc.indexOf(c).toString(2).padStart(5, "0");
+            const key = Buffer.from(bits.match(/.{8}/g).map((b) => parseInt(b, 2)));
+            const counter = Buffer.alloc(8); counter.writeBigUInt64BE(BigInt(Math.floor(Date.now() / 30000)));
+            const mac = createHmac("sha1", key).update(counter).digest(); const o = mac[19] & 15;
+            const totp = String((mac.readUInt32BE(o) & 0x7fffffff) % 1000000).padStart(6, "0");
+            const h = { "X-Requested-With": "ortus", "Content-Type": "application/json" };
+            const post = async (p, b, t) => (await fetch("http://127.0.0.1:7900/api/v1" + p, { method: "POST", headers: t ? { ...h, Authorization: "Bearer " + t } : h, body: JSON.stringify(b) })).json();
+            const { ticket } = await post("/session/password", { email: "olena@ministry.example", password: pass });
+            const { session_token } = await post("/session/code", { ticket, code: totp });
+            const { link } = await post("/me/phone-link", {}, session_token);
+            console.log(link.split("p=").pop());')
+          echo "ORTUS_SCREENSHOT_CODE=$code" >> "$GITHUB_ENV"
+          echo "ORTUS_SERVER=http://127.0.0.1:7900" >> "$GITHUB_ENV"
+      - name: Screenshots on a 6.9-inch iPhone
+        run: |
+          xcrun simctl shutdown all || true
+          defaults write com.apple.iphonesimulator ConnectHardwareKeyboard -bool false
+          brew install xcodegen
+          xcodegen generate
+          # The newest iOS's largest iPhone (Pro Max: 1320 x 2868).
+          udid=$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          d = json.load(sys.stdin)["devices"]
+          ios = sorted((k for k in d if "iOS" in k), key=lambda k: [int(x) for x in k.rsplit("iOS-", 1)[-1].split("-")])
+          phones = [x["udid"] for k in reversed(ios) for x in d[k] if "Pro Max" in x["name"]]
+          print(phones[0] if phones else "")')
+          [ -n "$udid" ] || { echo "no Pro Max simulator"; exit 1; }
+          xcrun simctl bootstatus "$udid" -b
+          xcrun simctl status_override "$udid" --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3
+          set -o pipefail
+          TEST_RUNNER_ORTUS_SERVER="$ORTUS_SERVER" TEST_RUNNER_ORTUS_SCREENSHOT_CODE="$ORTUS_SCREENSHOT_CODE" \
+            xcodebuild test -project Ortus.xcodeproj -scheme Ortus -destination "id=$udid" \
+            -only-testing:OrtusUITests/StoreScreenshots -resultBundlePath shots.xcresult > xcodebuild.log 2>&1 || status=$?
+          grep -E "error:|Test Case .*(passed|failed)|\*\* TEST" xcodebuild.log | cut -c1-2000
+          mkdir -p screenshots
+          xcrun xcresulttool export attachments --path shots.xcresult --output-path screenshots
+          ls -la screenshots
+          exit "${status:-0}"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: |
+            screenshots
+            xcodebuild.log
