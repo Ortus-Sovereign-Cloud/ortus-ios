@@ -56,10 +56,15 @@ final class StoreScreenshots: XCTestCase {
 
         // 1. Mail: the inbox, then a thread.
         app.tabBars.buttons["Mail"].tap()
-        // A conversation (three messages), not a calendar invitation.
-        let thread = app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Sandbag stock'")).firstMatch
-        XCTAssertTrue(thread.waitForExistence(timeout: 20))
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Radio check'")).firstMatch.waitForExistence(timeout: 20), "the inbox")
         shot(app, "1-mail")
+        // A conversation (three messages), not a calendar invitation: the
+        // week's oldest, further down the list.
+        let thread = app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Sandbag stock'")).firstMatch
+        for _ in 0..<8 where !thread.exists {
+            app.swipeUp()
+        }
+        XCTAssertTrue(thread.waitForExistence(timeout: 5), "the Sandbag stock thread")
         thread.tap()
         XCTAssertTrue(app.textFields["reply"].waitForExistence(timeout: 10))
         shot(app, "2-thread")
