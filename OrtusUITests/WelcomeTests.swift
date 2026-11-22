@@ -182,8 +182,8 @@ final class WelcomeTests: XCTestCase {
         app.buttons["makeKey"].tap()
         XCTAssertTrue(app.tabBars.buttons["Chat"].waitForExistence(timeout: 20))
         app.tabBars.buttons["Chat"].tap()
-        let channel = app.staticTexts["phone-calls"]
-        XCTAssertTrue(channel.waitForExistence(timeout: 20), "the channel")
+        let channel = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS 'phone-calls'")).firstMatch
+        XCTAssertTrue(channel.waitForExistence(timeout: 20), "the channel; screen:\n\(app.debugDescription)")
         channel.tap()
         let call = app.buttons["call"]
         XCTAssertTrue(call.waitForExistence(timeout: 10))
