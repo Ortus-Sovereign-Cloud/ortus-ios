@@ -86,7 +86,7 @@ jobs:
           print(phones[0] if phones else "")')
           [ -n "$udid" ] || { echo "no Pro Max simulator"; exit 1; }
           xcrun simctl bootstatus "$udid" -b
-          xcrun simctl status_override "$udid" --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3
+          xcrun simctl status_bar "$udid" override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3
           set -o pipefail
           TEST_RUNNER_ORTUS_SERVER="$ORTUS_SERVER" TEST_RUNNER_ORTUS_SCREENSHOT_CODE="$ORTUS_SCREENSHOT_CODE" \
             xcodebuild test -project Ortus.xcodeproj -scheme Ortus -destination "id=$udid" \
