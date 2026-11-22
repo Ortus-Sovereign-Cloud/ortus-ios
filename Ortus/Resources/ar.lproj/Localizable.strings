@@ -128,3 +128,14 @@
 "call.close" = "إغلاق";
 "push.new" = "شيء جديد في Ortus";
 "offline.banner" = "دون اتصال: يظهر ما احتفظ به الهاتف";
+"call.connected" = "متصل";
+"call.connecting" = "جارٍ الاتصال…";
+"call.joining" = "جارٍ الانضمام…";
+"call.alone" = "لا أحد غيرك هنا بعد";
+"call.mute" = "كتم";
+"call.unmute" = "إلغاء الكتم";
+"call.cameraOff" = "إيقاف الكاميرا";
+"call.cameraOn" = "تشغيل الكاميرا";
+"call.speaker" = "مكبّر الصوت";
+"call.earpiece" = "سماعة الأذن";
+"call.hangUp" = "مغادرة";

@@ -190,7 +190,10 @@ final class WelcomeTests: XCTestCase {
         let call = app.buttons["call"]
         XCTAssertTrue(call.waitForExistence(timeout: 10))
         call.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
-        XCTAssertTrue(app.webViews.buttons["Start a call"].waitForExistence(timeout: 30), "the call page; screen:\n\(app.debugDescription)")
+        // Natively: the phone joined and the media node answered its offer.
+        XCTAssertTrue(app.staticTexts["answered"].waitForExistence(timeout: 40) || app.otherElements["answered"].exists, "the media node's answer; screen:\n\(app.debugDescription)")
+        XCTAssertFalse(app.staticTexts["callError"].exists)
+        app.buttons["mute"].tap()
         attach(app, "call")
     }
 

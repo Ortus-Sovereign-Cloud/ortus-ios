@@ -128,3 +128,14 @@
 "call.close" = "Close";
 "push.new" = "Something new in Ortus";
 "offline.banner" = "Offline: showing what this phone kept";
+"call.connected" = "Connected";
+"call.connecting" = "Connecting…";
+"call.joining" = "Joining…";
+"call.alone" = "No one else is here yet";
+"call.mute" = "Mute";
+"call.unmute" = "Unmute";
+"call.cameraOff" = "Camera off";
+"call.cameraOn" = "Camera on";
+"call.speaker" = "Speaker";
+"call.earpiece" = "Earpiece";
+"call.hangUp" = "Leave";

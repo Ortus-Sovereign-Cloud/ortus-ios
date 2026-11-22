@@ -128,3 +128,14 @@
 "call.close" = "Закрити";
 "push.new" = "Щось нове в Ortus";
 "offline.banner" = "Немає зв'язку: показано збережене на телефоні";
+"call.connected" = "З’єднано";
+"call.connecting" = "З’єднання…";
+"call.joining" = "Приєднання…";
+"call.alone" = "Тут ще нікого немає";
+"call.mute" = "Вимкнути мікрофон";
+"call.unmute" = "Увімкнути мікрофон";
+"call.cameraOff" = "Вимкнути камеру";
+"call.cameraOn" = "Увімкнути камеру";
+"call.speaker" = "Гучномовець";
+"call.earpiece" = "Динамік телефона";
+"call.hangUp" = "Вийти";

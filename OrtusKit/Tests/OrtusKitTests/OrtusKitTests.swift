@@ -381,3 +381,45 @@ final class CacheTests: XCTestCase {
 
 final class ReachedBox: @unchecked Sendable { var last: Bool? }
 
+final class CallTests: XCTestCase {
+    func testPartsRoundTrip() {
+        let long = "v=0\r\n" + String(repeating: "a=x", count: 20_000)
+        let parts = CallParts.split(long, id: "abc")
+        XCTAssertEqual(4, parts.count)
+        let j = CallParts.Joiner()
+        XCTAssertNil(j.take(parts[2]))
+        XCTAssertNil(j.take(parts[0]))
+        XCTAssertNil(j.take(parts[3]))
+        XCTAssertEqual(long, j.take(parts[1]))
+        XCTAssertNil(j.take(#"{"id":"x","part":5,"of":2,"data":"y"}"#))
+        XCTAssertEqual("hi", CallParts.Joiner().take(CallParts.split("hi")[0]))
+    }
+
+    func testOffersAndAnswers() {
+        XCTAssertEqual("v=0", CallParts.offer(#"{"type":"offer","sdp":"v=0","n":3}"#)?.sdp)
+        XCTAssertEqual(3, CallParts.offer(#"{"type":"offer","sdp":"v=0","n":3}"#)?.n)
+        XCTAssertNil(CallParts.offer(#"{"type":"answer","sdp":"v=0"}"#))
+        XCTAssertEqual(#"{"n":3,"sdp":"v=1","type":"answer"}"#, CallParts.answer("v=1", n: 3))
+    }
+
+    func testJoinsWithTheRelay() async throws {
+        let seen = Recorded.Box()
+        let body = #"{"call":{"id":"c1","room":"r1","sessions":[{"session":"s2","user":"u2","muted":true}],"people":{"u2":{"name":"Taras"}}},"session":"s1","ice_servers":[{"urls":["turns:turn.example:443?transport=tcp"],"username":"1:s1","credential":"x"}]}"#
+        let client = Client(server: URL(string: "https://ortus.example")!, token: "t", transport: Recorded(status: 200, body: body, seen: seen))
+        let j = try await client.joinCall(room: "r1")
+        XCTAssertEqual("s1", j.session)
+        XCTAssertEqual("turns:turn.example:443?transport=tcp", j.ice_servers?.first?.urls.first)
+        XCTAssertEqual("Taras", j.call.name(of: "s2"))
+        XCTAssertEqual("https://ortus.example/api/v1/calls/rooms/r1/join", seen.requests[0].url?.absoluteString)
+    }
+
+    func testSendsTheOffer() async throws {
+        let seen = Recorded.Box()
+        let client = Client(server: URL(string: "https://ortus.example")!, token: "t", transport: Recorded(status: 200, body: #"{"answer":{"type":"answer","sdp":"v=0 answer"}}"#, seen: seen))
+        let answer = try await client.sendOffer(session: "s1", sdp: "v=0 offer")
+        XCTAssertEqual("v=0 answer", answer)
+        let sent = try JSONSerialization.jsonObject(with: seen.requests[0].httpBody!) as! [String: Any]
+        XCTAssertEqual("v=0 offer", (sent["offer"] as? [String: Any])?["sdp"] as? String)
+    }
+}
+

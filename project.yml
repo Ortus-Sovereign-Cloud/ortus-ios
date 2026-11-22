@@ -8,6 +8,9 @@ options:
 packages:
   OrtusKit:
     path: OrtusKit
+  # Google's WebRTC for native calls (BSD-3-Clause, the owner's exception).
+  WebRTC:
+    path: WebRTC
 settings:
   base:
     SWIFT_VERSION: "5.10"
@@ -27,6 +30,7 @@ targets:
       - path: Shared
     dependencies:
       - package: OrtusKit
+      - package: WebRTC
       - target: OrtusNotifications
     settings:
       base:
@@ -60,6 +64,8 @@ targets:
         NSFaceIDUsageDescription: Face ID guards the key this phone keeps for you.
         NSCameraUsageDescription: The camera reads sign-in codes and shows you in calls.
         NSMicrophoneUsageDescription: The microphone lets others hear you in calls.
+        # A call goes on when you switch to another app.
+        UIBackgroundModes: [audio]
         # ortus://join?server=…&code=…, which an invitation page offers on a phone.
         CFBundleURLTypes:
           - CFBundleURLName: cc.ortus.app.join

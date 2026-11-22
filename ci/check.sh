@@ -5,11 +5,14 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 for script in ci/*.sh; do bash -n "$script"; done
-# No third-party packages: every line of the app is ours (and permissive).
-if grep -q "\.package(" OrtusKit/Package.swift || grep -q "^  [A-Za-z]*:$" <(sed -n '/^packages:/,/^[a-z]/p' project.yml | grep -v "OrtusKit\|path:\|packages:"); then
+# No third-party packages: every line of the app is ours, except Google's
+# WebRTC (BSD-3-Clause, native calls, the owner's exception 2026-11-22),
+# a binary pinned by its checksum in WebRTC/Package.swift.
+if grep -q "\.package(" OrtusKit/Package.swift || grep -q "^  [A-Za-z]*:$" <(sed -n '/^packages:/,/^[a-z]/p' project.yml | grep -v "OrtusKit\|WebRTC\|path:\|packages:"); then
   echo "check: a third-party package needs a licence review first" >&2
   exit 1
 fi
+grep -q 'checksum: "9532fe3ce47507c304f37a4355b907be1e89967971d614a04603005a546249be"' WebRTC/Package.swift || { echo "check: WebRTC is not the reviewed build" >&2; exit 1; }
 # Every text in all six languages.
 keys() { grep -o '^"[^"]*"' "Ortus/Resources/$1.lproj/Localizable.strings" | sort; }
 for lang in pl uk de fr ar; do
