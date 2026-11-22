@@ -111,3 +111,16 @@
 "folder.choose" = "Foldery";
 "delivery.failed" = "Nie doręczono";
 "delivery.trying" = "Wysyłanie";
+"compose.title" = "Nowa wiadomość";
+"compose.from" = "Od";
+"compose.to" = "Do";
+"compose.subject" = "Temat";
+"compose.message" = "Wiadomość";
+"compose.send" = "Wyślij";
+"compose.cancel" = "Anuluj";
+"compose.removeRecipient %@" = "Usuń %@";
+"compose.noAddress" = "Nie możesz jeszcze stąd wysyłać poczty: Twoje konto nie ma adresu w poczcie tej organizacji. Może go nadać administrator.";
+"delivery.done %@" = "Doręczono do %@";
+"delivery.notDone %@" = "Nie doręczono do %@";
+"delivery.retrying %@" = "Jeszcze nie doręczono do %@; ponawiamy";
+"delivery.sendingTo %@" = "Wysyłanie do %@…";

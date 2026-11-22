@@ -75,6 +75,25 @@ final class WelcomeTests: XCTestCase {
         XCTAssertTrue(app.buttons["Inbox"].waitForExistence(timeout: 10))
         app.buttons["Inbox"].tap()
 
+        // A new message to Olena, picked from the suggestions; it is in Sent.
+        let compose = app.buttons["compose"]
+        XCTAssertTrue(compose.waitForExistence(timeout: 10))
+        compose.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        let to = app.textFields["to"]
+        XCTAssertTrue(to.waitForExistence(timeout: 10))
+        to.tap()
+        to.typeText("olena")
+        let olena = app.buttons.matching(NSPredicate(format: "label CONTAINS 'olena@ministry.example'")).firstMatch
+        XCTAssertTrue(olena.waitForExistence(timeout: 10), "a suggestion for Olena")
+        olena.tap()
+        app.textFields["subject"].tap()
+        app.textFields["subject"].typeText("Depot keys")
+        app.textFields["message"].tap()
+        app.textFields["message"].typeText("The keys are with the guard.")
+        app.buttons["send"].tap()
+        XCTAssertTrue(app.staticTexts["Sent."].waitForExistence(timeout: 20), app.staticTexts["error"].exists ? app.staticTexts["error"].label : "not sent")
+        attach(app, "compose-sent")
+
         // S1.9: she signs the flood plan on her phone, with its key.
         app.tabBars.buttons["More"].tap()
         tap(app, "foryou")

@@ -7,6 +7,8 @@ struct InboxView: View {
     @EnvironmentObject var model: AppModel
     @State private var category: JMAP.Category = .important
     @State private var folder: JMAP.Folder = .inbox
+    @State private var composing = false
+    @State private var note: String?
     @State private var emails: [Email] = []
     @State private var unread: [JMAP.Category: Int] = [:]
     @State private var error: String?
@@ -38,6 +40,9 @@ struct InboxView: View {
                 if let error {
                     Text(error).foregroundStyle(.red)
                 }
+                if let note {
+                    Text(note).font(.callout).foregroundStyle(Theme.text2).listRowBackground(Color.clear).accessibilityIdentifier("note")
+                }
                 ForEach(emails) { e in
                     NavigationLink(value: e.threadId) { Row(email: e, sent: folder == .sent) }
                         .listRowBackground(Theme.background)
@@ -50,7 +55,18 @@ struct InboxView: View {
             .scrollContentBackground(.hidden)
             .background(Theme.background)
             .navigationTitle(name(folder))
+            .sheet(isPresented: $composing) {
+                ComposeView(sent: {
+                    note = String(localized: "thread.sent")
+                    Task { await load() }
+                })
+            }
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button { composing = true } label: { Image(systemName: "square.and.pencil") }
+                        .accessibilityLabel(Text("compose.title"))
+                        .accessibilityIdentifier("compose")
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         ForEach(JMAP.Folder.allCases, id: \.self) { f in

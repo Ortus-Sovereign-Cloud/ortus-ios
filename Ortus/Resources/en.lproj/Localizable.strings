@@ -111,3 +111,16 @@
 "folder.choose" = "Folders";
 "delivery.failed" = "Not delivered";
 "delivery.trying" = "Sending";
+"compose.title" = "New message";
+"compose.from" = "From";
+"compose.to" = "To";
+"compose.subject" = "Subject";
+"compose.message" = "Message";
+"compose.send" = "Send";
+"compose.cancel" = "Cancel";
+"compose.removeRecipient %@" = "Remove %@";
+"compose.noAddress" = "You cannot send mail from here yet: your account has no address in this organisation's mail. An administrator can give you one.";
+"delivery.done %@" = "Delivered to %@";
+"delivery.notDone %@" = "Not delivered to %@";
+"delivery.retrying %@" = "Not delivered to %@ yet; trying again";
+"delivery.sendingTo %@" = "Sending to %@…";

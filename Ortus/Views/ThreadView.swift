@@ -102,6 +102,22 @@ private struct Message: View {
             if let invite = email.ortusInvite, invite.method == "REQUEST", !invite.cancelled {
                 Invitation(invite: invite, answer: answer)
             }
+            // How a message one sent is getting to each recipient outside.
+            if let delivery = email.ortusDelivery, !delivery.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(Array(delivery.enumerated()), id: \.offset) { _, d in
+                        let to = d.recipient ?? ""
+                        switch d.state {
+                        case "sent": Label(String(localized: "delivery.done \(to)"), systemImage: "checkmark").foregroundStyle(Theme.teal)
+                        case "bounced": Label(String(localized: "delivery.notDone \(to)"), systemImage: "xmark").foregroundStyle(.red)
+                        case "deferred": Label(String(localized: "delivery.retrying \(to)"), systemImage: "clock").foregroundStyle(.orange)
+                        default: Label(String(localized: "delivery.sendingTo \(to)"), systemImage: "paperplane").foregroundStyle(Theme.text2)
+                        }
+                    }
+                }
+                .font(.footnote)
+                .accessibilityIdentifier("delivery")
+            }
         }
     }
 }

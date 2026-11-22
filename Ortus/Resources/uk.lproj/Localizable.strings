@@ -111,3 +111,16 @@
 "folder.choose" = "Теки";
 "delivery.failed" = "Не доставлено";
 "delivery.trying" = "Надсилається";
+"compose.title" = "Новий лист";
+"compose.from" = "Від";
+"compose.to" = "Кому";
+"compose.subject" = "Тема";
+"compose.message" = "Повідомлення";
+"compose.send" = "Надіслати";
+"compose.cancel" = "Скасувати";
+"compose.removeRecipient %@" = "Прибрати %@";
+"compose.noAddress" = "Ви ще не можете надсилати звідси пошту: ваш обліковий запис не має адреси в пошті цієї організації. Її може дати адміністратор.";
+"delivery.done %@" = "Доставлено до %@";
+"delivery.notDone %@" = "Не доставлено до %@";
+"delivery.retrying %@" = "Ще не доставлено до %@; пробуємо знову";
+"delivery.sendingTo %@" = "Надсилання до %@…";

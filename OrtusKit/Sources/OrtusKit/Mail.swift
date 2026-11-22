@@ -62,6 +62,20 @@ public struct Email: Decodable, Equatable, Identifiable {
     public var date: Date? { ISO8601DateFormatter().date(from: receivedAt) }
 }
 
+/// An address one may send from.
+public struct Identity: Decodable, Equatable, Identifiable {
+    public let id: String
+    public let name: String?
+    public let email: String
+}
+
+/// Someone to write to, as Compose suggests them.
+public struct Suggestion: Decodable, Equatable, Hashable {
+    public let name: String?
+    public let email: String
+    public var shown: String { (name?.isEmpty == false ? name : email) ?? email }
+}
+
 public struct Mailbox: Decodable, Equatable {
     public let id: String
     public let name: String
@@ -72,7 +86,7 @@ public struct Mailbox: Decodable, Equatable {
 public enum JMAP {
     public static let using = ["urn:ietf:params:jmap:core", "urn:ietf:params:jmap:mail", "urn:ietf:params:jmap:submission"]
     public static let listProperties = ["threadId", "subject", "from", "to", "receivedAt", "preview", "keywords", "mailboxIds", "hasAttachment", "ortusCategory", "ortusInvite", "ortusDelivery"]
-    public static let readProperties = listProperties + ["cc", "replyTo", "messageId", "references", "attachments", "ortusText", "ortusVerified"]
+    public static let readProperties = listProperties + ["cc", "replyTo", "messageId", "references", "attachments", "ortusText", "ortusVerified", "ortusDelivery"]
 
     /// The categories of the inbox.
     public enum Category: String, CaseIterable { case important, other, feeds }
@@ -185,6 +199,48 @@ extension Client {
             ["Email/set", ["create": ["r": draft]], "c"],
             ["EmailSubmission/set", ["create": ["s": ["identityId": identityID, "emailId": "#r"]], "onSuccessDestroyEmail": ["#s"]], "s"],
         ])
+        if let failed = ((sent["s"] as? [String: Any])?["notCreated"] as? [String: Any])?["s"] as? [String: Any] {
+            throw APIError(status: 0, code: failed["type"] as? String ?? "notSent", message: failed["description"] as? String ?? "Not sent.")
+        }
+    }
+
+    /// The addresses one may send from (none: no mail address here).
+    public func identities() async throws -> [Identity] {
+        let got = try await jmap([["Identity/get", [:], "i"]])
+        return try JMAP.decode((got["i"] as? [String: Any])?["list"], as: [Identity].self)
+    }
+
+    /// People to write to whose name or address starts with `query`.
+    public func suggest(_ query: String) async throws -> [Suggestion] {
+        struct Found: Decodable { let people: [Suggestion] }
+        let q = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let (status, data) = try await transport.send(request("GET", "/mail/people?q=\(q)"))
+        guard (200..<300).contains(status) else { throw APIError(status: status, code: "http_\(status)", message: "") }
+        return try JSONDecoder().decode(Found.self, from: data).people
+    }
+
+    /// Sends a new message from `identity` to `to`.
+    public func send(from identity: Identity, to: [String], subject: String, text: String) async throws {
+        let got = try await jmap([["Mailbox/get", [:], "b"]])
+        guard let drafts = ((got["b"] as? [String: Any])?["list"] as? [[String: Any]])?.first(where: { $0["role"] as? String == "drafts" })?["id"] as? String else {
+            throw APIError(status: 0, code: "notSent", message: "Not sent.")
+        }
+        let draft: [String: Any] = [
+            "mailboxIds": [drafts: true],
+            "keywords": ["$draft": true, "$seen": true],
+            "from": [["name": identity.name ?? "", "email": identity.email]],
+            "to": to.map { ["email": $0] },
+            "subject": subject,
+            "textBody": [["partId": "1", "type": "text/plain"]],
+            "bodyValues": ["1": ["value": text]],
+        ]
+        let sent = try await jmap([
+            ["Email/set", ["create": ["m": draft]], "c"],
+            ["EmailSubmission/set", ["create": ["s": ["identityId": identity.id, "emailId": "#m"]], "onSuccessDestroyEmail": ["#s"]], "s"],
+        ])
+        if let failed = ((sent["c"] as? [String: Any])?["notCreated"] as? [String: Any])?["m"] as? [String: Any] {
+            throw APIError(status: 0, code: failed["type"] as? String ?? "notSent", message: failed["description"] as? String ?? "Not sent.")
+        }
         if let failed = ((sent["s"] as? [String: Any])?["notCreated"] as? [String: Any])?["s"] as? [String: Any] {
             throw APIError(status: 0, code: failed["type"] as? String ?? "notSent", message: failed["description"] as? String ?? "Not sent.")
         }

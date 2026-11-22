@@ -111,3 +111,16 @@
 "folder.choose" = "المجلدات";
 "delivery.failed" = "لم تُسلَّم";
 "delivery.trying" = "قيد الإرسال";
+"compose.title" = "رسالة جديدة";
+"compose.from" = "من";
+"compose.to" = "إلى";
+"compose.subject" = "الموضوع";
+"compose.message" = "الرسالة";
+"compose.send" = "إرسال";
+"compose.cancel" = "إلغاء";
+"compose.removeRecipient %@" = "إزالة %@";
+"compose.noAddress" = "لا يمكنك إرسال البريد من هنا بعد: ليس لحسابك عنوان في بريد هذه المؤسسة. يمكن للمسؤول أن يمنحك عنوانًا.";
+"delivery.done %@" = "سُلِّمت إلى %@";
+"delivery.notDone %@" = "لم تُسلَّم إلى %@";
+"delivery.retrying %@" = "لم تُسلَّم إلى %@ بعد؛ نعيد المحاولة";
+"delivery.sendingTo %@" = "جارٍ الإرسال إلى %@…";

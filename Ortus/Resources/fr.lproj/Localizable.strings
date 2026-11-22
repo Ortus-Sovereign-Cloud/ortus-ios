@@ -111,3 +111,16 @@
 "folder.choose" = "Dossiers";
 "delivery.failed" = "Non remis";
 "delivery.trying" = "Envoi en cours";
+"compose.title" = "Nouveau message";
+"compose.from" = "De";
+"compose.to" = "À";
+"compose.subject" = "Objet";
+"compose.message" = "Message";
+"compose.send" = "Envoyer";
+"compose.cancel" = "Annuler";
+"compose.removeRecipient %@" = "Retirer %@";
+"compose.noAddress" = "Vous ne pouvez pas encore envoyer de courriel d’ici : votre compte n’a pas d’adresse dans la messagerie de cette organisation. Un administrateur peut vous en donner une.";
+"delivery.done %@" = "Remis à %@";
+"delivery.notDone %@" = "Non remis à %@";
+"delivery.retrying %@" = "Pas encore remis à %@ ; nouvel essai en cours";
+"delivery.sendingTo %@" = "Envoi à %@…";

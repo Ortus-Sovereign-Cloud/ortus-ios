@@ -111,3 +111,16 @@
 "folder.choose" = "Ordner";
 "delivery.failed" = "Nicht zugestellt";
 "delivery.trying" = "Wird gesendet";
+"compose.title" = "Neue Nachricht";
+"compose.from" = "Von";
+"compose.to" = "An";
+"compose.subject" = "Betreff";
+"compose.message" = "Nachricht";
+"compose.send" = "Senden";
+"compose.cancel" = "Abbrechen";
+"compose.removeRecipient %@" = "%@ entfernen";
+"compose.noAddress" = "Sie können von hier noch keine E-Mails senden: Ihr Konto hat keine Adresse in der Mail dieser Organisation. Ihre Administration kann Ihnen eine geben.";
+"delivery.done %@" = "Zugestellt an %@";
+"delivery.notDone %@" = "Nicht an %@ zugestellt";
+"delivery.retrying %@" = "Noch nicht an %@ zugestellt; neuer Versuch läuft";
+"delivery.sendingTo %@" = "Wird an %@ gesendet…";
