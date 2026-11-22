@@ -5,12 +5,23 @@ struct MainTabs: View {
     @EnvironmentObject var model: AppModel
 
     var body: some View {
+        VStack(spacing: 0) {
+            if model.offline {
+                Label("offline.banner", systemImage: "wifi.slash")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(Theme.text2)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+                    .background(Theme.surface)
+                    .accessibilityIdentifier("offline")
+            }
         TabView(selection: $model.tab) {
             InboxView().tabItem { Label("tab.mail", systemImage: "tray") }.tag(0)
             ChatsView().tabItem { Label("tab.chat", systemImage: "bubble.left") }.tag(1)
             CalendarView().tabItem { Label("tab.calendar", systemImage: "calendar") }.tag(2)
             DriveView().tabItem { Label("tab.files", systemImage: "folder") }.tag(3)
             MoreView().tabItem { Label("tab.more", systemImage: "square.grid.2x2") }.tag(4)
+        }
         }
     }
 }

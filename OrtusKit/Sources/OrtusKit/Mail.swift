@@ -122,7 +122,7 @@ public enum JMAP {
 extension Client {
     /// Runs JMAP method calls.
     public func jmap(_ calls: [[Any]]) async throws -> [String: Any] {
-        let body = try JSONSerialization.data(withJSONObject: ["using": JMAP.using, "methodCalls": calls])
+        let body = try JSONSerialization.data(withJSONObject: ["using": JMAP.using, "methodCalls": calls], options: [.sortedKeys])
         let (status, data) = try await transport.send(request("POST", "/mail/web/jmap", body: body))
         guard (200..<300).contains(status) else { throw APIError(status: status, code: "http_\(status)", message: "") }
         return try JMAP.answers(data)

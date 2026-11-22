@@ -127,3 +127,4 @@
 "call.start" = "Call";
 "call.close" = "Close";
 "push.new" = "Something new in Ortus";
+"offline.banner" = "Offline: showing what this phone kept";

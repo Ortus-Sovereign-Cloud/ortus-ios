@@ -55,7 +55,8 @@ struct CalendarView: View {
     private func load() async {
         guard let client = model.client else { return }
         let end = Calendar.current.date(byAdding: .day, value: 1, to: day) ?? day
-        events = (try? await client.events(from: day, to: end)) ?? []
+        let start = day
+        try? await quickly({ try await client.events(from: start, to: end) }) { events = $0 }
     }
 
     private func answer(_ e: Event, _ a: String) async {

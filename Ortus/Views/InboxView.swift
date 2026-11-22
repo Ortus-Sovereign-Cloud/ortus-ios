@@ -108,11 +108,14 @@ struct InboxView: View {
         guard let client = model.client else { return }
         do {
             if folder == .inbox {
-                let got = try await client.inbox(category)
-                emails = got.emails
-                unread = got.unread
+                let category = category
+                try await quickly({ try await client.inbox(category) }) { got in
+                    emails = got.emails
+                    unread = got.unread
+                }
             } else {
-                emails = try await client.folder(folder)
+                let folder = folder
+                try await quickly({ try await client.folder(folder) }) { emails = $0 }
             }
             error = nil
         } catch {

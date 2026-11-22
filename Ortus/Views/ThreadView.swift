@@ -48,7 +48,8 @@ struct ThreadView: View {
 
     private func load() async {
         guard let client = model.client else { return }
-        emails = (try? await client.thread(threadID)) ?? []
+        let id = threadID
+        try? await quickly({ try await client.thread(id) }) { emails = $0 }
         let unread = emails.filter(\.unread).map(\.id)
         if !unread.isEmpty { try? await client.markRead(unread) }
     }

@@ -13,6 +13,8 @@ final class AppModel: ObservableObject {
     @Published var busy = false
     /// The open tab (a notification's tap chooses it).
     @Published var tab = 0
+    /// The installation could not be reached: screens show what was kept.
+    @Published var offline = false
     private(set) var client: Client? {
         didSet { if client?.token != nil, client !== oldValue { startPush() } }
     }
@@ -26,7 +28,7 @@ final class AppModel: ObservableObject {
         }
         if let server = lastServer,
            let token = Keychain.get("session").map({ String(decoding: $0, as: UTF8.self) }) {
-            client = Client(server: server, token: token)
+            client = makeClient(server, token: token)
             stage = .signedIn
             Task { await refresh() }
             startPush()
@@ -119,7 +121,7 @@ final class AppModel: ObservableObject {
         }
         busy = true
         defer { busy = false }
-        let client = Client(server: server)
+        let client = makeClient(server)
         do {
             let token = code.trimmingCharacters(in: .whitespacesAndNewlines).components(separatedBy: "#").last ?? ""
             let me: Me = try await client.call("POST", "/invitation/accept", json: ["token": token])
@@ -162,7 +164,7 @@ final class AppModel: ObservableObject {
         }
         busy = true
         defer { busy = false }
-        let client = Client(server: server)
+        let client = makeClient(server)
         do {
             let me: Me = try await client.call("POST", "/session/phone-link", json: ["token": code])
             guard let session = me.session_token else { throw APIError(status: 0, code: "no_session", message: "") }
@@ -245,7 +247,7 @@ final class AppModel: ObservableObject {
         }
         busy = true
         defer { busy = false }
-        let client = Client(server: server)
+        let client = makeClient(server)
         do {
             struct Next: Decodable { let ticket: String? }
             let next: Next = try await client.call("POST", "/session/password", json: ["email": email.trimmingCharacters(in: .whitespaces), "password": password])
@@ -290,7 +292,7 @@ final class AppModel: ObservableObject {
         }
         busy = true
         defer { busy = false }
-        let client = Client(server: server)
+        let client = makeClient(server)
         do {
             me = nil
             try await signInWithKey(client: client)
@@ -308,7 +310,10 @@ final class AppModel: ObservableObject {
 
     /// The session ended on the server: sign in again (the key stays).
     private func ended() {
-        if let client { PushStore.remove(server: client.server) }
+        if let client {
+            PushStore.remove(server: client.server)
+            forgetKept(client.server)
+        }
         Keychain.remove("session")
         client = nil
         me = nil

@@ -308,3 +308,76 @@ final class PushTests: XCTestCase {
         XCTAssertEqual(4, Push.tab(for: nil))
     }
 }
+
+final class CacheTests: XCTestCase {
+    struct Flaky: Transport {
+        let box: Box
+        final class Box: @unchecked Sendable { var online = true; var calls = 0 }
+        func send(_ request: URLRequest) async throws -> (Int, Data) {
+            box.calls += 1
+            guard box.online else { throw URLError(.notConnectedToInternet) }
+            return (200, Data("{\"n\":\(box.calls)}".utf8))
+        }
+    }
+
+    private func dir() -> URL {
+        FileManager.default.temporaryDirectory.appendingPathComponent("ortus-cache-\(UUID().uuidString)")
+    }
+
+    func testReadsAreKeptAndServedOffline() async throws {
+        let box = Flaky.Box()
+        let seen = Recorded.Box()
+        _ = seen
+        let reached = ReachedBox()
+        let t = CachingTransport(inner: Flaky(box: box), cache: ResponseCache(directory: dir())) { reached.last = $0 }
+        let client = Client(server: URL(string: "https://ortus.example")!, token: "s", transport: t)
+        struct N: Decodable { let n: Int }
+        let first: N = try await client.call("GET", "/chat/rooms")
+        XCTAssertEqual(1, first.n)
+        XCTAssertEqual(true, reached.last)
+        box.online = false
+        let offline: N = try await client.call("GET", "/chat/rooms")
+        XCTAssertEqual(1, offline.n, "the kept answer")
+        XCTAssertEqual(false, reached.last)
+        // Never fetched: no answer.
+        do {
+            let _: N = try await client.call("GET", "/calendar/events")
+            XCTFail("nothing kept")
+        } catch {}
+        // Writes are never answered from the phone.
+        do {
+            let _: N = try await client.call("POST", "/chat/rooms/r1/messages", json: ["text": "hi"])
+            XCTFail("a write needs the connection")
+        } catch {}
+        // Shown at once: from the phone only, without asking the installation.
+        box.online = true
+        let calls = box.calls
+        let quick: N = try await CachingTransport.$cacheOnly.withValue(true) { try await client.call("GET", "/chat/rooms") }
+        XCTAssertEqual(1, quick.n)
+        XCTAssertEqual(calls, box.calls)
+        t.cache.clear()
+        box.online = false
+        do {
+            let _: N = try await client.call("GET", "/chat/rooms")
+            XCTFail("cleared")
+        } catch {}
+    }
+
+    func testOnlyJmapReadsCount() throws {
+        func jmap(_ names: [String]) -> URLRequest {
+            var r = URLRequest(url: URL(string: "https://ortus.example/api/v1/mail/web/jmap")!)
+            r.httpMethod = "POST"
+            r.httpBody = try! JSONSerialization.data(withJSONObject: ["methodCalls": names.map { [$0, [:], "x"] }])
+            return r
+        }
+        XCTAssertTrue(CachingTransport.reads(jmap(["Mailbox/get", "Email/query", "Email/get"])))
+        XCTAssertFalse(CachingTransport.reads(jmap(["Email/get", "Email/set"])))
+        XCTAssertFalse(CachingTransport.reads(jmap(["EmailSubmission/set"])))
+        var signOut = URLRequest(url: URL(string: "https://ortus.example/api/v1/session/sign-out")!)
+        signOut.httpMethod = "POST"
+        XCTAssertFalse(CachingTransport.reads(signOut))
+    }
+}
+
+final class ReachedBox: @unchecked Sendable { var last: Bool? }
+

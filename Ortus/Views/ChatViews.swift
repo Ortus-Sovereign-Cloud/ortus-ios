@@ -74,7 +74,7 @@ struct ChatsView: View {
 
     private func load() async {
         guard let client = model.client else { return }
-        data = try? await client.rooms()
+        try? await quickly({ try await client.rooms() }) { data = $0 }
     }
 }
 
@@ -148,7 +148,8 @@ struct ChannelView: View {
 
     private func load() async {
         guard let client = model.client else { return }
-        messages = try? await client.messages(in: room.id)
+        let id = room.id
+        try? await quickly({ try await client.messages(in: id) }) { messages = $0 }
     }
 
     private func send() async {
