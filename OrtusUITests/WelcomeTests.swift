@@ -62,13 +62,16 @@ final class WelcomeTests: XCTestCase {
         let folders = app.buttons["folders"]
         XCTAssertTrue(folders.waitForExistence(timeout: 10))
         for _ in 0..<20 where !folders.isHittable { usleep(250_000) }
-        folders.tap()
+        // A menu in the iOS 26 navigation bar may not take an accessibility
+        // tap ("cannot scroll to visible"): tap where it is on screen.
+        func openFolders() { folders.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap() }
+        openFolders()
         XCTAssertTrue(app.buttons["Sent"].waitForExistence(timeout: 10))
         app.buttons["Sent"].tap()
         XCTAssertTrue(app.navigationBars["Sent"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Gauge report'")).firstMatch.waitForExistence(timeout: 20), "the reply in Sent")
         attach(app, "sent")
-        app.buttons["folders"].tap()
+        openFolders()
         XCTAssertTrue(app.buttons["Inbox"].waitForExistence(timeout: 10))
         app.buttons["Inbox"].tap()
 
