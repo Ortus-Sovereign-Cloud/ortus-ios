@@ -10,6 +10,16 @@
     <!-- The shared app link of every installation's invitations. -->
     <string>applinks:join.ortus.cc</string>
   </array>
+  <!-- Notifications while the app is closed (Apple's push service). -->
+  <key>aps-environment</key>
+  <string>development</string>
+  <!-- The app's own group first (where the session and key stay), then
+       the one it shares with the notification extension. -->
+  <key>keychain-access-groups</key>
+  <array>
+    <string>$(AppIdentifierPrefix)cc.ortus.app</string>
+    <string>$(AppIdentifierPrefix)cc.ortus.shared</string>
+  </array>
   <!-- An organisation's device management may add its own domains. -->
   <key>com.apple.developer.associated-domains.mdm-managed</key>
   <true/>

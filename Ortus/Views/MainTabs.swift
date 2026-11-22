@@ -5,12 +5,12 @@ struct MainTabs: View {
     @EnvironmentObject var model: AppModel
 
     var body: some View {
-        TabView {
-            InboxView().tabItem { Label("tab.mail", systemImage: "tray") }
-            ChatsView().tabItem { Label("tab.chat", systemImage: "bubble.left") }
-            CalendarView().tabItem { Label("tab.calendar", systemImage: "calendar") }
-            DriveView().tabItem { Label("tab.files", systemImage: "folder") }
-            MoreView().tabItem { Label("tab.more", systemImage: "square.grid.2x2") }
+        TabView(selection: $model.tab) {
+            InboxView().tabItem { Label("tab.mail", systemImage: "tray") }.tag(0)
+            ChatsView().tabItem { Label("tab.chat", systemImage: "bubble.left") }.tag(1)
+            CalendarView().tabItem { Label("tab.calendar", systemImage: "calendar") }.tag(2)
+            DriveView().tabItem { Label("tab.files", systemImage: "folder") }.tag(3)
+            MoreView().tabItem { Label("tab.more", systemImage: "square.grid.2x2") }.tag(4)
         }
     }
 }

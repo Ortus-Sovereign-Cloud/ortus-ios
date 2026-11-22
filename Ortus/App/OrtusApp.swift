@@ -2,6 +2,7 @@ import SwiftUI
 
 @main
 struct OrtusApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var delegate
     @StateObject private var model = AppModel()
 
     var body: some Scene {
@@ -12,6 +13,7 @@ struct OrtusApp: App {
                 .tint(Theme.accent)
                 // The app's own link, from an invitation page on this phone.
                 .onOpenURL { model.open($0.absoluteString) }
+                .onAppear { AppDelegate.model = model }
                 // An invitation link (universal link) for a domain the app names.
                 .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
                     if let url = activity.webpageURL { model.open(url.absoluteString) }

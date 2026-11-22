@@ -263,3 +263,48 @@ final class DiscoveryTests: XCTestCase {
         XCTAssertNil(Discovery.server(fromAnswer: Data("<html>".utf8)))
     }
 }
+
+final class PushTests: XCTestCase {
+    func testRegistersWithTheDeviceTokenInHex() async throws {
+        let seen = Recorded.Box()
+        let client = Client(server: URL(string: "https://ortus.example")!, token: "s1", transport: Recorded(status: 200, body: #"{"id":"pd1","fetch_token":"f1"}"#, seen: seen))
+        let r = try await client.registerPush(token: Data([0x0a, 0xff, 0x10]), sandbox: false, utcOffsetMinutes: 60)
+        XCTAssertEqual(PushRegistration(id: "pd1", fetch_token: "f1"), r)
+        let sent = try JSONSerialization.jsonObject(with: seen.requests[0].httpBody!) as! [String: Any]
+        XCTAssertEqual("0aff10", sent["token"] as? String)
+        XCTAssertEqual("production", sent["environment"] as? String)
+        XCTAssertEqual("apns", sent["platform"] as? String)
+        XCTAssertEqual("https://ortus.example/api/v1/me/push-devices", seen.requests[0].url?.absoluteString)
+    }
+
+    func testFetchesWithTheFetchTokenOnly() async throws {
+        let seen = Recorded.Box()
+        let notice = try await Push.fetch(server: URL(string: "https://ortus.example")!, fetchToken: "f1", id: "nabc", transport: Recorded(status: 200, body: #"{"app":"mail","title":"Ana Ferreira","detail":"Town hall","path":"/mail?thread=t1","at":1}"#, seen: seen))
+        XCTAssertEqual("Ana Ferreira", notice.title)
+        let r = seen.requests[0]
+        XCTAssertEqual("https://ortus.example/api/v1/push/notices/nabc", r.url?.absoluteString)
+        XCTAssertEqual("f1", r.value(forHTTPHeaderField: "X-Ortus-Push"))
+        XCTAssertNil(r.value(forHTTPHeaderField: "Authorization"), "never the session")
+        do {
+            _ = try await Push.fetch(server: URL(string: "https://ortus.example")!, fetchToken: "f1", id: "x", transport: Recorded(status: 401, body: "{}", seen: seen))
+            XCTFail("a refused fetch throws")
+        } catch {}
+    }
+
+    func testReadsOnlyOurPushes() {
+        XCTAssertEqual("n1", Push.parts(of: ["n": "n1", "s": "https://ortus.example"])?.id)
+        XCTAssertEqual("https://ortus.example", Push.parts(of: ["n": "n1", "s": "https://ortus.example"])?.server.absoluteString)
+        XCTAssertNil(Push.parts(of: ["n": "n1"]))
+        XCTAssertNil(Push.parts(of: ["s": "https://ortus.example"]))
+        XCTAssertNil(Push.parts(of: ["n": "n1", "s": "https://ortus.example/elsewhere"]))
+    }
+
+    func testOpensTheRightTab() {
+        XCTAssertEqual(0, Push.tab(for: "/mail?thread=t1"))
+        XCTAssertEqual(1, Push.tab(for: "/chat?room=r1"))
+        XCTAssertEqual(2, Push.tab(for: "/calendar"))
+        XCTAssertEqual(3, Push.tab(for: "/drive"))
+        XCTAssertEqual(4, Push.tab(for: "/approvals"))
+        XCTAssertEqual(4, Push.tab(for: nil))
+    }
+}

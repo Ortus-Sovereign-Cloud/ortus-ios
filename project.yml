@@ -24,8 +24,10 @@ targets:
     platform: iOS
     sources:
       - path: Ortus
+      - path: Shared
     dependencies:
       - package: OrtusKit
+      - target: OrtusNotifications
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: cc.ortus.app
@@ -64,6 +66,34 @@ targets:
             CFBundleURLSchemes: [ortus]
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
+  OrtusNotifications:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: OrtusNotifications
+      - path: Shared
+    dependencies:
+      - package: OrtusKit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: cc.ortus.app.notifications
+        TARGETED_DEVICE_FAMILY: "1"
+      configs:
+        Release:
+          CODE_SIGN_STYLE: Automatic
+          CODE_SIGN_IDENTITY: "Apple Development"
+          CODE_SIGNING_REQUIRED: "YES"
+          DEVELOPMENT_TEAM: XD7JHZ5DB3
+          CODE_SIGN_ENTITLEMENTS: OrtusNotifications.entitlements
+    info:
+      path: OrtusNotifications/Info.plist
+      properties:
+        CFBundleDisplayName: Ortus
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.usernotifications.service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).NotificationService
   OrtusUITests:
     type: bundle.ui-testing
     platform: iOS

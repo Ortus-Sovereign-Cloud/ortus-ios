@@ -11,7 +11,11 @@ final class AppModel: ObservableObject {
     @Published var me: Me?
     @Published var error: String?
     @Published var busy = false
-    private(set) var client: Client?
+    /// The open tab (a notification's tap chooses it).
+    @Published var tab = 0
+    private(set) var client: Client? {
+        didSet { if client?.token != nil, client !== oldValue { startPush() } }
+    }
 
     init() {
         // UI tests (and a fresh install) start clean when asked.
@@ -25,6 +29,7 @@ final class AppModel: ObservableObject {
             client = Client(server: server, token: token)
             stage = .signedIn
             Task { await refresh() }
+            startPush()
         }
     }
 
@@ -303,6 +308,7 @@ final class AppModel: ObservableObject {
 
     /// The session ended on the server: sign in again (the key stays).
     private func ended() {
+        if let client { PushStore.remove(server: client.server) }
         Keychain.remove("session")
         client = nil
         me = nil
@@ -312,6 +318,7 @@ final class AppModel: ObservableObject {
     /// Ends the session on the server too. The key stays: the phone is
     /// still the person's key (an administrator turns off a lost phone's).
     func signOut() async {
+        await stopPush()
         if let client, let token = client.token { await end(session: token, on: client.server) }
         ended()
     }

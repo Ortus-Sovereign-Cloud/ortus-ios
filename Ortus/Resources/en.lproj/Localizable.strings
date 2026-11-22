@@ -126,3 +126,4 @@
 "delivery.sendingTo %@" = "Sending to %@…";
 "call.start" = "Call";
 "call.close" = "Close";
+"push.new" = "Something new in Ortus";
