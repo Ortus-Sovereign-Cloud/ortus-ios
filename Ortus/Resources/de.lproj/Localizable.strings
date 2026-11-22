@@ -103,3 +103,4 @@
 "join.scan" = "QR-Code der Einladung scannen";
 "join.badLink" = "Das ist keine Ortus-Einladung.";
 "join.notFound" = "Für diese E-Mail wurde kein Ortus gefunden. Geben Sie die Adresse aus Ihrem Willkommensbrief ein.";
+"join.phoneLinkExpired" = "Dieser Anmeldecode ist abgelaufen oder wurde benutzt. Öffnen Sie im Web Ihren Namen, dann Auf dem Telefon anmelden, für einen neuen.";

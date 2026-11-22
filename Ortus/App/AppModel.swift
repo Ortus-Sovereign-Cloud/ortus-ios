@@ -68,6 +68,7 @@ final class AppModel: ObservableObject {
 
     private func sayPlain(_ error: Error) -> String {
         if let e = error as? APIError {
+            if e.code == "phone_link_expired" { return String(localized: "join.phoneLinkExpired") }
             if e.status > 0, !e.message.isEmpty { return e.message }
             switch e.code {
             case "no_key": return String(localized: "welcome.noKey")
@@ -140,7 +141,34 @@ final class AppModel: ObservableObject {
         }
         guard stage == .join, !busy else { return }
         handed = invitation
-        Task { await join(server: invitation.server, code: invitation.code) }
+        switch invitation.kind {
+        case .invite: Task { await join(server: invitation.server, code: invitation.code) }
+        case .phone: Task { await signInWithPhoneLink(server: invitation.server, code: invitation.code) }
+        }
+    }
+
+    /// "Sign in on your phone" from the web: the code signs this phone in as
+    /// the person; a phone that is not yet their key becomes it next.
+    func signInWithPhoneLink(server typed: String, code: String) async {
+        error = nil
+        guard let server = server(from: typed) else {
+            error = String(localized: "join.badServer")
+            return
+        }
+        busy = true
+        defer { busy = false }
+        let client = Client(server: server)
+        do {
+            let me: Me = try await client.call("POST", "/session/phone-link", json: ["token": code])
+            guard let session = me.session_token else { throw APIError(status: 0, code: "no_session", message: "") }
+            client.token = session
+            self.client = client
+            self.me = me
+            keep(server: server, token: session)
+            stage = PhoneKey.load(for: server) == nil ? .welcome : .signedIn
+        } catch {
+            self.error = say(error)
+        }
     }
 
     /// Makes the phone a passkey of the account (Face ID guards it). The

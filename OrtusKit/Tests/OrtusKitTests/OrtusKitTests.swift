@@ -205,6 +205,16 @@ final class InvitationLinkTests: XCTestCase {
         XCTAssertNil(InvitationLink.parse("https://join.ortus.cc/i#c=\(code)"))
     }
 
+    func testAPhoneSignInCode() {
+        let phone = InvitationLink(server: "https://ortus.cc", code: code, kind: .phone)
+        // The QR code on the web ("Sign in on your phone"), and the button on a phone.
+        XCTAssertEqual(phone, InvitationLink.parse("https://join.ortus.cc/i#s=https%3A%2F%2Fortus.cc&p=\(code)"))
+        XCTAssertEqual(phone, InvitationLink.parse("ortus://signin?server=https%3A%2F%2Fortus.cc&code=\(code)"))
+        // An invitation stays one.
+        XCTAssertEqual(.invite, InvitationLink.parse("https://join.ortus.cc/i#s=https%3A%2F%2Fortus.cc&c=\(code)")?.kind)
+        XCTAssertNil(InvitationLink.parse("https://join.ortus.cc/i#s=https%3A%2F%2Fortus.cc&p=short"))
+    }
+
     func testAnythingElseIsNot() {
         for text in [
             "",

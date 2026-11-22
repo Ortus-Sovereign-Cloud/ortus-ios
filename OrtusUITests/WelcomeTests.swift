@@ -91,6 +91,43 @@ final class WelcomeTests: XCTestCase {
                       app.staticTexts["error"].exists ? app.staticTexts["error"].label : "not joined; screen:\n\(app.debugDescription)\nsystem:\n\(springboard.debugDescription)")
     }
 
+    /// "Sign in on your phone" from the web: the code from the owner's web
+    /// session, opened as the QR code or button hands it to the app, signs
+    /// the app in; the phone then becomes the owner's key.
+    func testSignInOnThePhoneFromTheWeb() throws {
+        try need("ORTUS_SERVER", "ORTUS_OWNER_SESSION")
+        let env = ProcessInfo.processInfo.environment
+        var request = URLRequest(url: URL(string: env["ORTUS_SERVER"]! + "/api/v1/me/phone-link")!)
+        request.httpMethod = "POST"
+        request.httpBody = Data("{}".utf8)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("ortus", forHTTPHeaderField: "X-Requested-With")
+        request.setValue("Bearer \(env["ORTUS_OWNER_SESSION"]!)", forHTTPHeaderField: "Authorization")
+        let done = DispatchSemaphore(value: 0)
+        var body = Data()
+        URLSession.shared.dataTask(with: request) { data, _, _ in body = data ?? Data(); done.signal() }.resume()
+        done.wait()
+        struct Made: Decodable { let link: String }
+        let link = try JSONDecoder().decode(Made.self, from: body).link
+        let code = String(link.split(separator: "p=").last ?? "")
+
+        let app = app()
+        app.launchEnvironment["ORTUS_SERVER"] = ""
+        app.launchEnvironment["ORTUS_CODE"] = ""
+        app.launch()
+        XCTAssertTrue(app.textFields["code"].waitForExistence(timeout: 20))
+        var open = URLComponents()
+        open.scheme = "ortus"
+        open.host = "signin"
+        open.queryItems = [URLQueryItem(name: "server", value: env["ORTUS_SERVER"]), URLQueryItem(name: "code", value: code)]
+        XCUIDevice.shared.system.open(open.url!)
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        if springboard.buttons["Open"].waitForExistence(timeout: 5) { springboard.buttons["Open"].tap() }
+        XCTAssertTrue(app.buttons["makeKey"].waitForExistence(timeout: 30),
+                      app.staticTexts["error"].exists ? app.staticTexts["error"].label : "not signed in; screen:\n\(app.debugDescription)")
+        attach(app, "phone-link")
+    }
+
     /// The owner signs in with a password and the authenticator's code.
     func testAPasswordAndACode() throws {
         try need("ORTUS_SERVER", "ORTUS_OWNER_TOTP")

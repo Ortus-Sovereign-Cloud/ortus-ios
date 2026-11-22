@@ -143,7 +143,7 @@ struct JoinView: View {
         }
         // An invitation handed to the app fills in what it joins with.
         .onChange(of: model.handed) {
-            if let handed = model.handed {
+            if let handed = model.handed, handed.kind == .invite {
                 server = handed.server
                 code = handed.code
                 withPassword = false
