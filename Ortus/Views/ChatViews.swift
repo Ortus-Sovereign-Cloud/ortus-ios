@@ -85,6 +85,7 @@ struct ChannelView: View {
     let title: String
     @State private var messages: Messages?
     @State private var text = ""
+    @State private var calling = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -131,6 +132,17 @@ struct ChannelView: View {
         .background(Theme.background)
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            // A room's call (channels and private rooms; an end-to-end room has none).
+            if room.encrypted != true {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { calling = true } label: { Image(systemName: "video") }
+                        .accessibilityLabel(Text("call.start"))
+                        .accessibilityIdentifier("call")
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $calling) { CallView(room: room, title: title) }
         .task { await load() }
     }
 

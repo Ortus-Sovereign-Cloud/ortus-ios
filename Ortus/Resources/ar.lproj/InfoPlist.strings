@@ -1,2 +1,3 @@
 "NSFaceIDUsageDescription" = "يحمي Face ID المفتاح الذي يحتفظ به هذا الهاتف من أجلك.";
-"NSCameraUsageDescription" = "تقرأ الكاميرا رمز QR الخاص بدعوتك.";
+"NSCameraUsageDescription" = "تقرأ الكاميرا رموز الدخول وتُظهرك في المكالمات.";
+"NSMicrophoneUsageDescription" = "يتيح الميكروفون للآخرين سماعك في المكالمات.";

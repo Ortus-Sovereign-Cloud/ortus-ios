@@ -124,3 +124,5 @@
 "delivery.notDone %@" = "Не доставлено до %@";
 "delivery.retrying %@" = "Ще не доставлено до %@; пробуємо знову";
 "delivery.sendingTo %@" = "Надсилання до %@…";
+"call.start" = "Дзвінок";
+"call.close" = "Закрити";

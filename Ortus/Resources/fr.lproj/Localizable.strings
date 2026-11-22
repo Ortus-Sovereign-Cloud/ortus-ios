@@ -124,3 +124,5 @@
 "delivery.notDone %@" = "Non remis à %@";
 "delivery.retrying %@" = "Pas encore remis à %@ ; nouvel essai en cours";
 "delivery.sendingTo %@" = "Envoi à %@…";
+"call.start" = "Appel";
+"call.close" = "Fermer";

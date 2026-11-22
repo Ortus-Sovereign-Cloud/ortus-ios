@@ -56,7 +56,8 @@ targets:
         ITSAppUsesNonExemptEncryption: false
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         NSFaceIDUsageDescription: Face ID guards the key this phone keeps for you.
-        NSCameraUsageDescription: The camera reads the QR code of your invitation.
+        NSCameraUsageDescription: The camera reads sign-in codes and shows you in calls.
+        NSMicrophoneUsageDescription: The microphone lets others hear you in calls.
         # ortus://join?server=…&code=…, which an invitation page offers on a phone.
         CFBundleURLTypes:
           - CFBundleURLName: cc.ortus.app.join

@@ -124,3 +124,5 @@
 "delivery.notDone %@" = "Nicht an %@ zugestellt";
 "delivery.retrying %@" = "Noch nicht an %@ zugestellt; neuer Versuch läuft";
 "delivery.sendingTo %@" = "Wird an %@ gesendet…";
+"call.start" = "Anruf";
+"call.close" = "Schließen";

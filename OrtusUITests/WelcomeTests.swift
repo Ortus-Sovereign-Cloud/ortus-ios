@@ -168,6 +168,28 @@ final class WelcomeTests: XCTestCase {
         XCTAssertTrue(app.buttons["makeKey"].waitForExistence(timeout: 30),
                       app.staticTexts["error"].exists ? app.staticTexts["error"].label : "not signed in; screen:\n\(app.debugDescription)")
         attach(app, "phone-link")
+
+        // A channel's call opens in the app (the web call page, signed in).
+        var room = URLRequest(url: URL(string: env["ORTUS_SERVER"]! + "/api/v1/chat/rooms")!)
+        room.httpMethod = "POST"
+        room.httpBody = Data(#"{"kind":"channel","name":"phone-calls"}"#.utf8)
+        room.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        room.setValue("ortus", forHTTPHeaderField: "X-Requested-With")
+        room.setValue("Bearer \(env["ORTUS_OWNER_SESSION"]!)", forHTTPHeaderField: "Authorization")
+        let made = DispatchSemaphore(value: 0)
+        URLSession.shared.dataTask(with: room) { _, _, _ in made.signal() }.resume()
+        made.wait()
+        app.buttons["makeKey"].tap()
+        XCTAssertTrue(app.tabBars.buttons["Chat"].waitForExistence(timeout: 20))
+        app.tabBars.buttons["Chat"].tap()
+        let channel = app.staticTexts["phone-calls"]
+        XCTAssertTrue(channel.waitForExistence(timeout: 20), "the channel")
+        channel.tap()
+        let call = app.buttons["call"]
+        XCTAssertTrue(call.waitForExistence(timeout: 10))
+        call.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        XCTAssertTrue(app.webViews.buttons["Start a call"].waitForExistence(timeout: 30), "the call page; screen:\n\(app.debugDescription)")
+        attach(app, "call")
     }
 
     /// The owner signs in with a password and the authenticator's code.

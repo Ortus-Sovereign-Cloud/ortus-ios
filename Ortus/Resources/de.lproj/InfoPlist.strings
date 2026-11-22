@@ -1,2 +1,3 @@
 "NSFaceIDUsageDescription" = "Face ID schützt den Schlüssel, den dieses Telefon für Sie aufbewahrt.";
-"NSCameraUsageDescription" = "Die Kamera liest den QR-Code Ihrer Einladung.";
+"NSCameraUsageDescription" = "Die Kamera liest Anmeldecodes und zeigt Sie in Anrufen.";
+"NSMicrophoneUsageDescription" = "Das Mikrofon lässt andere Sie in Anrufen hören.";
