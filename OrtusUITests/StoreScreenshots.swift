@@ -1,8 +1,8 @@
 import XCTest
 
 /// The App Store screenshots, against an Ortus filled with the sample
-/// organisation (workflow `screenshots`, which passes ORTUS_SERVER and a
-/// phone sign-in code for its owner as ORTUS_SCREENSHOT_CODE). Skipped
+/// organisation (workflow `screenshots`, which passes ORTUS_SERVER and the
+/// owner's session as ORTUS_SCREENSHOT_SESSION). Skipped
 /// everywhere else.
 final class StoreScreenshots: XCTestCase {
     override func setUp() { continueAfterFailure = false }
@@ -22,9 +22,23 @@ final class StoreScreenshots: XCTestCase {
 
     func testStoreScreenshots() throws {
         let env = ProcessInfo.processInfo.environment
-        guard let server = env["ORTUS_SERVER"], !server.isEmpty, let code = env["ORTUS_SCREENSHOT_CODE"], !code.isEmpty else {
+        guard let server = env["ORTUS_SERVER"], !server.isEmpty, let session = env["ORTUS_SCREENSHOT_SESSION"], !session.isEmpty else {
             throw XCTSkip("only in the screenshots workflow")
         }
+        // A phone sign-in code from the owner's session, made now (codes
+        // last five minutes).
+        var request = URLRequest(url: URL(string: server + "/api/v1/me/phone-link")!)
+        request.httpMethod = "POST"
+        request.httpBody = Data("{}".utf8)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("ortus", forHTTPHeaderField: "X-Requested-With")
+        request.setValue("Bearer \(session)", forHTTPHeaderField: "Authorization")
+        let done = DispatchSemaphore(value: 0)
+        var body = Data()
+        URLSession.shared.dataTask(with: request) { data, _, _ in body = data ?? Data(); done.signal() }.resume()
+        done.wait()
+        struct Made: Decodable { let link: String }
+        let code = String(try JSONDecoder().decode(Made.self, from: body).link.split(separator: "p=").last ?? "")
         let app = XCUIApplication()
         app.launchArguments = ["-reset", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
         app.launch()
