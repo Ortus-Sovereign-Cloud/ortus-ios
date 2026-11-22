@@ -11,7 +11,7 @@ packages:
 settings:
   base:
     SWIFT_VERSION: "5.10"
-    MARKETING_VERSION: "0.1.0"
+    MARKETING_VERSION: "1.1.0"
     CURRENT_PROJECT_VERSION: "1"
     # Signed ad hoc (no developer account): the simulator's Keychain needs a
     # signed app. Store builds are signed by the owner (OWNER-NEEDED.md).
