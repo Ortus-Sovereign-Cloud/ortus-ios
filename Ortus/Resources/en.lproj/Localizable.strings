@@ -104,3 +104,10 @@
 "join.badLink" = "That is not an Ortus invitation.";
 "join.notFound" = "No Ortus was found for that email. Type the address from your welcome letter.";
 "join.phoneLinkExpired" = "This sign-in code has expired or was used. On the web, open your name, then Sign in on your phone, for a new one.";
+"folder.inbox" = "Inbox";
+"folder.sent" = "Sent";
+"folder.archive" = "Archive";
+"folder.trash" = "Trash";
+"folder.choose" = "Folders";
+"delivery.failed" = "Not delivered";
+"delivery.trying" = "Sending";

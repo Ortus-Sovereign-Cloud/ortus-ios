@@ -19,6 +19,15 @@ public struct Invite: Decodable, Equatable {
     public let inCalendar: Bool
 }
 
+/// How a message one sent is getting to one recipient outside.
+public struct Delivery: Decodable, Equatable {
+    public let recipient: String?
+    /// queued, deferred (trying again), sent (delivered) or bounced.
+    public let state: String?
+    public let attempts: Int?
+    public let lastError: String?
+}
+
 public struct Email: Decodable, Equatable, Identifiable {
     public let id: String
     public let threadId: String
@@ -36,9 +45,20 @@ public struct Email: Decodable, Equatable, Identifiable {
     public let messageId: [String]?
     public let references: [String]?
     public let hasAttachment: Bool?
+    public let ortusDelivery: [Delivery]?
 
     public var unread: Bool { keywords?["$seen"] != true }
     public var sender: String { from?.first?.shown ?? "" }
+    /// Whom it went to (for Sent).
+    public var recipients: String { (to ?? []).map(\.shown).joined(separator: ", ") }
+
+    /// The worst delivery state, for a mark in Sent: failed, trying, or nil.
+    public var deliveryState: String? {
+        guard let d = ortusDelivery, !d.isEmpty else { return nil }
+        if d.contains(where: { $0.state == "bounced" }) { return "failed" }
+        if d.contains(where: { $0.state == "deferred" }) { return "trying" }
+        return nil
+    }
     public var date: Date? { ISO8601DateFormatter().date(from: receivedAt) }
 }
 
@@ -51,11 +71,14 @@ public struct Mailbox: Decodable, Equatable {
 
 public enum JMAP {
     public static let using = ["urn:ietf:params:jmap:core", "urn:ietf:params:jmap:mail", "urn:ietf:params:jmap:submission"]
-    public static let listProperties = ["threadId", "subject", "from", "to", "receivedAt", "preview", "keywords", "mailboxIds", "hasAttachment", "ortusCategory", "ortusInvite"]
+    public static let listProperties = ["threadId", "subject", "from", "to", "receivedAt", "preview", "keywords", "mailboxIds", "hasAttachment", "ortusCategory", "ortusInvite", "ortusDelivery"]
     public static let readProperties = listProperties + ["cc", "replyTo", "messageId", "references", "attachments", "ortusText", "ortusVerified"]
 
     /// The categories of the inbox.
     public enum Category: String, CaseIterable { case important, other, feeds }
+
+    /// The folders the app shows, by their role.
+    public enum Folder: String, CaseIterable { case inbox, sent, archive, trash }
 
     /// Answers by call id; a method error becomes an APIError.
     static func answers(_ data: Data) throws -> [String: Any] {
@@ -108,6 +131,17 @@ extension Client {
         var unread: [JMAP.Category: Int] = [:]
         for c in JMAP.Category.allCases { unread[c] = (got["u-\(c.rawValue)"] as? [String: Any])?["total"] as? Int ?? 0 }
         return (emails, unread, boxes)
+    }
+
+    /// A folder other than the inbox, newest first (threads collapsed).
+    public func folder(_ folder: JMAP.Folder) async throws -> [Email] {
+        let boxes = try JMAP.decode(try await jmap([["Mailbox/get", [:], "b"]])["b"].flatMap { ($0 as? [String: Any])?["list"] }, as: [Mailbox].self)
+        guard let box = boxes.first(where: { $0.role == folder.rawValue }) else { return [] }
+        let got = try await jmap([
+            ["Email/query", ["filter": ["inMailbox": box.id], "sort": [["property": "receivedAt", "isAscending": false]], "collapseThreads": true, "limit": 100], "q"],
+            ["Email/get", ["#ids": ["resultOf": "q", "name": "Email/query", "path": "/ids"], "properties": JMAP.listProperties], "l"],
+        ])
+        return try JMAP.decode((got["l"] as? [String: Any])?["list"], as: [Email].self)
     }
 
     /// The messages of a thread, oldest first.

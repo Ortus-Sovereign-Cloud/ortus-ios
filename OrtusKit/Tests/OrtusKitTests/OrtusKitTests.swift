@@ -117,6 +117,22 @@ final class MailTests: XCTestCase {
     }
 }
 
+final class DeliveryTests: XCTestCase {
+    private func email(_ delivery: String) throws -> Email {
+        try JMAP.decode(try JSONSerialization.jsonObject(with: Data(#"[{"id":"m1","threadId":"t1","subject":"Agreement","to":[{"name":"Anna Kowalska","email":"anna@regional.example"},{"name":null,"email":"kasia@down.example"}],"receivedAt":"2026-11-22T10:00:00Z","keywords":{"$seen":true},"ortusDelivery":\#(delivery)}]"#.utf8)), as: [Email].self)[0]
+    }
+
+    func testSentShowsWhomAndHowDeliveryGoes() throws {
+        let delivered = try email(#"[{"recipient":"anna@regional.example","state":"sent","attempts":1,"lastError":null}]"#)
+        XCTAssertEqual("Anna Kowalska, kasia@down.example", delivered.recipients)
+        XCTAssertNil(delivered.deliveryState)
+        XCTAssertEqual("trying", try email(#"[{"recipient":"kasia@down.example","state":"deferred","attempts":3,"lastError":"no answer"}]"#).deliveryState)
+        XCTAssertEqual("failed", try email(#"[{"recipient":"a","state":"deferred"},{"recipient":"b","state":"bounced"}]"#).deliveryState)
+        XCTAssertNil(try email("[]").deliveryState)
+        XCTAssertNil(try email("null").deliveryState, "received mail has none")
+    }
+}
+
 final class ChatTests: XCTestCase {
     func testRoomsAndTitles() throws {
         let json = #"{"rooms":[{"id":"r1","name":"flood-response-2026","kind":"channel","unread":3,"state":"join","federated":true},{"id":"r2","name":"","kind":"direct","unread":0,"with":["@u2:ministry.example"]}],"people":{"@u2:ministry.example":{"name":"Anna Kowalska","local":true}},"me":"@u1:ministry.example"}"#

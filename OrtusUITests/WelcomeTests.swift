@@ -55,6 +55,16 @@ final class WelcomeTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Sent."].waitForExistence(timeout: 20), app.staticTexts["note"].exists ? app.staticTexts["note"].label : "not sent")
         attach(app, "thread")
 
+        // Her reply is in Sent, with whom it went to.
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.buttons["folders"].tap()
+        app.buttons["Sent"].tap()
+        XCTAssertTrue(app.navigationBars["Sent"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Gauge report'")).firstMatch.waitForExistence(timeout: 20), "the reply in Sent")
+        attach(app, "sent")
+        app.buttons["folders"].tap()
+        app.buttons["Inbox"].tap()
+
         // S1.9: she signs the flood plan on her phone, with its key.
         app.tabBars.buttons["More"].tap()
         tap(app, "foryou")

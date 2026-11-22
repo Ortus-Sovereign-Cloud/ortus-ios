@@ -6,6 +6,7 @@ import SwiftUI
 struct InboxView: View {
     @EnvironmentObject var model: AppModel
     @State private var category: JMAP.Category = .important
+    @State private var folder: JMAP.Folder = .inbox
     @State private var emails: [Email] = []
     @State private var unread: [JMAP.Category: Int] = [:]
     @State private var error: String?
@@ -13,6 +14,7 @@ struct InboxView: View {
     var body: some View {
         NavigationStack {
             List {
+                if folder == .inbox {
                 Section {
                     HStack(spacing: 8) {
                         ForEach(JMAP.Category.allCases, id: \.self) { c in
@@ -32,11 +34,12 @@ struct InboxView: View {
                     }
                     .listRowBackground(Color.clear)
                 }
+                }
                 if let error {
                     Text(error).foregroundStyle(.red)
                 }
                 ForEach(emails) { e in
-                    NavigationLink(value: e.threadId) { Row(email: e) }
+                    NavigationLink(value: e.threadId) { Row(email: e, sent: folder == .sent) }
                         .listRowBackground(Theme.background)
                 }
                 if emails.isEmpty && error == nil {
@@ -46,7 +49,26 @@ struct InboxView: View {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .background(Theme.background)
-            .navigationTitle("inbox.title")
+            .navigationTitle(name(folder))
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        ForEach(JMAP.Folder.allCases, id: \.self) { f in
+                            Button {
+                                folder = f
+                                emails = []
+                                Task { await load() }
+                            } label: {
+                                if f == folder { Label(name(f), systemImage: "checkmark") } else { Text(name(f)) }
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "folder")
+                    }
+                    .accessibilityLabel(Text("folder.choose"))
+                    .accessibilityIdentifier("folders")
+                }
+            }
             .navigationDestination(for: String.self) { ThreadView(threadID: $0) }
             .refreshable { await load() }
             .task { await load() }
@@ -62,12 +84,20 @@ struct InboxView: View {
         return n > 0 ? "\(name) \(n.formatted())" : name
     }
 
+    private func name(_ f: JMAP.Folder) -> String {
+        String(localized: String.LocalizationValue(stringLiteral: "folder." + f.rawValue))
+    }
+
     private func load() async {
         guard let client = model.client else { return }
         do {
-            let got = try await client.inbox(category)
-            emails = got.emails
-            unread = got.unread
+            if folder == .inbox {
+                let got = try await client.inbox(category)
+                emails = got.emails
+                unread = got.unread
+            } else {
+                emails = try await client.folder(folder)
+            }
             error = nil
         } catch {
             self.error = model.say(error)
@@ -84,15 +114,24 @@ func initials(_ name: String) -> String {
 
 private struct Row: View {
     let email: Email
+    /// In Sent: who it went to, and how its delivery goes.
+    var sent = false
+
+    private var who: String { sent ? email.recipients : email.sender }
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            Text(initials(email.sender)).font(.footnote.bold()).foregroundStyle(Theme.background)
+            Text(initials(who)).font(.footnote.bold()).foregroundStyle(Theme.background)
                 .frame(width: 40, height: 40).background(Theme.accent.opacity(0.85), in: RoundedRectangle(cornerRadius: 10))
             VStack(alignment: .leading, spacing: 2) {
                 HStack {
-                    Text(email.sender).font(.body.weight(email.unread ? .bold : .regular)).foregroundStyle(Theme.text).lineLimit(1)
+                    Text(who).font(.body.weight(email.unread && !sent ? .bold : .regular)).foregroundStyle(Theme.text).lineLimit(1)
                     Spacer()
+                    if sent, let state = email.deliveryState {
+                        Text(state == "failed" ? "delivery.failed" : "delivery.trying")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(state == "failed" ? Color.red : Color.orange)
+                    }
                     Text(when(email.date)).font(.footnote).foregroundStyle(Theme.text2)
                 }
                 Text(email.subject).font(.subheadline).foregroundStyle(Theme.text).lineLimit(1)

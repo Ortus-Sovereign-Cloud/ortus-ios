@@ -104,3 +104,10 @@
 "join.badLink" = "هذه ليست دعوة Ortus.";
 "join.notFound" = "لم يُعثر على Ortus لهذا البريد. اكتب العنوان من رسالة الترحيب.";
 "join.phoneLinkExpired" = "انتهت صلاحية رمز الدخول هذا أو استُخدم. على الويب، افتح اسمك ثم سجّل الدخول على هاتفك للحصول على رمز جديد.";
+"folder.inbox" = "الوارد";
+"folder.sent" = "المرسلة";
+"folder.archive" = "الأرشيف";
+"folder.trash" = "المهملات";
+"folder.choose" = "المجلدات";
+"delivery.failed" = "لم تُسلَّم";
+"delivery.trying" = "قيد الإرسال";
