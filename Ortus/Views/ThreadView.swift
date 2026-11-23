@@ -33,7 +33,7 @@ struct ThreadView: View {
                 Button {
                     Task { await send() }
                 } label: {
-                    Image(systemName: "arrow.up").font(.headline).frame(width: 40, height: 40)
+                    Image(systemName: "arrow.up").font(.headline).frame(width: 44, height: 44)
                         .background(Theme.accent, in: RoundedRectangle(cornerRadius: 12)).foregroundStyle(Theme.background)
                 }
                 .disabled(reply.trimmingCharacters(in: .whitespaces).isEmpty || sending)
