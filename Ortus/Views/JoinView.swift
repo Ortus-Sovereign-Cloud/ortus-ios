@@ -59,6 +59,19 @@ struct JoinView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Mark()
+            if let link = model.confirming {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("join.confirm \(URL(string: link.server).map { ($0.host ?? link.server) + ($0.port.map { ":\($0)" } ?? "") } ?? link.server)")
+                        .font(.headline).foregroundStyle(Theme.text)
+                    Text("join.confirmLead").font(.subheadline).foregroundStyle(Theme.text2)
+                    HStack {
+                        Button("join.continue") { model.confirmLink() }.buttonStyle(.borderedProminent).accessibilityIdentifier("confirmLink")
+                        Button("compose.cancel") { model.confirming = nil }
+                    }
+                }
+                .padding(14)
+                .background(Theme.surface2, in: RoundedRectangle(cornerRadius: 14))
+            }
             Text("join.title").font(.largeTitle.bold()).foregroundStyle(Theme.text)
             Text("join.lead").foregroundStyle(Theme.text2)
             TextField("join.server", text: $server)

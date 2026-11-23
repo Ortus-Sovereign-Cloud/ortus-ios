@@ -65,21 +65,26 @@ struct AdminView: View {
 
     private func load() async { imports = (try? await model.client?.imports()) ?? [] }
 
-    private func run(_ done: String, _ work: () async throws -> Void) async {
+    @discardableResult
+    private func run(_ done: String, _ work: () async throws -> Void) async -> Bool {
         do {
             try await work()
             note = String(localized: String.LocalizationValue(done))
             await load()
+            return true
         } catch {
             note = model.say(error)
+            return false
         }
     }
 
     private func ask() async { await run("admin.asked") { try await model.client?.askOwners(failed) } }
     private func retry(_ a: ImportAccount) async { await run("admin.retrying") { try await model.client?.retry(a, password: passwords[a.id] ?? "") } }
     private func invite() async {
-        await run("admin.invited") { try await model.client?.invite(name: inviteName, email: inviteEmail) }
-        inviteName = ""
-        inviteEmail = ""
+        // Cleared only once invited: a mistyped address is fixed, not retyped.
+        if await run("admin.invited", { try await model.client?.invite(name: inviteName, email: inviteEmail) }) {
+            inviteName = ""
+            inviteEmail = ""
+        }
     }
 }

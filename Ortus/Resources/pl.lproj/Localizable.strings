@@ -142,3 +142,5 @@
 "offline.queued" = "Zostanie wysłane po odzyskaniu połączenia";
 "offline.waiting %lld" = "Czeka na wysłanie: %lld";
 "call.flip" = "Odwróć";
+"join.confirm %@" = "Zalogować się do %@?";
+"join.confirmLead" = "Kontynuuj tylko, jeśli to Ortus Twojej organizacji.";

@@ -50,6 +50,9 @@ final class StoreScreenshots: XCTestCase {
         XCUIDevice.shared.system.open(open.url!)
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
         if springboard.buttons["Open"].waitForExistence(timeout: 5) { springboard.buttons["Open"].tap() }
+        // The link names its installation; the person says yes.
+        XCTAssertTrue(app.buttons["confirmLink"].waitForExistence(timeout: 20), "the link's installation to confirm")
+        app.buttons["confirmLink"].tap()
         XCTAssertTrue(app.buttons["makeKey"].waitForExistence(timeout: 30))
         app.buttons["makeKey"].tap()
         XCTAssertTrue(app.tabBars.buttons["Mail"].waitForExistence(timeout: 30))

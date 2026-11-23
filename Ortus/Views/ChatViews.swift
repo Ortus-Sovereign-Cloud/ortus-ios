@@ -85,6 +85,7 @@ struct ChannelView: View {
     let title: String
     @State private var messages: Messages?
     @State private var text = ""
+    @State private var note: String?
     @State private var calling = false
 
     var body: some View {
@@ -113,6 +114,9 @@ struct ChannelView: View {
                 .onChange(of: messages?.messages.count) {
                     if let last = messages?.messages.last { scroller.scrollTo(last.id, anchor: .bottom) }
                 }
+            }
+            if let note {
+                Text(note).font(.footnote).foregroundStyle(Theme.text2).padding(.horizontal, 12).accessibilityIdentifier("chatNote")
             }
             HStack(spacing: 8) {
                 TextField(String(localized: "chat.message \(title)"), text: $text, axis: .vertical)
@@ -156,7 +160,16 @@ struct ChannelView: View {
         guard let client = model.client else { return }
         let said = text
         text = ""
-        try? await client.say(said, in: room.id)
+        do {
+            try await client.say(said, in: room.id)
+            note = nil
+        } catch let e as APIError where e.code == "queued" {
+            note = String(localized: "offline.queued")
+        } catch {
+            // Not sent: the words come back.
+            text = said
+            note = model.say(error)
+        }
         await load()
     }
 }

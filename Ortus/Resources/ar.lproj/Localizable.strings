@@ -142,3 +142,5 @@
 "offline.queued" = "سيُرسل عند عودة الاتصال";
 "offline.waiting %lld" = "بانتظار الإرسال: %lld";
 "call.flip" = "تبديل الكاميرا";
+"join.confirm %@" = "تسجيل الدخول إلى %@؟";
+"join.confirmLead" = "تابع فقط إن كان هذا Ortus الخاص بمؤسستك.";

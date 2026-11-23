@@ -142,3 +142,5 @@
 "offline.queued" = "Sera envoyé dès le retour de la connexion";
 "offline.waiting %lld" = "En attente d’envoi : %lld";
 "call.flip" = "Retourner";
+"join.confirm %@" = "Se connecter à %@ ?";
+"join.confirmLead" = "Ne continuez que s’il s’agit de l’Ortus de votre organisation.";

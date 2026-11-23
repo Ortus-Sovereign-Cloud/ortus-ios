@@ -142,3 +142,5 @@
 "offline.queued" = "Wird gesendet, sobald Sie wieder online sind";
 "offline.waiting %lld" = "Warten auf Versand: %lld";
 "call.flip" = "Kamera wechseln";
+"join.confirm %@" = "Bei %@ anmelden?";
+"join.confirmLead" = "Fahren Sie nur fort, wenn das das Ortus Ihrer Organisation ist.";

@@ -15,6 +15,17 @@ public final class ResponseCache: @unchecked Sendable {
     public init(directory: URL) {
         self.directory = directory
         try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        excludeFromBackup(directory)
+    }
+
+    /// Written whole, and on Apple devices sealed while the phone is locked
+    /// (except files already open).
+    static var protected: Data.WritingOptions {
+        #if os(iOS)
+        return [.atomic, .completeFileProtectionUnlessOpen]
+        #else
+        return [.atomic]
+        #endif
     }
 
     private func file(_ key: String) -> URL { directory.appendingPathComponent(key + ".json") }
@@ -26,7 +37,7 @@ public final class ResponseCache: @unchecked Sendable {
 
     public func put(_ key: String, _ data: Data) {
         lock.lock(); defer { lock.unlock() }
-        try? data.write(to: file(key), options: [.atomic])
+        try? data.write(to: file(key), options: Self.protected)
     }
 
     /// Everything kept (signing out, another account).
@@ -55,7 +66,10 @@ public final class Outbox: @unchecked Sendable {
     }
 
     private func items() -> [Item] { (try? JSONDecoder().decode([Item].self, from: Data(contentsOf: file))) ?? [] }
-    private func save(_ list: [Item]) { try? JSONEncoder().encode(list).write(to: file, options: [.atomic]) }
+    private func save(_ list: [Item]) {
+        try? JSONEncoder().encode(list).write(to: file, options: ResponseCache.protected)
+        excludeFromBackup(file)
+    }
 
     public var count: Int { lock.lock(); defer { lock.unlock() }; return items().count }
 
@@ -194,4 +208,14 @@ public final class CachingTransport: Transport, @unchecked Sendable {
             throw error
         }
     }
+}
+
+/// Never in the phone's backups: what is kept here belongs on this phone only.
+func excludeFromBackup(_ url: URL) {
+    #if os(iOS) || os(macOS)
+    var u = url
+    var values = URLResourceValues()
+    values.isExcludedFromBackup = true
+    try? u.setResourceValues(values)
+    #endif
 }

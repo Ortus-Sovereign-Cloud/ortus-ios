@@ -15,6 +15,8 @@ final class AppModel: ObservableObject {
     @Published var tab = 0
     /// The installation could not be reached: screens show what was kept.
     @Published var offline = false
+    /// A link waiting for the person's yes (the installation it names is shown).
+    @Published var confirming: InvitationLink?
     /// Messages written offline that wait to be sent.
     @Published var waiting = 0
     private(set) var client: Client? {
@@ -150,6 +152,15 @@ final class AppModel: ObservableObject {
         }
         guard stage == .join, !busy else { return }
         handed = invitation
+        // A link may come from anyone: the person sees which installation
+        // it signs them into and says yes first.
+        confirming = invitation
+    }
+
+    /// Says yes to the link waiting for it.
+    func confirmLink() {
+        guard let invitation = confirming else { return }
+        confirming = nil
         switch invitation.kind {
         case .invite: Task { await join(server: invitation.server, code: invitation.code) }
         case .phone: Task { await signInWithPhoneLink(server: invitation.server, code: invitation.code) }
