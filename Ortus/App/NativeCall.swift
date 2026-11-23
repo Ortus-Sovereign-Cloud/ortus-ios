@@ -34,6 +34,7 @@ final class NativeCall: NSObject, ObservableObject {
     private var pc: RTCPeerConnection?
     private var channel: RTCDataChannel?
     private var capturer: RTCCameraVideoCapturer?
+    private var front = true
     private var audioTrack: RTCAudioTrack?
     private var session: String?
     private var info: CallInfo?
@@ -166,6 +167,23 @@ final class NativeCall: NSObject, ObservableObject {
         camera.toggle()
         local.isEnabled = camera
         report()
+    }
+
+    /// Front to back camera and back again.
+    func flipCamera() {
+        #if !targetEnvironment(simulator)
+        guard let capturer else { return }
+        front.toggle()
+        let devices = RTCCameraVideoCapturer.captureDevices()
+        guard let device = devices.first(where: { $0.position == (front ? .front : .back) }) else { return }
+        let formats = RTCCameraVideoCapturer.supportedFormats(for: device)
+        guard let format = formats.min(by: { a, b in
+            abs(CMVideoFormatDescriptionGetDimensions(a.formatDescription).width - 640) < abs(CMVideoFormatDescriptionGetDimensions(b.formatDescription).width - 640)
+        }) else { return }
+        capturer.stopCapture {
+            capturer.startCapture(with: device, format: format, fps: 24)
+        }
+        #endif
     }
 
     func toggleSpeaker() {

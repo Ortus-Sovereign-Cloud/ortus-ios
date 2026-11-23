@@ -141,3 +141,4 @@
 "call.hangUp" = "مغادرة";
 "offline.queued" = "سيُرسل عند عودة الاتصال";
 "offline.waiting %lld" = "بانتظار الإرسال: %lld";
+"call.flip" = "تبديل الكاميرا";

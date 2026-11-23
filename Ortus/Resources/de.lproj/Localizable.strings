@@ -141,3 +141,4 @@
 "call.hangUp" = "Verlassen";
 "offline.queued" = "Wird gesendet, sobald Sie wieder online sind";
 "offline.waiting %lld" = "Warten auf Versand: %lld";
+"call.flip" = "Kamera wechseln";
