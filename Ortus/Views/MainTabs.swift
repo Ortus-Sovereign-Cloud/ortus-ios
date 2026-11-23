@@ -23,6 +23,10 @@ struct MainTabs: View {
             MoreView().tabItem { Label("tab.more", systemImage: "square.grid.2x2") }.tag(4)
         }
         }
+        // A call answered on the lock screen opens here.
+        .fullScreenCover(item: $model.answered, onDismiss: { Ringer.shared.endAll() }) { call in
+            CallView(room: call.room, title: call.title)
+        }
     }
 }
 

@@ -53,6 +53,12 @@ public enum Push {
         return try JSONDecoder().decode(PushNotice.self, from: data)
     }
 
+    /// The room a call's path names (`/calls?room=…`).
+    public static func callRoom(_ path: String?) -> String? {
+        guard let path, path.hasPrefix("/calls"), let items = URLComponents(string: path)?.queryItems else { return nil }
+        return items.first { $0.name == "room" }?.value.flatMap { $0.isEmpty ? nil : $0 }
+    }
+
     /// Which tab a notification's path opens: 0 Mail, 1 Chat, 2 Calendar,
     /// 3 Files, 4 More.
     public static func tab(for path: String?) -> Int {
@@ -67,13 +73,16 @@ public enum Push {
 
 extension Client {
     /// Registers this phone for its person's notifications.
-    public func registerPush(token: Data, sandbox: Bool, utcOffsetMinutes: Int) async throws -> PushRegistration {
-        try await call("POST", "/me/push-devices", json: [
+    /// `voip`: the phone's PushKit token, on which calls ring.
+    public func registerPush(token: Data, voip: Data? = nil, sandbox: Bool, utcOffsetMinutes: Int) async throws -> PushRegistration {
+        var body: [String: Any] = [
             "platform": "apns",
             "token": Push.hex(token),
             "environment": sandbox ? "sandbox" : "production",
             "utc_offset": utcOffsetMinutes,
-        ])
+        ]
+        if let voip { body["voip"] = Push.hex(voip) }
+        return try await call("POST", "/me/push-devices", json: body)
     }
 
     public func unregisterPush(id: String) async throws {

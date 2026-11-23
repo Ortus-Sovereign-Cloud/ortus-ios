@@ -41,12 +41,22 @@ extension AppModel {
         Task {
             let center = UNUserNotificationCenter.current()
             let granted = (try? await center.requestAuthorization(options: [.alert, .sound, .badge])) ?? false
-            if granted { UIApplication.shared.registerForRemoteNotifications() }
+            if granted {
+                UIApplication.shared.registerForRemoteNotifications()
+                Ringer.shared.start()
+            }
         }
         #endif
     }
 
+    /// The VoIP token came (or changed): the installation learns it with
+    /// the ordinary one, so calls ring on this phone.
+    func registerVoip(_ token: Data) async {
+        if let apns = apnsToken { await registerPush(apns) }
+    }
+
     func registerPush(_ deviceToken: Data) async {
+        apnsToken = deviceToken
         guard let client, client.token != nil else { return }
         #if DEBUG
         let sandbox = true
@@ -55,7 +65,7 @@ extension AppModel {
         #endif
         let offset = TimeZone.current.secondsFromGMT() / 60
         // Off on this installation (or refused): nothing to keep.
-        guard let registration = try? await client.registerPush(token: deviceToken, sandbox: sandbox, utcOffsetMinutes: offset) else { return }
+        guard let registration = try? await client.registerPush(token: deviceToken, voip: Ringer.shared.voipToken, sandbox: sandbox, utcOffsetMinutes: offset) else { return }
         PushStore.save(registration, server: client.server)
     }
 

@@ -299,6 +299,13 @@ final class PushTests: XCTestCase {
         XCTAssertNil(Push.parts(of: ["n": "n1", "s": "https://ortus.example/elsewhere"]))
     }
 
+    func testCallRooms() {
+        XCTAssertEqual("r1", Push.callRoom("/calls?room=r1"))
+        XCTAssertEqual("r 2", Push.callRoom("/calls?room=r%202&x=1"))
+        XCTAssertNil(Push.callRoom("/chat?room=r1"))
+        XCTAssertNil(Push.callRoom(nil))
+    }
+
     func testOpensTheRightTab() {
         XCTAssertEqual(0, Push.tab(for: "/mail?thread=t1"))
         XCTAssertEqual(1, Push.tab(for: "/chat?room=r1"))

@@ -171,7 +171,7 @@ struct ChannelView: View {
                 }
             }
         }
-        .fullScreenCover(isPresented: $calling) { CallView(room: room, title: title) }
+        .fullScreenCover(isPresented: $calling) { CallView(room: room.id, title: title) }
         .task { await load() }
     }
 

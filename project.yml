@@ -65,7 +65,7 @@ targets:
         NSCameraUsageDescription: The camera reads sign-in codes and shows you in calls.
         NSMicrophoneUsageDescription: The microphone lets others hear you in calls.
         # A call goes on when you switch to another app.
-        UIBackgroundModes: [audio]
+        UIBackgroundModes: [audio, voip]
         # ortus://join?server=…&code=…, which an invitation page offers on a phone.
         CFBundleURLTypes:
           - CFBundleURLName: cc.ortus.app.join

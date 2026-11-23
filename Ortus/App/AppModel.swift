@@ -15,6 +15,10 @@ final class AppModel: ObservableObject {
     @Published var tab = 0
     /// The installation could not be reached: screens show what was kept.
     @Published var offline = false
+    /// A call answered from the system's call screen: the app opens it.
+    @Published var answered: AnsweredCall?
+    /// Apple's device token, kept to register again with the VoIP one.
+    var apnsToken: Data?
     /// A link waiting for the person's yes (the installation it names is shown).
     @Published var confirming: InvitationLink?
     /// Messages written offline that wait to be sent.

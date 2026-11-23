@@ -10,14 +10,15 @@ import WebRTC
 struct CallView: View {
     @EnvironmentObject var model: AppModel
     @Environment(\.dismiss) private var dismiss
-    let room: Room
+    /// The room's id.
+    let room: String
     let title: String
 
     var body: some View {
         NavigationStack {
             Group {
                 if let client = model.client {
-                    CallScreen(call: NativeCall(client: client, room: room.id), leave: { dismiss() })
+                    CallScreen(call: NativeCall(client: client, room: room), leave: { dismiss() })
                 } else {
                     VStack(spacing: 12) {
                         Text("error.generic").foregroundStyle(Theme.text2)
