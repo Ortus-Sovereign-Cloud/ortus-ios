@@ -146,3 +146,10 @@
 "join.confirmLead" = "Fahren Sie nur fort, wenn das das Ortus Ihrer Organisation ist.";
 "call.noMic" = "Ortus darf das Mikrofon nicht nutzen, niemand würde Sie hören. Erlauben Sie es in den Einstellungen.";
 "call.openSettings" = "Einstellungen öffnen";
+"list.tryAgain" = "Erneut versuchen";
+"notify.empty" = "Keine Mitteilungen.";
+"search.none" = "Nichts gefunden.";
+"foryou.noTasks" = "Keine Aufgaben.";
+"drive.empty" = "Dieser Ordner ist leer.";
+"chat.noRooms" = "Noch keine Räume.";
+"chat.noUnread" = "Keine ungelesenen Räume.";

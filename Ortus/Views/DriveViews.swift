@@ -26,28 +26,33 @@ struct FolderView: View {
     let parent: String?
     let title: String
     @State private var items: [DriveItem] = []
+    @State private var failure: String?
+    @State private var loaded = false
 
     var body: some View {
-        List(items) { item in
-            NavigationLink(value: item) {
-                HStack(spacing: 12) {
-                    Image(systemName: item.isFolder ? "folder.fill" : "doc.fill")
-                        .foregroundStyle(item.isFolder ? Theme.accent : Theme.text2).frame(width: 32)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(item.name).foregroundStyle(Theme.text).lineLimit(1)
-                        HStack(spacing: 6) {
-                            if let d = item.modified { Text(d.formatted(.dateTime.day().month(.abbreviated))) }
-                            if !item.isFolder, let size = item.size { Text(ByteCountFormatter.string(fromByteCount: size, countStyle: .file)) }
+        List {
+            ForEach(items) { item in
+                NavigationLink(value: item) {
+                    HStack(spacing: 12) {
+                        Image(systemName: item.isFolder ? "folder.fill" : "doc.fill")
+                            .foregroundStyle(item.isFolder ? Theme.accent : Theme.text2).frame(width: 32)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(item.name).foregroundStyle(Theme.text).lineLimit(1)
+                            HStack(spacing: 6) {
+                                if let d = item.modified { Text(d.formatted(.dateTime.day().month(.abbreviated))) }
+                                if !item.isFolder, let size = item.size { Text(ByteCountFormatter.string(fromByteCount: size, countStyle: .file)) }
+                            }
+                            .font(.caption).foregroundStyle(Theme.text2)
                         }
-                        .font(.caption).foregroundStyle(Theme.text2)
-                    }
-                    if let label = item.label {
-                        Spacer()
-                        Text(label).font(.caption).foregroundStyle(.orange)
+                        if let label = item.label {
+                            Spacer()
+                            Text(label).font(.caption).foregroundStyle(.orange)
+                        }
                     }
                 }
+                .listRowBackground(Theme.background)
             }
-            .listRowBackground(Theme.background)
+            ListStatus(failure: failure, isEmpty: loaded && items.isEmpty, empty: "drive.empty") { await load() }
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
@@ -58,7 +63,14 @@ struct FolderView: View {
     }
 
     private func load() async {
-        items = (try? await model.client?.folder(parent))?.items ?? []
+        guard let client = model.client else { return }
+        do {
+            items = try await client.folder(parent).items
+            failure = nil
+        } catch {
+            failure = model.listFailure(error, showing: !items.isEmpty)
+        }
+        loaded = true
     }
 }
 

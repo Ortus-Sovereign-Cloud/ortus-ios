@@ -146,3 +146,10 @@
 "join.confirmLead" = "تابع فقط إن كان هذا Ortus الخاص بمؤسستك.";
 "call.noMic" = "لا يمكن لـ Ortus استخدام الميكروفون، فلن يسمعك أحد. اسمح بذلك في الإعدادات.";
 "call.openSettings" = "فتح الإعدادات";
+"list.tryAgain" = "حاول مرة أخرى";
+"notify.empty" = "لا توجد إشعارات.";
+"search.none" = "لم يُعثر على شيء.";
+"foryou.noTasks" = "لا توجد مهام.";
+"drive.empty" = "هذا المجلد فارغ.";
+"chat.noRooms" = "لا توجد غرف بعد.";
+"chat.noUnread" = "لا توجد غرف غير مقروءة.";

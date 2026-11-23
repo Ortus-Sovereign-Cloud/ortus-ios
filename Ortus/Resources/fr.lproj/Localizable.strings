@@ -146,3 +146,10 @@
 "join.confirmLead" = "Ne continuez que s’il s’agit de l’Ortus de votre organisation.";
 "call.noMic" = "Ortus ne peut pas utiliser le micro : personne ne vous entendrait. Autorisez-le dans Réglages.";
 "call.openSettings" = "Ouvrir Réglages";
+"list.tryAgain" = "Réessayer";
+"notify.empty" = "Aucune notification.";
+"search.none" = "Rien trouvé.";
+"foryou.noTasks" = "Aucune tâche.";
+"drive.empty" = "Ce dossier est vide.";
+"chat.noRooms" = "Aucun salon pour l’instant.";
+"chat.noUnread" = "Aucun salon non lu.";

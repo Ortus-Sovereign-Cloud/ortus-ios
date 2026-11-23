@@ -7,6 +7,7 @@ struct ChatsView: View {
     @EnvironmentObject var model: AppModel
     @State private var data: Rooms?
     @State private var onlyUnread = false
+    @State private var failure: String?
 
     var body: some View {
         NavigationStack {
@@ -47,6 +48,7 @@ struct ChatsView: View {
                     }
                     .listRowBackground(Theme.background)
                 }
+                ListStatus(failure: failure, isEmpty: data != nil && shown.isEmpty, empty: onlyUnread ? "chat.noUnread" : "chat.noRooms") { await load() }
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
@@ -74,7 +76,12 @@ struct ChatsView: View {
 
     private func load() async {
         guard let client = model.client else { return }
-        try? await quickly({ try await client.rooms() }) { data = $0 }
+        do {
+            try await quickly({ try await client.rooms() }) { data = $0 }
+            failure = nil
+        } catch {
+            failure = model.listFailure(error, showing: !(data?.rooms.isEmpty ?? true))
+        }
     }
 }
 

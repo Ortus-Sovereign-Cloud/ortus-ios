@@ -9,6 +9,8 @@ struct ForYouView: View {
     @State private var tasks: [WorkTask] = []
     @State private var showTasks = false
     @State private var note: String?
+    @State private var failure: String?
+    @State private var loaded = false
 
     var body: some View {
         NavigationStack {
@@ -20,9 +22,10 @@ struct ForYouView: View {
                     }
                     if let note { Text(note).font(.callout).foregroundStyle(Theme.text2).accessibilityIdentifier("note") }
                     if showTasks {
+                        ListStatus(failure: failure, isEmpty: loaded && tasks.isEmpty, empty: "foryou.noTasks") { await load() }
                         ForEach(tasks) { t in TaskRow(task: t) { await toggle(t) } }
                     } else {
-                        if reviews.isEmpty { Text("foryou.nothing").foregroundStyle(Theme.text2) }
+                        ListStatus(failure: failure, isEmpty: loaded && reviews.isEmpty, empty: "foryou.nothing") { await load() }
                         ForEach(reviews) { r in Card(review: r) { await decide(r, $0) } }
                     }
                 }
@@ -47,8 +50,12 @@ struct ForYouView: View {
 
     private func load() async {
         guard let client = model.client else { return }
-        reviews = (try? await client.waitingReviews()) ?? []
-        tasks = (try? await client.myTasks()) ?? []
+        var failed: Error?
+        do { reviews = try await client.waitingReviews() } catch { failed = error }
+        do { tasks = try await client.myTasks() } catch { failed = failed ?? error }
+        let showing = !reviews.isEmpty || !tasks.isEmpty
+        failure = failed.flatMap { model.listFailure($0, showing: showing) }
+        loaded = true
     }
 
     private func decide(_ review: Review, _ approve: Bool) async {

@@ -11,19 +11,26 @@ struct AdminView: View {
     @State private var passwords: [String: String] = [:]
     @State private var inviteName = ""
     @State private var inviteEmail = ""
+    @State private var failure: String?
 
     private var failed: [ImportAccount] { imports.flatMap(\.accounts).filter(\.failed) }
 
     var body: some View {
         List {
-            Section {
-                HStack(spacing: 14) {
-                    Image(systemName: failed.isEmpty ? "checkmark" : "exclamationmark")
-                        .font(.title3.bold()).foregroundStyle(failed.isEmpty ? Theme.teal : .orange)
-                        .frame(width: 44, height: 44).background(Theme.surface2, in: RoundedRectangle(cornerRadius: 12))
-                    VStack(alignment: .leading) {
-                        Text(failed.isEmpty ? "admin.normal" : "admin.needs").font(.headline).foregroundStyle(Theme.text)
-                        Text("admin.things \(failed.count)").font(.subheadline).foregroundStyle(Theme.text2)
+            if failure != nil {
+                Section {
+                    ListStatus(failure: failure, isEmpty: false, empty: "admin.normal") { await load() }
+                }
+            } else {
+                Section {
+                    HStack(spacing: 14) {
+                        Image(systemName: failed.isEmpty ? "checkmark" : "exclamationmark")
+                            .font(.title3.bold()).foregroundStyle(failed.isEmpty ? Theme.teal : .orange)
+                            .frame(width: 44, height: 44).background(Theme.surface2, in: RoundedRectangle(cornerRadius: 12))
+                        VStack(alignment: .leading) {
+                            Text(failed.isEmpty ? "admin.normal" : "admin.needs").font(.headline).foregroundStyle(Theme.text)
+                            Text("admin.things \(failed.count)").font(.subheadline).foregroundStyle(Theme.text2)
+                        }
                     }
                 }
             }
@@ -63,7 +70,15 @@ struct AdminView: View {
         .task { await load() }
     }
 
-    private func load() async { imports = (try? await model.client?.imports()) ?? [] }
+    private func load() async {
+        guard let client = model.client else { return }
+        do {
+            imports = try await client.imports()
+            failure = nil
+        } catch {
+            failure = model.listFailure(error, showing: !imports.isEmpty)
+        }
+    }
 
     @discardableResult
     private func run(_ done: String, _ work: () async throws -> Void) async -> Bool {
