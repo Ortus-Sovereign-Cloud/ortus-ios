@@ -35,6 +35,15 @@ jobs:
           printf '%s\n' "$ASC_KEY_P8" > "$key"
           chmod 600 "$key"
           echo "ASC_KEY_PATH=$key" >> "$GITHUB_ENV"
+      - name: Certificates earlier runs made go
+        # Each run is a fresh machine and Xcode makes a new certificate for
+        # it; Apple allows a few per account. Only "Created via API" ones.
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          python3 -m pip install --quiet --break-system-packages 'pyjwt[crypto]==2.10.1'
+          python3 ci/revoke-ci-certificates.py
       - name: The newest Xcode
         run: |
           xcode=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
