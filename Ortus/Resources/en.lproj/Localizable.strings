@@ -153,3 +153,4 @@
 "drive.empty" = "This folder is empty.";
 "chat.noRooms" = "No rooms yet.";
 "chat.noUnread" = "No unread rooms.";
+"chat.locked" = "Messages in this room are end-to-end encrypted. Open it on a computer to read and write.";

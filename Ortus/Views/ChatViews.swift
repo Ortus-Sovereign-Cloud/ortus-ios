@@ -96,6 +96,24 @@ struct ChannelView: View {
     @State private var calling = false
 
     var body: some View {
+        // End-to-end rooms are read on a computer in V1 (the phone cannot
+        // decrypt them yet): never show their ciphertext as text.
+        if room.encrypted == true {
+            VStack(spacing: 12) {
+                Image(systemName: "lock.fill").font(.largeTitle).foregroundStyle(Theme.text2)
+                Text("chat.locked").multilineTextAlignment(.center).foregroundStyle(Theme.text2)
+            }
+            .padding(24)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Theme.background)
+            .navigationTitle(title)
+            .accessibilityIdentifier("locked")
+        } else {
+            channel
+        }
+    }
+
+    private var channel: some View {
         VStack(spacing: 0) {
             ScrollViewReader { scroller in
                 ScrollView {

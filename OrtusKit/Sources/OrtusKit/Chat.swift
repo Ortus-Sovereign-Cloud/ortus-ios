@@ -60,6 +60,7 @@ extension Client {
 
     public func say(_ text: String, in room: String) async throws {
         struct Sent: Decodable { let id: String? }
-        let _: Sent = try await call("POST", "/chat/rooms/\(room)/messages", json: ["text": text])
+        // Its client id makes a resend from the outbox one message.
+        let _: Sent = try await call("POST", "/chat/rooms/\(room)/messages", json: ["text": text, "client_id": UUID().uuidString])
     }
 }

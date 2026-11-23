@@ -153,3 +153,4 @@
 "drive.empty" = "Ten folder jest pusty.";
 "chat.noRooms" = "Brak pokoi.";
 "chat.noUnread" = "Brak nieprzeczytanych pokoi.";
+"chat.locked" = "Wiadomości w tym pokoju są szyfrowane end-to-end. Otwórz go na komputerze, aby czytać i pisać.";

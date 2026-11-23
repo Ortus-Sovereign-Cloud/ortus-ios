@@ -153,3 +153,4 @@
 "drive.empty" = "Ce dossier est vide.";
 "chat.noRooms" = "Aucun salon pour l’instant.";
 "chat.noUnread" = "Aucun salon non lu.";
+"chat.locked" = "Les messages de ce salon sont chiffrés de bout en bout. Ouvrez-le sur un ordinateur pour lire et écrire.";

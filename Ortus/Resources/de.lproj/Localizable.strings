@@ -153,3 +153,4 @@
 "drive.empty" = "Dieser Ordner ist leer.";
 "chat.noRooms" = "Noch keine Räume.";
 "chat.noUnread" = "Keine ungelesenen Räume.";
+"chat.locked" = "Nachrichten in diesem Raum sind Ende-zu-Ende-verschlüsselt. Öffnen Sie ihn am Computer, um zu lesen und zu schreiben.";
