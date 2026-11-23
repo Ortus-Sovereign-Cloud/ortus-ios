@@ -144,3 +144,5 @@
 "call.flip" = "Kamera wechseln";
 "join.confirm %@" = "Bei %@ anmelden?";
 "join.confirmLead" = "Fahren Sie nur fort, wenn das das Ortus Ihrer Organisation ist.";
+"call.noMic" = "Ortus darf das Mikrofon nicht nutzen, niemand würde Sie hören. Erlauben Sie es in den Einstellungen.";
+"call.openSettings" = "Einstellungen öffnen";

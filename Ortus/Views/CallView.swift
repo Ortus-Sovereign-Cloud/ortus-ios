@@ -1,3 +1,4 @@
+import AVFoundation
 import AVKit
 import OrtusKit
 import SwiftUI
@@ -18,15 +19,16 @@ struct CallView: View {
                 if let client = model.client {
                     CallScreen(call: NativeCall(client: client, room: room.id), leave: { dismiss() })
                 } else {
-                    Text("error.generic").foregroundStyle(Theme.text2)
+                    VStack(spacing: 12) {
+                        Text("error.generic").foregroundStyle(Theme.text2)
+                        Button("call.hangUp") { dismiss() }
+                    }
                 }
             }
             .background(Theme.background)
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("call.close") { dismiss() } }
-            }
+            // One way out: Leave (in the controls).
         }
     }
 }
@@ -34,8 +36,27 @@ struct CallView: View {
 private struct CallScreen: View {
     @StateObject var call: NativeCall
     let leave: () -> Void
+    /// The microphone was refused: nobody would hear them.
+    @State private var noMic = AVAudioApplication.shared.recordPermission == .denied
 
     var body: some View {
+        if noMic {
+            VStack(spacing: 14) {
+                Text("call.noMic").foregroundStyle(Theme.text).multilineTextAlignment(.center)
+                Button("call.openSettings") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(url) }
+                }
+                .buttonStyle(.borderedProminent)
+                Button("call.hangUp", action: leave)
+            }
+            .padding(24)
+            .accessibilityIdentifier("noMic")
+        } else {
+            screen
+        }
+    }
+
+    private var screen: some View {
         VStack(spacing: 12) {
             if let error = call.error {
                 Text(error).font(.footnote).foregroundStyle(.red).accessibilityIdentifier("callError")
@@ -62,16 +83,17 @@ private struct CallScreen: View {
                 }
             }
             .frame(maxHeight: .infinity)
-            HStack(spacing: 12) {
-                control(call.muted ? "call.unmute" : "call.mute", on: call.muted, id: "mute") { call.toggleMute() }
-                control(call.camera ? "call.cameraOff" : "call.cameraOn", on: !call.camera, id: "camera") { call.toggleCamera() }
-                control(call.speaker ? "call.earpiece" : "call.speaker", on: false, id: "speaker") { call.toggleSpeaker() }
-                if call.camera { control("call.flip", on: false, id: "flip") { call.flipCamera() } }
+            HStack(spacing: 14) {
+                control(call.muted ? "mic.slash.fill" : "mic.fill", call.muted ? "call.unmute" : "call.mute", on: call.muted, id: "mute") { call.toggleMute() }
+                control(call.camera ? "video.fill" : "video.slash.fill", call.camera ? "call.cameraOff" : "call.cameraOn", on: !call.camera, id: "camera") { call.toggleCamera() }
+                control("speaker.wave.2.fill", call.speaker ? "call.earpiece" : "call.speaker", on: call.speaker, id: "speaker") { call.toggleSpeaker() }
+                if call.camera { control("arrow.triangle.2.circlepath.camera", "call.flip", on: false, id: "flip") { call.flipCamera() } }
                 Button(role: .destructive, action: leave) {
-                    Text("call.hangUp").font(.subheadline.weight(.semibold)).foregroundStyle(.white)
-                        .padding(.horizontal, 14).padding(.vertical, 10)
-                        .background(Color(red: 0.9, green: 0.28, blue: 0.3), in: Capsule())
+                    Image(systemName: "phone.down.fill").font(.title3).foregroundStyle(.white)
+                        .frame(width: 60, height: 60)
+                        .background(Color(red: 0.9, green: 0.28, blue: 0.3), in: Circle())
                 }
+                .accessibilityLabel(Text("call.hangUp"))
                 .accessibilityIdentifier("hangUp")
             }
             .padding(.bottom, 8)
@@ -81,12 +103,16 @@ private struct CallScreen: View {
         .onDisappear { call.end() }
     }
 
-    private func control(_ label: LocalizedStringKey, on: Bool, id: String, action: @escaping () -> Void) -> some View {
+    /// A round control (60 pt): its symbol, its name for VoiceOver, and whether it is on.
+    private func control(_ symbol: String, _ label: LocalizedStringKey, on: Bool, id: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(label).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.text)
-                .padding(.horizontal, 12).padding(.vertical, 10)
-                .background(on ? Theme.surface2 : Theme.surface, in: Capsule())
+            Image(systemName: symbol).font(.title3)
+                .foregroundStyle(on ? Theme.background : Theme.text)
+                .frame(width: 60, height: 60)
+                .background(on ? Theme.text : Theme.surface2, in: Circle())
         }
+        .accessibilityLabel(Text(label))
+        .accessibilityAddTraits(on ? .isSelected : [])
         .accessibilityIdentifier(id)
     }
 }

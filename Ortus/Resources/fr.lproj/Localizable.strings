@@ -144,3 +144,5 @@
 "call.flip" = "Retourner";
 "join.confirm %@" = "Se connecter à %@ ?";
 "join.confirmLead" = "Ne continuez que s’il s’agit de l’Ortus de votre organisation.";
+"call.noMic" = "Ortus ne peut pas utiliser le micro : personne ne vous entendrait. Autorisez-le dans Réglages.";
+"call.openSettings" = "Ouvrir Réglages";

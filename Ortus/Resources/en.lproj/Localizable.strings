@@ -144,3 +144,5 @@
 "call.flip" = "Flip";
 "join.confirm %@" = "Sign in to %@?";
 "join.confirmLead" = "Only continue if this is your organisation's Ortus.";
+"call.noMic" = "Ortus may not use the microphone, so nobody would hear you. Allow it in Settings.";
+"call.openSettings" = "Open Settings";
