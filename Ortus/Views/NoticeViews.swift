@@ -40,10 +40,10 @@ struct NotificationsView: View {
         do {
             items = try await client.notices()
             failure = nil
+            loaded = true
         } catch {
             failure = model.listFailure(error, showing: !items.isEmpty)
         }
-        loaded = true
     }
 
     private func icon(_ kind: String) -> String {
@@ -89,10 +89,11 @@ struct SearchView: View {
         do {
             hits = try await client.search(words)
             failure = nil
+            searched = true
         } catch {
             hits = []
+            searched = false
             failure = model.listFailure(error, showing: false)
         }
-        searched = true
     }
 }

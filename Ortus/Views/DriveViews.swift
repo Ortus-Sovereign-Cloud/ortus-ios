@@ -67,10 +67,10 @@ struct FolderView: View {
         do {
             items = try await client.folder(parent).items
             failure = nil
+            loaded = true
         } catch {
             failure = model.listFailure(error, showing: !items.isEmpty)
         }
-        loaded = true
     }
 }
 

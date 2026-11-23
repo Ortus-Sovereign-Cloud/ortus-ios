@@ -9,8 +9,10 @@ struct ForYouView: View {
     @State private var tasks: [WorkTask] = []
     @State private var showTasks = false
     @State private var note: String?
-    @State private var failure: String?
-    @State private var loaded = false
+    @State private var reviewsFailure: String?
+    @State private var tasksFailure: String?
+    @State private var reviewsLoaded = false
+    @State private var tasksLoaded = false
 
     var body: some View {
         NavigationStack {
@@ -22,10 +24,10 @@ struct ForYouView: View {
                     }
                     if let note { Text(note).font(.callout).foregroundStyle(Theme.text2).accessibilityIdentifier("note") }
                     if showTasks {
-                        ListStatus(failure: failure, isEmpty: loaded && tasks.isEmpty, empty: "foryou.noTasks") { await load() }
+                        ListStatus(failure: tasksFailure, isEmpty: tasksLoaded && tasks.isEmpty, empty: "foryou.noTasks") { await load() }
                         ForEach(tasks) { t in TaskRow(task: t) { await toggle(t) } }
                     } else {
-                        ListStatus(failure: failure, isEmpty: loaded && reviews.isEmpty, empty: "foryou.nothing") { await load() }
+                        ListStatus(failure: reviewsFailure, isEmpty: reviewsLoaded && reviews.isEmpty, empty: "foryou.nothing") { await load() }
                         ForEach(reviews) { r in Card(review: r) { await decide(r, $0) } }
                     }
                 }
@@ -50,12 +52,21 @@ struct ForYouView: View {
 
     private func load() async {
         guard let client = model.client else { return }
-        var failed: Error?
-        do { reviews = try await client.waitingReviews() } catch { failed = error }
-        do { tasks = try await client.myTasks() } catch { failed = failed ?? error }
-        let showing = !reviews.isEmpty || !tasks.isEmpty
-        failure = failed.flatMap { model.listFailure($0, showing: showing) }
-        loaded = true
+        // Each list says for itself whether it loaded.
+        do {
+            reviews = try await client.waitingReviews()
+            reviewsFailure = nil
+            reviewsLoaded = true
+        } catch {
+            reviewsFailure = model.listFailure(error, showing: !reviews.isEmpty)
+        }
+        do {
+            tasks = try await client.myTasks()
+            tasksFailure = nil
+            tasksLoaded = true
+        } catch {
+            tasksFailure = model.listFailure(error, showing: !tasks.isEmpty)
+        }
     }
 
     private func decide(_ review: Review, _ approve: Bool) async {
