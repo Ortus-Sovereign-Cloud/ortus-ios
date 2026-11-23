@@ -15,6 +15,8 @@ final class AppModel: ObservableObject {
     @Published var tab = 0
     /// The installation could not be reached: screens show what was kept.
     @Published var offline = false
+    /// Messages written offline that wait to be sent.
+    @Published var waiting = 0
     private(set) var client: Client? {
         didSet { if client?.token != nil, client !== oldValue { startPush() } }
     }

@@ -18,12 +18,26 @@ extension AppModel {
                 if self?.offline != !reached { self?.offline = !reached }
             }
         }
+        let outbox = Self.outbox(for: server)
+        outbox.changed = { [weak self] n in Task { @MainActor in self?.waiting = n } }
+        transport.outbox = outbox
+        waiting = outbox.count
         return Client(server: server, token: token, transport: transport)
+    }
+
+    /// Messages written without a connection (Application Support: kept
+    /// until sent, never backed up off the phone with the session).
+    nonisolated static func outbox(for server: URL) -> Outbox {
+        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        let name = SHA256.hash(Data(server.absoluteString.utf8)).prefix(8).map { String(format: "%02x", $0) }.joined()
+        return Outbox(file: base.appendingPathComponent("ortus-outbox-" + name + ".json"))
     }
 
     /// Signing out, or another account: nothing of the last one stays.
     func forgetKept(_ server: URL) {
         Self.cache(for: server).clear()
+        Self.outbox(for: server).clear()
+        waiting = 0
     }
 }
 

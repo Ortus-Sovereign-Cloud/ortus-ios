@@ -139,3 +139,5 @@
 "call.speaker" = "Haut-parleur";
 "call.earpiece" = "Écouteur";
 "call.hangUp" = "Quitter";
+"offline.queued" = "Sera envoyé dès le retour de la connexion";
+"offline.waiting %lld" = "En attente d’envoi : %lld";

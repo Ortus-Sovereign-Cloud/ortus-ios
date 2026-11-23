@@ -121,6 +121,10 @@ struct ComposeView: View {
             try await client.send(from: identity, to: to, subject: subject, text: text)
             sent()
             dismiss()
+        } catch let e as APIError where e.code == "queued" {
+            // No connection: it waits in the outbox and goes by itself.
+            sent()
+            dismiss()
         } catch {
             self.error = model.say(error)
         }

@@ -139,3 +139,5 @@
 "call.speaker" = "Гучномовець";
 "call.earpiece" = "Динамік телефона";
 "call.hangUp" = "Вийти";
+"offline.queued" = "Буде надіслано, щойно з’явиться зв’язок";
+"offline.waiting %lld" = "Чекає на надсилання: %lld";

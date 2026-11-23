@@ -6,8 +6,8 @@ struct MainTabs: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if model.offline {
-                Label("offline.banner", systemImage: "wifi.slash")
+            if model.offline || model.waiting > 0 {
+                Label(model.waiting > 0 ? "offline.waiting \(model.waiting)" : "offline.banner", systemImage: model.offline ? "wifi.slash" : "arrow.up.circle")
                     .font(.footnote.weight(.semibold))
                     .foregroundStyle(Theme.text2)
                     .frame(maxWidth: .infinity)

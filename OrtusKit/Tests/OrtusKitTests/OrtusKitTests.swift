@@ -423,3 +423,48 @@ final class CallTests: XCTestCase {
     }
 }
 
+final class OutboxTests: XCTestCase {
+    final class Net: Transport, @unchecked Sendable {
+        var online = false
+        var sent: [URLRequest] = []
+        func send(_ request: URLRequest) async throws -> (Int, Data) {
+            guard online else { throw URLError(.notConnectedToInternet) }
+            sent.append(request)
+            return (200, Data("{}".utf8))
+        }
+    }
+
+    func testMessagesWaitAndGoOnceBackOnline() async throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("ortus-outbox-\(UUID().uuidString)")
+        let net = Net()
+        let t = CachingTransport(inner: net, cache: ResponseCache(directory: dir.appendingPathComponent("c")))
+        t.outbox = Outbox(file: dir.appendingPathComponent("outbox.json"))
+        let client = Client(server: URL(string: "https://ortus.example")!, token: "s1", transport: t)
+        do {
+            try await client.say("On my way", in: "r1")
+            XCTFail("queued, not sent")
+        } catch let e as APIError {
+            XCTAssertEqual("queued", e.code)
+        }
+        XCTAssertEqual(1, t.outbox?.count)
+        // Other writes still fail plainly.
+        do {
+            struct X: Decodable {}
+            let _: X = try await client.call("POST", "/calendar/events", json: [:])
+            XCTFail("a write fails offline")
+        } catch let e as APIError { XCTFail("not queued: \(e.code)") } catch {}
+        XCTAssertEqual(1, t.outbox?.count)
+        // Back online: the next call sends what waited, with the session.
+        net.online = true
+        struct R: Decodable {}
+        let _: R = try await client.call("GET", "/chat/rooms")
+        for _ in 0..<50 where t.outbox?.count != 0 { try await Task.sleep(nanoseconds: 20_000_000) }
+        XCTAssertEqual(0, t.outbox?.count)
+        let message = net.sent.first { $0.url?.path.hasSuffix("/messages") == true }
+        XCTAssertEqual("Bearer s1", message?.value(forHTTPHeaderField: "Authorization"))
+        XCTAssertTrue(String(decoding: message?.httpBody ?? Data(), as: UTF8.self).contains("On my way"))
+        // Nothing of the session was kept on disk.
+        XCTAssertFalse((try? String(contentsOf: dir.appendingPathComponent("outbox.json"), encoding: .utf8))?.contains("s1") ?? false)
+    }
+}
+

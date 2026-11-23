@@ -75,6 +75,10 @@ struct ThreadView: View {
             typing = false
             note = String(localized: "thread.sent")
             await load()
+        } catch let e as APIError where e.code == "queued" {
+            reply = ""
+            typing = false
+            note = String(localized: "offline.queued")
         } catch {
             note = model.say(error)
         }

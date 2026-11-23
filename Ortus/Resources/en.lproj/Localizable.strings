@@ -139,3 +139,5 @@
 "call.speaker" = "Speaker";
 "call.earpiece" = "Earpiece";
 "call.hangUp" = "Leave";
+"offline.queued" = "Will send when you're back online";
+"offline.waiting %lld" = "%lld waiting to send";
