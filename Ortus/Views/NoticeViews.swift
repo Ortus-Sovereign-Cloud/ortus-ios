@@ -11,6 +11,7 @@ struct NotificationsView: View {
 
     var body: some View {
         List {
+            ListStatus(failure: failure, isEmpty: loaded && items.isEmpty, empty: "notify.empty") { await load() }
             ForEach(items) { n in
                 HStack(alignment: .top, spacing: 12) {
                     Image(systemName: icon(n.kind)).foregroundStyle(n.kind == "alert" ? .red : Theme.accent).frame(width: 28)
@@ -22,7 +23,6 @@ struct NotificationsView: View {
                 }
                 .listRowBackground(Theme.background)
             }
-            ListStatus(failure: failure, isEmpty: loaded && items.isEmpty, empty: "notify.empty") { await load() }
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
@@ -66,6 +66,7 @@ struct SearchView: View {
 
     var body: some View {
         List {
+            ListStatus(failure: failure, isEmpty: searched && hits.isEmpty, empty: "search.none") { await search() }
             ForEach(hits, id: \.key) { h in
                 VStack(alignment: .leading, spacing: 2) {
                     Text(h.title).foregroundStyle(Theme.text)
@@ -74,7 +75,6 @@ struct SearchView: View {
                 }
                 .listRowBackground(Theme.background)
             }
-            ListStatus(failure: failure, isEmpty: searched && hits.isEmpty, empty: "search.none") { await search() }
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)

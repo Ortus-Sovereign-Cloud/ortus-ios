@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// What a list says under its rows: that it could not be loaded (with a
+/// What a list says above its rows: that it could not be loaded (with a
 /// way to try again), or that there is nothing in it. A failure never
 /// looks like an empty list.
 struct ListStatus: View {

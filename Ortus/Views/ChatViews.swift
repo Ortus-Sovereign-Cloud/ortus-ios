@@ -20,6 +20,7 @@ struct ChatsView: View {
                     }
                     .listRowBackground(Color.clear)
                 }
+                ListStatus(failure: failure, isEmpty: data != nil && shown.isEmpty, empty: onlyUnread ? "chat.noUnread" : "chat.noRooms") { await load() }
                 ForEach(shown) { room in
                     NavigationLink(value: room) {
                         HStack(spacing: 12) {
@@ -48,7 +49,6 @@ struct ChatsView: View {
                     }
                     .listRowBackground(Theme.background)
                 }
-                ListStatus(failure: failure, isEmpty: data != nil && shown.isEmpty, empty: onlyUnread ? "chat.noUnread" : "chat.noRooms") { await load() }
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)

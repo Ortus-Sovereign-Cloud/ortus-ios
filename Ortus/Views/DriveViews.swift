@@ -31,6 +31,7 @@ struct FolderView: View {
 
     var body: some View {
         List {
+            ListStatus(failure: failure, isEmpty: loaded && items.isEmpty, empty: "drive.empty") { await load() }
             ForEach(items) { item in
                 NavigationLink(value: item) {
                     HStack(spacing: 12) {
@@ -52,7 +53,6 @@ struct FolderView: View {
                 }
                 .listRowBackground(Theme.background)
             }
-            ListStatus(failure: failure, isEmpty: loaded && items.isEmpty, empty: "drive.empty") { await load() }
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
