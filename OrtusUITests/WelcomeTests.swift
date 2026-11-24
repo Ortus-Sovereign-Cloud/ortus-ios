@@ -60,8 +60,11 @@ final class WelcomeTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Anna Kowalska"].exists)
         attach(app, "u6-search-thread")
         app.navigationBars.buttons.element(boundBy: 0).tap()
-        XCTAssertTrue(app.buttons["closeSheet"].waitForExistence(timeout: 10))
-        app.buttons["closeSheet"].tap()
+        // While the search field is active it hides the bar with Close.
+        let close = app.buttons["closeSheet"]
+        if !close.waitForExistence(timeout: 5), app.buttons["Cancel"].exists { app.buttons["Cancel"].tap() }
+        XCTAssertTrue(close.waitForExistence(timeout: 10), "Close; screen:\n\(app.debugDescription)")
+        close.tap()
         // The bell opens the notifications; once read, its number goes.
         bell.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
         XCTAssertTrue(app.navigationBars["Notifications"].waitForExistence(timeout: 10))
@@ -193,7 +196,9 @@ final class WelcomeTests: XCTestCase {
         URLSession.shared.dataTask(with: request) { data, _, _ in body = data ?? Data(); done.signal() }.resume()
         done.wait()
         struct Made: Decodable { let link: String }
-        let link = try JSONDecoder().decode(Made.self, from: body).link
+        guard let link = try? JSONDecoder().decode(Made.self, from: body).link else {
+            return XCTFail("no phone link: \(String(decoding: body, as: UTF8.self))")
+        }
         let code = String(link.split(separator: "p=").last ?? "")
 
         let app = app()
