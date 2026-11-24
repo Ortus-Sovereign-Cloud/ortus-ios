@@ -19,10 +19,16 @@
 "welcome.lost" = "فقدت هاتفك لاحقًا؟ يمكن لقسم التقنية إيقاف المفتاح خلال دقيقة.";
 "welcome.keyName" = "Ortus على هذا الهاتف";
 "welcome.noKey" = "لا يملك هذا الهاتف مفتاحًا بعد.";
-"tab.mail" = "البريد";
-"tab.chat" = "الدردشة";
-"tab.calendar" = "التقويم";
-"tab.files" = "الملفات";
+"app.mail" = "البريد";
+"app.chat" = "المحادثة";
+"app.calls" = "المكالمات";
+"app.calendar" = "التقويم";
+"app.tasks" = "المهام";
+"app.people" = "الأشخاص";
+"app.drive" = "الملفات";
+"app.docs" = "المستندات";
+"app.approvals" = "الموافقات";
+"app.records" = "السجلات";
 "tab.more" = "المزيد";
 "more.signOut" = "تسجيل الخروج";
 "inbox.title" = "البريد الوارد";
@@ -154,3 +160,5 @@
 "chat.noRooms" = "لا توجد غرف بعد.";
 "chat.noUnread" = "لا توجد غرف غير مقروءة.";
 "chat.locked" = "الرسائل في هذه الغرفة مشفّرة من طرف إلى طرف. افتحها على حاسوب للقراءة والكتابة.";
+"sheet.close" = "إغلاق";
+"search.gone" = "لم يعد موجودًا.";

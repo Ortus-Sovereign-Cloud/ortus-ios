@@ -14,12 +14,65 @@ public struct Notice: Decodable, Equatable, Identifiable {
 }
 
 public struct SearchHit: Decodable, Equatable, Identifiable {
+    /// What the app that indexed it adds: where it opens on the web, and
+    /// when an event starts (an older installation may send none).
+    public struct Meta: Decodable, Equatable {
+        public let path: String?
+        public let start: Int64?
+        public let from: String?
+    }
     public let app: String
     public let id: String
     public let title: String
     public let snippet: String?
     public let at: Int64?
+    public let meta: Meta?
     public var key: String { app + ":" + id }
+    /// Where it opens: the web's path, or the app's own page as the web does.
+    public var place: Place { Place(path: meta?.path ?? "/" + app, start: meta?.start) }
+}
+
+/// Where a web path (a search result's, a notification's) opens on the
+/// phone: one of the app's screens, or else the web page itself.
+public enum Place: Hashable, Sendable {
+    case thread(String)
+    case room(String)
+    case doc(String)
+    case folder(String)
+    case file(String)
+    /// An event, on its day.
+    case event(String, start: Int64)
+    /// Approvals at one's turn (a review's notification).
+    case approvals
+    /// No screen of its own on the phone.
+    case web(String)
+
+    /// `start`: an event's, which its search result carries.
+    public init(path: String, start: Int64? = nil) {
+        let parts = URLComponents(string: path)
+        let value = { (name: String) in parts?.queryItems?.first { $0.name == name }?.value.flatMap { $0.isEmpty ? nil : $0 } }
+        switch parts?.path {
+        case "/mail": if let t = value("thread") { self = .thread(t); return }
+        case "/chat": if let r = value("room") { self = .room(r); return }
+        case "/docs":
+            if let d = value("doc") { self = .doc(d); return }
+            if value("review") != nil { self = .approvals; return }
+        case "/approvals": self = .approvals; return
+        case "/calendar": if let e = value("event"), let start { self = .event(e, start: start); return }
+        case "/drive":
+            if let f = value("folder") { self = .folder(f); return }
+            if let f = value("file") { self = .file(f); return }
+        default: break
+        }
+        self = .web(path)
+    }
+
+    /// The page on the installation, for a place the phone has no screen
+    /// for: only a path on it (never another site a result might name).
+    public func webURL(on server: URL) -> URL? {
+        guard case let .web(path) = self, path.hasPrefix("/"), !path.hasPrefix("//"), !path.contains("\\") else { return nil }
+        return URL(string: server.absoluteString + path)
+    }
 }
 
 extension Client {
@@ -27,6 +80,14 @@ extension Client {
         struct Answer: Decodable { let items: [Notice] }
         let a: Answer = try await call("GET", "/notifications")
         return a.items
+    }
+
+    /// How many notifications are unread: the number on the bell, as the
+    /// web's bell counts them.
+    public func unreadNotices() async throws -> Int {
+        struct Answer: Decodable { let unread: Int? }
+        let a: Answer = try await call("GET", "/notifications")
+        return a.unread ?? 0
     }
 
     public func markNoticesRead() async throws {
@@ -39,5 +100,13 @@ extension Client {
         let q = words.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed.subtracting(CharacterSet(charactersIn: "&=+#"))) ?? ""
         let a: Answer = try await call("GET", "/search?q=\(q)")
         return a.results
+    }
+}
+
+extension Client {
+    /// One file or folder.
+    public func item(_ id: String) async throws -> DriveItem {
+        let safe = id.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? ""
+        return try await call("GET", "/drive/items/" + safe)
     }
 }

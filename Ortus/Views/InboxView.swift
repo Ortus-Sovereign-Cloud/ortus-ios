@@ -85,6 +85,7 @@ struct InboxView: View {
                     .accessibilityIdentifier("folders")
                 }
             }
+            .topBar()
             .navigationDestination(for: String.self) { ThreadView(threadID: $0) }
             .refreshable { await load() }
             .task { await load() }

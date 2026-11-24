@@ -38,6 +38,44 @@ final class WelcomeTests: XCTestCase {
         app.tabBars.buttons["More"].tap()
         XCTAssertTrue(app.staticTexts["iryna@ministry.example"].waitForExistence(timeout: 10))
 
+        // U6: the bell at the top counts what is unread (the flood plan
+        // to sign, Anna's mail).
+        let bell = app.buttons["bell"]
+        XCTAssertTrue(bell.waitForExistence(timeout: 10), "the bell")
+        func unread() -> Int { Int((bell.value as? String) ?? "") ?? 0 }
+        for _ in 0..<80 where unread() == 0 { usleep(250_000) }
+        XCTAssertGreaterThan(unread(), 0, "a number on the bell")
+        attach(app, "u6-bell")
+        // Search from the top bar; a result opens what it found.
+        app.buttons["search"].coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        let words = app.searchFields.firstMatch
+        XCTAssertTrue(words.waitForExistence(timeout: 10), "the search field")
+        words.tap()
+        words.typeText("gauge\n")
+        let hit = app.descendants(matching: .any)["hit-mail"].firstMatch
+        XCTAssertTrue(hit.waitForExistence(timeout: 20), "a mail result; screen:\n\(app.debugDescription)")
+        attach(app, "u6-search")
+        hit.tap()
+        XCTAssertTrue(app.textFields["reply"].waitForExistence(timeout: 10), "the thread opened")
+        XCTAssertTrue(app.staticTexts["Anna Kowalska"].exists)
+        attach(app, "u6-search-thread")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.buttons["closeSheet"].waitForExistence(timeout: 10))
+        app.buttons["closeSheet"].tap()
+        // The bell opens the notifications; once read, its number goes.
+        bell.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        XCTAssertTrue(app.navigationBars["Notifications"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Flood response plan'")).firstMatch.waitForExistence(timeout: 20), "the approval's notification")
+        attach(app, "u6-notifications")
+        app.buttons["closeSheet"].tap()
+        for _ in 0..<80 where unread() > 0 { usleep(250_000) }
+        XCTAssertEqual(0, unread(), "the bell still counts after reading")
+        // The sections are named as on the web: Drive, not Files.
+        XCTAssertFalse(app.tabBars.buttons["Files"].exists, "a tab named Files")
+        app.tabBars.buttons["Drive"].tap()
+        XCTAssertTrue(app.navigationBars["Drive"].waitForExistence(timeout: 10), "the Drive section")
+        attach(app, "u6-drive")
+
         // Her inbox: Anna's mail; the thread; a quick reply goes out.
         app.tabBars.buttons["Mail"].tap()
         // The inbox's tabs in words, not their keys.

@@ -1,8 +1,10 @@
 import SwiftUI
 
-/// The tab bar: Mail, Chat, Calendar, Files, More.
+/// The tab bar: Mail, Chat, Calendar, Drive, More (the sections named as
+/// on the web); search and the bell at the top of each.
 struct MainTabs: View {
     @EnvironmentObject var model: AppModel
+    @Environment(\.scenePhase) private var phase
 
     var body: some View {
         VStack(spacing: 0) {
@@ -16,12 +18,17 @@ struct MainTabs: View {
                     .accessibilityIdentifier("offline")
             }
         TabView(selection: $model.tab) {
-            InboxView().tabItem { Label("tab.mail", systemImage: "tray") }.tag(0)
-            ChatsView().tabItem { Label("tab.chat", systemImage: "bubble.left") }.tag(1)
-            CalendarView().tabItem { Label("tab.calendar", systemImage: "calendar") }.tag(2)
-            DriveView().tabItem { Label("tab.files", systemImage: "folder") }.tag(3)
+            InboxView().tabItem { Label("app.mail", systemImage: "tray") }.tag(0)
+            ChatsView().tabItem { Label("app.chat", systemImage: "bubble.left") }.tag(1)
+            CalendarView().tabItem { Label("app.calendar", systemImage: "calendar") }.tag(2)
+            DriveView().tabItem { Label("app.drive", systemImage: "folder") }.tag(3)
             MoreView().tabItem { Label("tab.more", systemImage: "square.grid.2x2") }.tag(4)
         }
+        }
+        // The bell's number: on opening and whenever the app comes back.
+        .task { await model.refreshUnread() }
+        .onChange(of: phase) {
+            if phase == .active { Task { await model.refreshUnread() } }
         }
         // A call answered on the lock screen opens here.
         .fullScreenCover(item: $model.answered, onDismiss: { Ringer.shared.endAll() }) { call in
@@ -68,6 +75,7 @@ struct MoreView: View {
                 }
             }
             .navigationTitle("tab.more")
+            .topBar()
         }
     }
 }

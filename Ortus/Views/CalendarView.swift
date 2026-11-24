@@ -42,11 +42,12 @@ struct CalendarView: View {
                     if events.isEmpty {
                         Text("calendar.free").foregroundStyle(Theme.text2)
                     }
-                    ForEach(events) { e in Item(event: e) { await answer(e, $0) } }
+                    ForEach(events) { e in EventCard(event: e) { await answer(e, $0) } }
                 }
                 .padding(16)
             }
             .background(Theme.background)
+            .topBar()
             .refreshable { await load() }
             .task { await load() }
         }
@@ -65,7 +66,8 @@ struct CalendarView: View {
     }
 }
 
-private struct Item: View {
+/// One event, with Yes, Maybe, No while it waits for an answer.
+struct EventCard: View {
     let event: Event
     let answer: (String) async -> Void
 

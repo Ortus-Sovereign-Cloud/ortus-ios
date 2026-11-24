@@ -23,6 +23,8 @@ final class AppModel: ObservableObject {
     @Published var confirming: InvitationLink?
     /// Messages written offline that wait to be sent.
     @Published var waiting = 0
+    /// Unread notifications: the number on the bell.
+    @Published var unread = 0
     private(set) var client: Client? {
         didSet { if client?.token != nil, client !== oldValue { startPush() } }
     }
@@ -61,6 +63,13 @@ final class AppModel: ObservableObject {
     private func keep(server: URL, token: String) {
         try? Keychain.set(Data(server.absoluteString.utf8), for: "server")
         try? Keychain.set(Data(token.utf8), for: "session")
+    }
+
+    /// The bell's number, as the web's bell counts (kept when the
+    /// installation cannot be reached).
+    func refreshUnread() async {
+        guard let client, client.token != nil, let n = try? await client.unreadNotices() else { return }
+        unread = n
     }
 
     func refresh() async {
@@ -334,6 +343,7 @@ final class AppModel: ObservableObject {
         Keychain.remove("session")
         client = nil
         me = nil
+        unread = 0
         stage = .join
     }
 

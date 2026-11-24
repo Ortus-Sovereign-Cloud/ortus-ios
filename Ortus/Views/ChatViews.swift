@@ -53,7 +53,8 @@ struct ChatsView: View {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .background(Theme.background)
-            .navigationTitle("tab.chat")
+            .navigationTitle("app.chat")
+            .topBar()
             .navigationDestination(for: Room.self) { ChannelView(room: $0, title: data?.title($0) ?? $0.name) }
             .refreshable { await load() }
             .task { await load() }

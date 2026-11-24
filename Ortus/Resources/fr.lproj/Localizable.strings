@@ -19,10 +19,16 @@
 "welcome.lost" = "Téléphone perdu ? L'informatique désactive la clé en une minute.";
 "welcome.keyName" = "Ortus sur ce téléphone";
 "welcome.noKey" = "Ce téléphone n'a pas encore de clé.";
-"tab.mail" = "Messagerie";
-"tab.chat" = "Discussion";
-"tab.calendar" = "Agenda";
-"tab.files" = "Fichiers";
+"app.mail" = "Courrier";
+"app.chat" = "Discussion";
+"app.calls" = "Appels";
+"app.calendar" = "Agenda";
+"app.tasks" = "Tâches";
+"app.people" = "Contacts";
+"app.drive" = "Fichiers";
+"app.docs" = "Documents";
+"app.approvals" = "Approbations";
+"app.records" = "Archives";
 "tab.more" = "Plus";
 "more.signOut" = "Se déconnecter";
 "inbox.title" = "Boîte de réception";
@@ -154,3 +160,5 @@
 "chat.noRooms" = "Aucun salon pour l’instant.";
 "chat.noUnread" = "Aucun salon non lu.";
 "chat.locked" = "Les messages de ce salon sont chiffrés de bout en bout. Ouvrez-le sur un ordinateur pour lire et écrire.";
+"sheet.close" = "Fermer";
+"search.gone" = "Ce n’est plus là.";

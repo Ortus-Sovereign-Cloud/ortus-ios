@@ -19,10 +19,16 @@
 "welcome.lost" = "Lost your phone later? IT can turn the key off in one minute.";
 "welcome.keyName" = "Ortus on this phone";
 "welcome.noKey" = "This phone has no key yet.";
-"tab.mail" = "Mail";
-"tab.chat" = "Chat";
-"tab.calendar" = "Calendar";
-"tab.files" = "Files";
+"app.mail" = "Mail";
+"app.chat" = "Chat";
+"app.calls" = "Calls";
+"app.calendar" = "Calendar";
+"app.tasks" = "Tasks";
+"app.people" = "People";
+"app.drive" = "Drive";
+"app.docs" = "Docs";
+"app.approvals" = "Approvals";
+"app.records" = "Records";
 "tab.more" = "More";
 "more.signOut" = "Sign out";
 "inbox.title" = "Inbox";
@@ -154,3 +160,5 @@
 "chat.noRooms" = "No rooms yet.";
 "chat.noUnread" = "No unread rooms.";
 "chat.locked" = "Messages in this room are end-to-end encrypted. Open it on a computer to read and write.";
+"sheet.close" = "Close";
+"search.gone" = "It is no longer there.";

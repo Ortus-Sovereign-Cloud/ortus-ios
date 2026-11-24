@@ -19,10 +19,16 @@
 "welcome.lost" = "Zgubisz telefon? IT wyłączy klucz w minutę.";
 "welcome.keyName" = "Ortus na tym telefonie";
 "welcome.noKey" = "Ten telefon nie ma jeszcze klucza.";
-"tab.mail" = "Poczta";
-"tab.chat" = "Czat";
-"tab.calendar" = "Kalendarz";
-"tab.files" = "Pliki";
+"app.mail" = "Poczta";
+"app.chat" = "Czat";
+"app.calls" = "Rozmowy";
+"app.calendar" = "Kalendarz";
+"app.tasks" = "Zadania";
+"app.people" = "Osoby";
+"app.drive" = "Dysk";
+"app.docs" = "Dokumenty";
+"app.approvals" = "Akceptacje";
+"app.records" = "Akta";
 "tab.more" = "Więcej";
 "more.signOut" = "Wyloguj";
 "inbox.title" = "Odebrane";
@@ -154,3 +160,5 @@
 "chat.noRooms" = "Brak pokoi.";
 "chat.noUnread" = "Brak nieprzeczytanych pokoi.";
 "chat.locked" = "Wiadomości w tym pokoju są szyfrowane end-to-end. Otwórz go na komputerze, aby czytać i pisać.";
+"sheet.close" = "Zamknij";
+"search.gone" = "Już tego nie ma.";

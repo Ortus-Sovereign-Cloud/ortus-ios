@@ -19,10 +19,16 @@
 "welcome.lost" = "Загубили телефон? ІТ вимкне ключ за хвилину.";
 "welcome.keyName" = "Ortus на цьому телефоні";
 "welcome.noKey" = "Цей телефон ще не має ключа.";
-"tab.mail" = "Пошта";
-"tab.chat" = "Чат";
-"tab.calendar" = "Календар";
-"tab.files" = "Файли";
+"app.mail" = "Пошта";
+"app.chat" = "Чат";
+"app.calls" = "Дзвінки";
+"app.calendar" = "Календар";
+"app.tasks" = "Завдання";
+"app.people" = "Люди";
+"app.drive" = "Диск";
+"app.docs" = "Документи";
+"app.approvals" = "Погодження";
+"app.records" = "Записи";
 "tab.more" = "Більше";
 "more.signOut" = "Вийти";
 "inbox.title" = "Вхідні";
@@ -154,3 +160,5 @@
 "chat.noRooms" = "Кімнат ще немає.";
 "chat.noUnread" = "Непрочитаних кімнат немає.";
 "chat.locked" = "Повідомлення в цій кімнаті наскрізно зашифровані. Відкрийте її на комп’ютері, щоб читати й писати.";
+"sheet.close" = "Закрити";
+"search.gone" = "Цього вже немає.";

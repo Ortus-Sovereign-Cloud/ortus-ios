@@ -186,6 +186,44 @@ final class AnswersTests: XCTestCase {
         XCTAssertEqual(true, sent["all"] as? Bool)
     }
 
+    func testTheBellCountsAsTheWebDoes() async throws {
+        let box = Recorded.Box()
+        let listing = #"{"items":[],"unread":3,"counts":{"mention":1,"approval":2,"alert":0,"update":0},"quiet":{"from":null,"to":null,"dnd":false}}"#
+        let client = Client(server: URL(string: "https://ortus.example")!, token: "t", transport: Scripted(bodies: [listing], seen: box))
+        let unread = try await client.unreadNotices()
+        XCTAssertEqual(3, unread)
+        XCTAssertEqual("/api/v1/notifications", box.requests[0].url?.path)
+    }
+
+    func testSearchResultsOpenTheirPlace() async throws {
+        let box = Recorded.Box()
+        // As core answers: each app's own meta, with where it opens.
+        let results = #"{"results":[{"app":"mail","id":"m1","title":"Gauge report","snippet":"Attached","meta":{"path":"/mail?thread=t1","from":"Anna Kowalska","attachment":false},"at":1,"mine":true},{"app":"calendar","id":"e1","title":"Stand-up","snippet":"","meta":{"path":"/calendar?event=e1","start":1795784400000},"at":2,"mine":true},{"app":"people","id":"p1","title":"Anna","snippet":""}],"words":["gauge"]}"#
+        let client = Client(server: URL(string: "https://ortus.example")!, token: "t", transport: Scripted(bodies: [results], seen: box))
+        let hits = try await client.search("gauge")
+        XCTAssertEqual([.thread("t1"), .event("e1", start: 1795784400000), .web("/people")], hits.map(\.place))
+        XCTAssertEqual(1795784400000, hits[1].meta?.start)
+    }
+
+    func testPlacesOfWebPaths() {
+        XCTAssertEqual(.thread("t1"), Place(path: "/mail?thread=t1"))
+        XCTAssertEqual(.room("!r1:ortus.example"), Place(path: "/chat?room=!r1:ortus.example&message=$e1"))
+        XCTAssertEqual(.doc("d1"), Place(path: "/docs?doc=d1"))
+        XCTAssertEqual(.folder("f1"), Place(path: "/drive?folder=f1"))
+        XCTAssertEqual(.file("f2"), Place(path: "/drive?file=f2"))
+        XCTAssertEqual(.web("/tasks?task=k1"), Place(path: "/tasks?task=k1"))
+        XCTAssertEqual(.approvals, Place(path: "/docs?review=r1"))
+        // An event without its start (a notification's) is the web's.
+        XCTAssertEqual(.web("/calendar?event=e1"), Place(path: "/calendar?event=e1"))
+        XCTAssertEqual(.web("/mail"), Place(path: "/mail"))
+        let server = URL(string: "https://ortus.example")!
+        XCTAssertEqual("https://ortus.example/tasks?task=k1", Place(path: "/tasks?task=k1").webURL(on: server)?.absoluteString)
+        // Only a page of the installation itself.
+        XCTAssertNil(Place(path: "//evil.example/x").webURL(on: server))
+        XCTAssertNil(Place(path: "https://evil.example/x").webURL(on: server))
+        XCTAssertNil(Place(path: "/mail?thread=t1").webURL(on: server))
+    }
+
     func testOriginsAndRelyingParty() throws {
         // As the installation's public_url reads: lower case, no default port, no path.
         XCTAssertEqual("https://ortus.example", Client.serverURL(from: "HTTPS://Ortus.Example:443/inbox")?.absoluteString)

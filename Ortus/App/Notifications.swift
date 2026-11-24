@@ -20,13 +20,16 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 
     /// While the app is open, a notification still shows as a banner.
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
-        [.banner, .sound, .list]
+        // A new one: the bell counts it.
+        Task { @MainActor in await Self.model?.refreshUnread() }
+        return [.banner, .sound, .list]
     }
 
     /// A tap opens the tab the notification belongs to.
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
         let path = response.notification.request.content.userInfo["path"] as? String
         await MainActor.run { Self.model?.tab = Push.tab(for: path) }
+        Task { @MainActor in await Self.model?.refreshUnread() }
     }
 }
 

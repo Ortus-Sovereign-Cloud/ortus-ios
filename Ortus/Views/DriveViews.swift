@@ -7,7 +7,8 @@ struct DriveView: View {
 
     var body: some View {
         NavigationStack {
-            FolderView(parent: nil, title: String(localized: "tab.files"))
+            FolderView(parent: nil, title: String(localized: "app.drive"))
+                .topBar()
                 .navigationDestination(for: DriveItem.self) { item in
                     if item.isFolder {
                         FolderView(parent: item.id, title: item.name)

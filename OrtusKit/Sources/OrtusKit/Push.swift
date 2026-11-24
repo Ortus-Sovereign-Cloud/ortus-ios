@@ -60,7 +60,7 @@ public enum Push {
     }
 
     /// Which tab a notification's path opens: 0 Mail, 1 Chat, 2 Calendar,
-    /// 3 Files, 4 More.
+    /// 3 Drive, 4 More.
     public static func tab(for path: String?) -> Int {
         let p = path ?? ""
         if p.hasPrefix("/mail") { return 0 }
