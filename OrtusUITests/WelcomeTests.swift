@@ -183,14 +183,18 @@ final class WelcomeTests: XCTestCase {
     /// session, opened as the QR code or button hands it to the app, signs
     /// the app in; the phone then becomes the owner's key.
     func testSignInOnThePhoneFromTheWeb() throws {
-        try need("ORTUS_SERVER", "ORTUS_OWNER_SESSION")
+        try need("ORTUS_SERVER", "ORTUS_OWNER_SESSION", "ORTUS_OWNER_TOTP")
         let env = ProcessInfo.processInfo.environment
+        // A phone link needs a session that proved itself in the last ten
+        // minutes: CI's own is older by now (the build comes between), so
+        // the owner signs in afresh, with the password and a code.
+        let session = try Self.freshOwnerSession()
         var request = URLRequest(url: URL(string: env["ORTUS_SERVER"]! + "/api/v1/me/phone-link")!)
         request.httpMethod = "POST"
         request.httpBody = Data("{}".utf8)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("ortus", forHTTPHeaderField: "X-Requested-With")
-        request.setValue("Bearer \(env["ORTUS_OWNER_SESSION"]!)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(session)", forHTTPHeaderField: "Authorization")
         let done = DispatchSemaphore(value: 0)
         var body = Data()
         URLSession.shared.dataTask(with: request) { data, _, _ in body = data ?? Data(); done.signal() }.resume()
@@ -290,6 +294,35 @@ final class WelcomeTests: XCTestCase {
         }
         // Not yet her key: the phone offers to become it.
         XCTAssertTrue(app.buttons["makeKey"].waitForExistence(timeout: 20), app.staticTexts["error"].exists ? app.staticTexts["error"].label : "not signed in")
+    }
+
+    /// The owner's new session: the password, then the authenticator's
+    /// code of a new 30-second step (an earlier test may have used this one).
+    private static func freshOwnerSession() throws -> String {
+        let env = ProcessInfo.processInfo.environment
+        func post(_ path: String, _ body: [String: String]) throws -> [String: Any] {
+            var r = URLRequest(url: URL(string: env["ORTUS_SERVER"]! + "/api/v1" + path)!)
+            r.httpMethod = "POST"
+            r.httpBody = try JSONSerialization.data(withJSONObject: body)
+            r.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            r.setValue("ortus", forHTTPHeaderField: "X-Requested-With")
+            let done = DispatchSemaphore(value: 0)
+            var data = Data()
+            URLSession.shared.dataTask(with: r) { d, _, _ in data = d ?? Data(); done.signal() }.resume()
+            done.wait()
+            guard let answer = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                throw NSError(domain: "ortus", code: 1, userInfo: [NSLocalizedDescriptionKey: "\(path): \(String(decoding: data, as: UTF8.self))"])
+            }
+            return answer
+        }
+        let ticket = try post("/session/password", ["email": "taras@ministry.example", "password": "flood-plan-2026-ministry"])["ticket"] as? String ?? ""
+        let step = Int(Date().timeIntervalSince1970 / 30)
+        while Int(Date().timeIntervalSince1970 / 30) == step { usleep(250_000) }
+        let signedIn = try post("/session/code", ["ticket": ticket, "code": totp(env["ORTUS_OWNER_TOTP"]!)])
+        guard let token = signedIn["session_token"] as? String else {
+            throw NSError(domain: "ortus", code: 2, userInfo: [NSLocalizedDescriptionKey: "no session: \(signedIn)"])
+        }
+        return token
     }
 
     private static func totp(_ secret: String) -> String {
