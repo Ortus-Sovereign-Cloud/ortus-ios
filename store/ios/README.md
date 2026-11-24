@@ -1,7 +1,8 @@
 # Ortus Workspace on the App Store
 
-What the App Store listing needs, kept with the app: the texts in six
-languages (`listing/<locale>/`), the App Privacy answers (`PRIVACY.md`),
+What the App Store listing needs, kept with the app: the texts in eight
+languages (`listing/<locale>/`; Spanish and Italian wait for native review,
+`REVIEW-TRANSLATIONS.md`), the App Privacy answers (`PRIVACY.md`),
 the sign-in codes for App Review (`review-codes.mjs`) and the screenshots
 (workflow `screenshots`).
 
@@ -32,7 +33,7 @@ the sign-in codes for App Review (`review-codes.mjs`) and the screenshots
 - **App Privacy**: answers in `PRIVACY.md`; privacy policy
   `https://ortus.cc/privacy`.
 - **Version → each language** (English (U.S.), Polish, Ukrainian, German,
-  French, Arabic): paste name, subtitle, promotional text, description,
+  French, Arabic, Spanish (Spain), Italian): paste name, subtitle, promotional text, description,
   keywords and "What's New" from `listing/<locale>/`; support URL
   `https://ortus.cc/support`, marketing URL `https://ortus.cc`.
 - **App Review Information**: sign-in required: yes. Put in **Notes**

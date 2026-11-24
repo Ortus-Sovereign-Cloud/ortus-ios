@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Italian: translated without a native speaker; needs review before release in Italy. See store/ios/REVIEW-TRANSLATIONS.md. -->
+<plist version="1.0">
+<dict>
+	<key>thread.count %lld</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@n@</string>
+		<key>n</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld messaggio</string>
+			<key>other</key>
+			<string>%lld messaggi</string>
+		</dict>
+	</dict>
+	<key>admin.things %lld</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@n@</string>
+		<key>n</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld cosa richiede la Sua attenzione</string>
+			<key>other</key>
+			<string>%lld cose richiedono la Sua attenzione</string>
+		</dict>
+	</dict>
+	<key>admin.failed %lld</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@n@</string>
+		<key>n</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld casella di posta non riuscita</string>
+			<key>other</key>
+			<string>%lld caselle di posta non riuscite</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

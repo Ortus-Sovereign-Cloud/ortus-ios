@@ -13,16 +13,16 @@ if grep -q "\.package(" OrtusKit/Package.swift || grep -q "^  [A-Za-z]*:$" <(sed
   exit 1
 fi
 grep -q 'checksum: "9532fe3ce47507c304f37a4355b907be1e89967971d614a04603005a546249be"' WebRTC/Package.swift || { echo "check: WebRTC is not the reviewed build" >&2; exit 1; }
-# Every text in all six languages.
+# Every text in all eight languages.
 keys() { grep -o '^"[^"]*"' "Ortus/Resources/$1.lproj/Localizable.strings" | sort; }
-for lang in pl uk de fr ar; do
+for lang in pl uk de fr ar es it; do
   diff <(keys en) <(keys "$lang") > /dev/null || { echo "check: $lang texts differ from en" >&2; exit 1; }
 done
-for lang in en pl uk de fr ar; do
+for lang in en pl uk de fr ar es it; do
   grep -q '^"NSFaceIDUsageDescription" = ' "Ortus/Resources/$lang.lproj/InfoPlist.strings" || { echo "check: $lang has no Face ID text" >&2; exit 1; }
 done
 # The App Store listing in every language, within Apple's limits.
-for loc in en-US pl uk de-DE fr-FR ar-SA; do
+for loc in en-US pl uk de-DE fr-FR ar-SA es-ES it; do
   for f in name:30 subtitle:30 promotional_text:170 keywords:100 description:4000 release_notes:4000; do
     file="store/ios/listing/$loc/${f%%:*}.txt"
     [ -s "$file" ] || { echo "check: $file is missing" >&2; exit 1; }

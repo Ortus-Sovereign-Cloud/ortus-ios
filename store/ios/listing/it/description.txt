@@ -1,0 +1,24 @@
+Ortus Workspace è l’app per iPhone di Ortus, lo spazio di lavoro che un’organizzazione gestisce sui propri server: posta, chat, calendario, file, documenti, attività e approvazioni in un unico posto, senza che nulla finisca nel cloud di qualcun altro.
+
+TUTTO RESTA NELLA SUA ORGANIZZAZIONE
+L’app comunica solo con il server Ortus della Sua organizzazione. Nessuna analisi, nessuna pubblicità, nessun tracciamento, e nulla viene inviato all’editore dell’app.
+
+POSTA
+• La posta in arrivo suddivisa in Importanti, Altri e Notiziari
+• Conversazioni, risposte rapide e nuovi messaggi, con i nomi suggeriti mentre scrive
+• Veda se la posta verso l’esterno è stata consegnata
+• Inviata, Archivio e Cestino
+
+CHAT E CHIAMATE
+• I Suoi canali e i messaggi diretti
+• Partecipi alla chiamata di un canale, anche su reti che consentono solo il traffico web
+
+CALENDARIO, FILE E ATTIVITÀ
+• La Sua giornata e la Sua settimana, e gli inviti a cui rispondere
+• File e documenti condivisi con Lei
+• Approvazioni e firme che La aspettano, firmate con la chiave del Suo telefono
+
+ACCESSO SENZA PASSWORD
+Scansioni il codice della Sua lettera di benvenuto, oppure scelga “Accedi dal telefono” sul web. L’iPhone diventa così la Sua chiave, protetta da Face ID; non c’è nessuna password da rubare.
+
+Serve un account presso un’organizzazione che usa Ortus.

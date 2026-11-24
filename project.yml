@@ -56,7 +56,7 @@ targets:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         CFBundleDevelopmentRegion: en
-        CFBundleLocalizations: [en, pl, uk, de, fr, ar]
+        CFBundleLocalizations: [en, pl, uk, de, fr, ar, es, it]
         UILaunchScreen: {}
         # Only the system's own encryption (HTTPS, the Secure Enclave).
         ITSAppUsesNonExemptEncryption: false

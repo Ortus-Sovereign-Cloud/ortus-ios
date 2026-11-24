@@ -411,15 +411,15 @@ final class WelcomeTests: XCTestCase {
     }
 
     /// The first screen in every language; Arabic right to left.
-    func testJoinScreenInSixLanguages() {
-        let titles = ["en": "Join your organisation", "pl": "Dołącz do organizacji", "uk": "Приєднайтеся до організації", "de": "Ihrer Organisation beitreten", "fr": "Rejoindre votre organisation", "ar": "انضم إلى مؤسستك"]
+    func testJoinScreenInEveryLanguage() {
+        let titles = ["en": "Join your organisation", "pl": "Dołącz do organizacji", "uk": "Приєднайтеся до організації", "de": "Ihrer Organisation beitreten", "fr": "Rejoindre votre organisation", "ar": "انضم إلى مؤسستك", "es": "Únase a su organización", "it": "Entri nella Sua organizzazione"]
         for (language, title) in titles {
             let app = app(language)
             app.launchEnvironment["ORTUS_SERVER"] = ""
             app.launchEnvironment["ORTUS_CODE"] = ""
             app.launch()
             XCTAssertTrue(app.staticTexts[title].waitForExistence(timeout: 10), language)
-            // The mark sits at the start: the left in five languages, the
+            // The mark sits at the start: the left in seven languages, the
             // right in Arabic.
             let mark = app.otherElements["mark"].frame
             if language == "ar" {

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Spanish: translated without a native speaker; needs review before release in Spain. See store/ios/REVIEW-TRANSLATIONS.md. -->
+<plist version="1.0">
+<dict>
+	<key>thread.count %lld</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@n@</string>
+		<key>n</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld mensaje</string>
+			<key>other</key>
+			<string>%lld mensajes</string>
+		</dict>
+	</dict>
+	<key>admin.things %lld</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@n@</string>
+		<key>n</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld asunto requiere su atención</string>
+			<key>other</key>
+			<string>%lld asuntos requieren su atención</string>
+		</dict>
+	</dict>
+	<key>admin.failed %lld</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@n@</string>
+		<key>n</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld buzón ha fallado</string>
+			<key>other</key>
+			<string>%lld buzones han fallado</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

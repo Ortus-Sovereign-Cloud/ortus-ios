@@ -1,0 +1,4 @@
+/* Italian: translated without a native speaker; needs review before release in Italy. See store/ios/REVIEW-TRANSLATIONS.md. */
+"NSFaceIDUsageDescription" = "Face ID protegge la chiave che questo telefono custodisce per Lei.";
+"NSCameraUsageDescription" = "La fotocamera legge i codici di accesso e La mostra nelle chiamate.";
+"NSMicrophoneUsageDescription" = "Il microfono permette agli altri di sentirLa nelle chiamate.";
