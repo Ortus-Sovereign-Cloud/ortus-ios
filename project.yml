@@ -61,10 +61,12 @@ targets:
         CFBundleDevelopmentRegion: en
         CFBundleLocalizations: [en, pl, uk, de, fr, ar, es, it]
         UILaunchScreen: {}
-        # End-to-end rooms (Olm and Megolm: AES, Curve25519, Ed25519) besides
-        # the system's HTTPS: standard algorithms, mass market (EAR 5D992.c);
-        # the owner's decision of 25 November 2026 (store/ios/README.md).
-        ITSAppUsesNonExemptEncryption: true
+        # Exempt encryption only: the system's HTTPS and, for end-to-end
+        # rooms, Olm and Megolm (AES, Curve25519, Ed25519): standard
+        # algorithms, mass market (EAR 5D992.c, self-classification report).
+        # App Store Connect's encryption questions (26 November 2026): no
+        # documents needed, so NO here (store/ios/README.md).
+        ITSAppUsesNonExemptEncryption: false
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         NSFaceIDUsageDescription: Face ID guards the key this phone keeps for you.
         NSCameraUsageDescription: The camera reads sign-in codes and shows you in calls.
