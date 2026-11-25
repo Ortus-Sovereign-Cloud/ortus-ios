@@ -265,7 +265,6 @@ struct SealedChannelView: View {
         .background(Theme.background)
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
-        .accessibilityIdentifier("sealedRoom")
         .task { await load() }
     }
 

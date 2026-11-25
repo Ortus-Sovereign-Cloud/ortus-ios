@@ -328,6 +328,9 @@ final class WelcomeTests: XCTestCase {
         // Opening the room publishes this phone's keys.
         XCTAssertTrue(app.textFields["message"].waitForExistence(timeout: 30), "the sealed room; screen:\n\(app.debugDescription)")
         XCTAssertFalse(app.otherElements["locked"].exists, "the phone could not make its keys")
+        // The room is open once the server lists the phone's device.
+        let listed = expectation(for: NSPredicate { _, _ in Self.api("GET", "/chat/rooms/\(room)/devices", session: owner).1.contains("\"PHONE") }, evaluatedWith: nil)
+        wait(for: [listed], timeout: 30)
 
         // The other device writes; the phone opens it.
         let store = FileManager.default.temporaryDirectory.appendingPathComponent("e2e-peer-\(UUID().uuidString)")
