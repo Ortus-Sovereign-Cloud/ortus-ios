@@ -1,4 +1,5 @@
 import CryptoKit
+import OrtusE2E
 import XCTest
 
 /// The phone steps against a real Ortus (started by CI, which passes its
@@ -248,6 +249,109 @@ final class WelcomeTests: XCTestCase {
         XCTAssertFalse(app.staticTexts["callError"].exists)
         app.buttons["mute"].tap()
         attach(app, "call")
+    }
+
+    /// The owner's API, blocking (the test runner's thread).
+    private static func api(_ method: String, _ path: String, _ body: String? = nil, session: String) -> (Int, String) {
+        let env = ProcessInfo.processInfo.environment
+        var r = URLRequest(url: URL(string: env["ORTUS_SERVER"]! + "/api/v1" + path)!)
+        r.httpMethod = method
+        if let body {
+            r.httpBody = Data(body.utf8)
+            r.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        }
+        r.setValue("ortus", forHTTPHeaderField: "X-Requested-With")
+        r.setValue("Bearer \(session)", forHTTPHeaderField: "Authorization")
+        let done = DispatchSemaphore(value: 0)
+        var out = (0, "")
+        URLSession.shared.dataTask(with: r) { data, response, _ in
+            out = ((response as? HTTPURLResponse)?.statusCode ?? 0, String(decoding: data ?? Data(), as: UTF8.self))
+            done.signal()
+        }.resume()
+        done.wait()
+        return out
+    }
+
+    /// Another device of the owner, in this test: the end-to-end library
+    /// signed in with the owner's session.
+    private final class OwnerHTTP: OrtusE2E.Transport, @unchecked Sendable {
+        let session: String
+        init(session: String) { self.session = session }
+        func http(method: String, path: String, body: String?) throws -> HttpResponse {
+            let (status, text) = WelcomeTests.api(method, path, body, session: session)
+            return HttpResponse(status: UInt16(clamping: status), body: text)
+        }
+    }
+
+    /// An end-to-end room on the phone: another device of the same person
+    /// writes in it and the phone opens it; what the phone writes opens on
+    /// the other device. The server keeps no text of either.
+    func testAnEndToEndRoomOpensAndSends() throws {
+        try need("ORTUS_SERVER", "ORTUS_OWNER_SESSION", "ORTUS_OWNER_TOTP")
+        let env = ProcessInfo.processInfo.environment
+        let owner = env["ORTUS_OWNER_SESSION"]!
+        XCTAssertEqual(200, Self.api("PATCH", "/chat/policy", #"{"encryptedRooms":true}"#, session: owner).0, "the policy")
+        let made = Self.api("POST", "/chat/rooms", #"{"kind":"channel","name":"sealed-plans","encrypted":true}"#, session: owner)
+        XCTAssertEqual(200, made.0, made.1)
+        let room = try XCTUnwrap((try JSONSerialization.jsonObject(with: Data(made.1.utf8)) as? [String: Any])?["id"] as? String)
+        let rooms = try XCTUnwrap(try JSONSerialization.jsonObject(with: Data(Self.api("GET", "/chat/rooms", session: owner).1.utf8)) as? [String: Any])
+        let me = try XCTUnwrap(rooms["me"] as? String)
+        let user = String(me.dropFirst().split(separator: ":", maxSplits: 1)[0])
+        let serverName = String(me.split(separator: ":", maxSplits: 1)[1])
+
+        // The phone, signed in as the owner with a phone sign-in code.
+        let session = try Self.freshOwnerSession()
+        let linked = Self.api("POST", "/me/phone-link", "{}", session: session)
+        let link = try XCTUnwrap((try JSONSerialization.jsonObject(with: Data(linked.1.utf8)) as? [String: Any])?["link"] as? String, linked.1)
+        let code = String(link.split(separator: "p=").last ?? "")
+        let app = app()
+        app.launchEnvironment["ORTUS_SERVER"] = ""
+        app.launchEnvironment["ORTUS_CODE"] = ""
+        app.launch()
+        XCTAssertTrue(app.textFields["code"].waitForExistence(timeout: 20))
+        var open = URLComponents()
+        open.scheme = "ortus"
+        open.host = "signin"
+        open.queryItems = [URLQueryItem(name: "server", value: env["ORTUS_SERVER"]), URLQueryItem(name: "code", value: code)]
+        XCUIDevice.shared.system.open(open.url!)
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        if springboard.buttons["Open"].waitForExistence(timeout: 5) { springboard.buttons["Open"].tap() }
+        XCTAssertTrue(app.buttons["confirmLink"].waitForExistence(timeout: 20), "the link's installation to confirm")
+        app.buttons["confirmLink"].tap()
+        XCTAssertTrue(app.buttons["makeKey"].waitForExistence(timeout: 30), "not signed in; screen:\n\(app.debugDescription)")
+        app.buttons["makeKey"].tap()
+        XCTAssertTrue(app.tabBars.buttons["Chat"].waitForExistence(timeout: 20))
+        app.tabBars.buttons["Chat"].tap()
+        let channel = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS 'sealed-plans'")).firstMatch
+        XCTAssertTrue(channel.waitForExistence(timeout: 20), "the room; screen:\n\(app.debugDescription)")
+        channel.tap()
+        // Opening the room publishes this phone's keys.
+        XCTAssertTrue(app.textFields["message"].waitForExistence(timeout: 30), "the sealed room; screen:\n\(app.debugDescription)")
+        XCTAssertFalse(app.otherElements["locked"].exists, "the phone could not make its keys")
+
+        // The other device writes; the phone opens it.
+        let store = FileManager.default.temporaryDirectory.appendingPathComponent("e2e-peer-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: store, withIntermediateDirectories: true)
+        let peer = try OrtusE2e.open(storeDir: store.path, passphrase: "peer passphrase", user: user, device: "TESTPEER", serverName: serverName, transport: OwnerHTTP(session: owner))
+        let sent = try peer.send(room: room, text: "Shelter list for District 4 is ready", thread: nil)
+        let kept = Self.api("GET", "/chat/rooms/\(room)/messages", session: owner).1
+        XCTAssertFalse(kept.contains("Shelter list"), "the server keeps no text")
+        app.textFields["message"].tap()
+        app.textFields["message"].typeText("Received, thank you")
+        app.buttons["sendChat"].tap()
+        XCTAssertTrue(app.staticTexts["Shelter list for District 4 is ready"].waitForExistence(timeout: 40), "the other device's message, opened; screen:\n\(app.debugDescription)")
+        attach(app, "sealed-room")
+
+        // What the phone wrote opens on the other device.
+        _ = try peer.inbox()
+        let all = try XCTUnwrap(try JSONSerialization.jsonObject(with: Data(Self.api("GET", "/chat/rooms/\(room)/messages", session: owner).1.utf8)) as? [String: Any])
+        let messages = (all["messages"] as? [[String: Any]]) ?? []
+        let texts = messages.filter { ($0["id"] as? String) != sent && $0["sealed"] != nil }.compactMap { m -> String? in
+            guard let data = try? JSONSerialization.data(withJSONObject: m) else { return nil }
+            return try? peer.decrypt(room: room, messageJson: String(decoding: data, as: UTF8.self)).text
+        }
+        XCTAssertTrue(texts.contains("Received, thank you"), "the phone's message did not open on the other device: \(texts)")
+        try? peer.forget()
     }
 
     /// The owner signs in with a password and the authenticator's code.

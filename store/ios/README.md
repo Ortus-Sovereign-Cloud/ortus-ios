@@ -56,4 +56,10 @@ the sign-in codes for App Review (`review-codes.mjs`) and the screenshots
   Contact: name and phone of the person App Review may call;
   email `support@ortus.cc`.
 - **Export compliance**: the build declares `ITSAppUsesNonExemptEncryption
-  = NO` (only the system's HTTPS and the Secure Enclave).
+  = YES` (the owner's decision of 25 November 2026): besides the system's
+  HTTPS and the Secure Enclave, end-to-end chat rooms use Olm and Megolm
+  (AES-256, Curve25519, Ed25519, HMAC-SHA-256: standard algorithms, from
+  ortus-chat `phones/e2e`). In App Store Connect: it uses encryption,
+  standard algorithms rather than proprietary ones, exempt as mass-market
+  (EAR 5D992.c); the owner files the annual self-classification report
+  (as for HiTop). France needs its ANSSI declaration first.

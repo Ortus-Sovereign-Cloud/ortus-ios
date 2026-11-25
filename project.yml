@@ -32,6 +32,9 @@ targets:
       - package: OrtusKit
       - package: WebRTC
       - target: OrtusNotifications
+      # End-to-end rooms (static, linked in; not embedded).
+      - target: OrtusE2E
+        embed: false
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: cc.ortus.app
@@ -58,8 +61,10 @@ targets:
         CFBundleDevelopmentRegion: en
         CFBundleLocalizations: [en, pl, uk, de, fr, ar, es, it]
         UILaunchScreen: {}
-        # Only the system's own encryption (HTTPS, the Secure Enclave).
-        ITSAppUsesNonExemptEncryption: false
+        # End-to-end rooms (Olm and Megolm: AES, Curve25519, Ed25519) besides
+        # the system's HTTPS: standard algorithms, mass market (EAR 5D992.c);
+        # the owner's decision of 25 November 2026 (store/ios/README.md).
+        ITSAppUsesNonExemptEncryption: true
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         NSFaceIDUsageDescription: Face ID guards the key this phone keeps for you.
         NSCameraUsageDescription: The camera reads sign-in codes and shows you in calls.
@@ -100,6 +105,24 @@ targets:
         NSExtension:
           NSExtensionPointIdentifier: com.apple.usernotifications.service
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).NotificationService
+  # The end-to-end library (ci/e2e-lib.sh builds .deps/e2e: Rust from the
+  # chat commit the pinned program builds on) with its Swift bindings, as a
+  # module of its own.
+  OrtusE2E:
+    type: framework
+    platform: iOS
+    sources:
+      - path: .deps/e2e/swift
+    dependencies:
+      - framework: .deps/e2e/OrtusE2EFFI.xcframework
+        embed: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: cc.ortus.e2e
+        MACH_O_TYPE: staticlib
+        GENERATE_INFOPLIST_FILE: "YES"
+        SKIP_INSTALL: "YES"
+        TARGETED_DEVICE_FAMILY: "1"
   OrtusUITests:
     type: bundle.ui-testing
     platform: iOS
@@ -110,6 +133,9 @@ targets:
       - path: OrtusUITests
     dependencies:
       - target: Ortus
+      # Another device of the same person, in the end-to-end test.
+      - target: OrtusE2E
+        embed: false
 schemes:
   Ortus:
     build:

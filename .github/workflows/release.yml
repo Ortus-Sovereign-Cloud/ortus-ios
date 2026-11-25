@@ -49,6 +49,19 @@ jobs:
           xcode=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
           sudo xcode-select -s "$xcode"
           xcodebuild -version
+      # The end-to-end library (Rust, ci/e2e-lib.sh), kept per program pin:
+      # built again only when the pin moves.
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        id: e2e
+        with:
+          path: .deps/e2e
+          key: e2e-lib-ios-${{ hashFiles('pins.toml', 'ci/e2e-lib.sh') }}
+      - if: steps.e2e.outputs.cache-hit != 'true'
+        uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
+        with:
+          targets: aarch64-apple-ios, aarch64-apple-ios-sim, x86_64-apple-ios
+      - name: The end-to-end library
+        run: ci/e2e-lib.sh
       - name: Archive
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}

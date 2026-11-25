@@ -160,5 +160,7 @@
 "chat.noRooms" = "Aucun salon pour l’instant.";
 "chat.noUnread" = "Aucun salon non lu.";
 "chat.locked" = "Les messages de ce salon sont chiffrés de bout en bout. Ouvrez-le sur un ordinateur pour lire et écrire.";
+"chat.cannotOpen" = "Ce message ne peut pas être ouvert sur ce téléphone.";
+"chat.sealed" = "Chiffré de bout en bout";
 "sheet.close" = "Fermer";
 "search.gone" = "Ce n’est plus là.";

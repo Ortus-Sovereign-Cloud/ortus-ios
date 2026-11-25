@@ -160,5 +160,7 @@
 "chat.noRooms" = "Noch keine Räume.";
 "chat.noUnread" = "Keine ungelesenen Räume.";
 "chat.locked" = "Nachrichten in diesem Raum sind Ende-zu-Ende-verschlüsselt. Öffnen Sie ihn am Computer, um zu lesen und zu schreiben.";
+"chat.cannotOpen" = "Diese Nachricht lässt sich auf diesem Telefon nicht öffnen.";
+"chat.sealed" = "Ende-zu-Ende-verschlüsselt";
 "sheet.close" = "Schließen";
 "search.gone" = "Das gibt es nicht mehr.";

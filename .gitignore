@@ -1,3 +1,4 @@
 Ortus.xcodeproj/
 OrtusKit/.build/
 *.xcresult
+.deps/

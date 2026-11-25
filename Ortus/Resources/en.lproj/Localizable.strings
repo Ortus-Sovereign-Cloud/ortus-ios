@@ -160,5 +160,7 @@
 "chat.noRooms" = "No rooms yet.";
 "chat.noUnread" = "No unread rooms.";
 "chat.locked" = "Messages in this room are end-to-end encrypted. Open it on a computer to read and write.";
+"chat.cannotOpen" = "This message cannot be opened on this phone.";
+"chat.sealed" = "End-to-end encrypted";
 "sheet.close" = "Close";
 "search.gone" = "It is no longer there.";

@@ -28,6 +28,17 @@ final class AppModel: ObservableObject {
     private(set) var client: Client? {
         didSet { if client?.token != nil, client !== oldValue { startPush() } }
     }
+    private var e2e: (client: Client, rooms: EndToEnd)?
+    /// End-to-end rooms for the person signed in, made when first needed.
+    func endToEnd() -> EndToEnd? {
+        guard let client else { return nil }
+        if let e2e, e2e.client === client { return e2e.rooms }
+        let made = EndToEnd(client: client)
+        e2e = (client, made)
+        return made
+    }
+    /// The person's Matrix id, `me` of the rooms (end-to-end rooms need it).
+    var chatMe: String?
 
     init() {
         // UI tests (and a fresh install) start clean when asked.
@@ -351,6 +362,11 @@ final class AppModel: ObservableObject {
     /// still the person's key (an administrator turns off a lost phone's).
     func signOut() async {
         await stopPush()
+        // End-to-end rooms: the server drops this device, the phone its keys.
+        var me = chatMe
+        if me == nil, let client { me = try? await client.rooms().me }
+        await endToEnd()?.forget(me: me)
+        chatMe = nil
         if let client, let token = client.token { await end(session: token, on: client.server) }
         ended()
     }

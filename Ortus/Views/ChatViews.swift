@@ -78,7 +78,7 @@ struct ChatsView: View {
     private func load() async {
         guard let client = model.client else { return }
         do {
-            try await quickly({ try await client.rooms() }) { data = $0 }
+            try await quickly({ try await client.rooms() }) { data = $0; if let me = $0.me { model.chatMe = me } }
             failure = nil
         } catch {
             failure = model.listFailure(error, showing: !(data?.rooms.isEmpty ?? true))
@@ -97,18 +97,9 @@ struct ChannelView: View {
     @State private var calling = false
 
     var body: some View {
-        // End-to-end rooms are read on a computer in V1 (the phone cannot
-        // decrypt them yet): never show their ciphertext as text.
+        // End-to-end rooms are opened and sealed on the phone (EndToEnd).
         if room.encrypted == true {
-            VStack(spacing: 12) {
-                Image(systemName: "lock.fill").font(.largeTitle).foregroundStyle(Theme.text2)
-                Text("chat.locked").multilineTextAlignment(.center).foregroundStyle(Theme.text2)
-            }
-            .padding(24)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Theme.background)
-            .navigationTitle(title)
-            .accessibilityIdentifier("locked")
+            SealedChannelView(room: room, title: title)
         } else {
             channel
         }
@@ -193,6 +184,121 @@ struct ChannelView: View {
             note = String(localized: "offline.queued")
         } catch {
             // Not sent: the words come back.
+            text = said
+            note = model.say(error)
+        }
+        await load()
+    }
+}
+
+/// An end-to-end room: its messages opened on the phone, one that cannot
+/// be opened said so (never its ciphertext), and what is written sealed
+/// here. Without the library or its keys, the room says to use a computer.
+struct SealedChannelView: View {
+    @EnvironmentObject var model: AppModel
+    let room: Room
+    let title: String
+    @State private var messages: Messages?
+    @State private var texts: [String: String?] = [:]
+    @State private var unavailable = false
+    @State private var text = ""
+    @State private var note: String?
+
+    var body: some View {
+        if unavailable {
+            VStack(spacing: 12) {
+                Image(systemName: "lock.fill").font(.largeTitle).foregroundStyle(Theme.text2).accessibilityHidden(true)
+                Text("chat.locked").multilineTextAlignment(.center).foregroundStyle(Theme.text2)
+            }
+            .padding(24)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Theme.background)
+            .navigationTitle(title)
+            .accessibilityIdentifier("locked")
+        } else {
+            sealed
+        }
+    }
+
+    private var sealed: some View {
+        VStack(spacing: 0) {
+            Label("chat.sealed", systemImage: "lock.fill").font(.caption).foregroundStyle(Theme.text2).padding(.top, 8)
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 14) {
+                    ForEach(messages?.messages.filter { $0.deleted != true && $0.thread == nil } ?? []) { m in
+                        let name = messages?.people[m.sender]?.name ?? m.sender
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack {
+                                Text(name).font(.subheadline.bold()).foregroundStyle(Theme.text)
+                                Text(m.date.formatted(date: .omitted, time: .shortened)).font(.caption).foregroundStyle(Theme.text2)
+                            }
+                            if let shown = texts[m.id] ?? nil {
+                                Text(shown).foregroundStyle(Theme.text).accessibilityIdentifier("opened")
+                            } else {
+                                Text("chat.cannotOpen").font(.subheadline).foregroundStyle(Theme.text2).accessibilityIdentifier("cannotOpen")
+                            }
+                        }
+                        .id(m.id)
+                    }
+                }
+                .padding(16)
+            }
+            if let note {
+                Text(note).font(.footnote).foregroundStyle(Theme.text2).padding(.horizontal, 12).accessibilityIdentifier("chatNote")
+            }
+            HStack(spacing: 8) {
+                TextField(String(localized: "chat.message \(title)"), text: $text, axis: .vertical)
+                    .padding(12).background(Theme.surface, in: RoundedRectangle(cornerRadius: 16))
+                    .accessibilityIdentifier("message")
+                Button {
+                    Task { await send() }
+                } label: {
+                    Image(systemName: "arrow.up").font(.headline).frame(width: 44, height: 44)
+                        .background(Theme.accent, in: RoundedRectangle(cornerRadius: 12)).foregroundStyle(Theme.background)
+                }
+                .disabled(text.trimmingCharacters(in: .whitespaces).isEmpty)
+                .accessibilityLabel(Text("thread.send"))
+                .accessibilityIdentifier("sendChat")
+            }
+            .padding(12)
+        }
+        .background(Theme.background)
+        .navigationTitle(title)
+        .navigationBarTitleDisplayMode(.inline)
+        .accessibilityIdentifier("sealedRoom")
+        .task { await load() }
+    }
+
+    private func me() async -> String? {
+        if let me = model.chatMe { return me }
+        let me = try? await model.client?.rooms().me
+        model.chatMe = me
+        return me
+    }
+
+    private func load() async {
+        guard let client = model.client, let e2e = model.endToEnd() else { return }
+        guard let me = await me() else { unavailable = true; return }
+        do {
+            let got = try await client.messages(in: room.id)
+            texts = try await e2e.read(me: me, room: room.id, messages: got.messages)
+            messages = got
+        } catch where EndToEnd.unavailable(error) {
+            unavailable = true
+        } catch {
+            note = model.say(error)
+        }
+    }
+
+    private func send() async {
+        guard let e2e = model.endToEnd(), let me = await me() else { return }
+        let said = text
+        text = ""
+        note = nil
+        do {
+            _ = try await e2e.send(me: me, room: room.id, text: said)
+        } catch {
+            // Not sent (never in the clear): the words come back.
             text = said
             note = model.say(error)
         }
