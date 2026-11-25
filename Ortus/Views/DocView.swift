@@ -17,7 +17,7 @@ struct DocView: View {
                     if let label = text?.label { Text(label).font(.caption.bold()).foregroundStyle(.orange) }
                     Text(text?.now ?? "").foregroundStyle(Theme.text).textSelection(.enabled)
                     if !comments.isEmpty {
-                        Text("doc.comments").font(.headline).foregroundStyle(Theme.text)
+                        Text("doc.comments").font(.headline).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
                         ForEach(comments.filter { $0.resolved != true }) { c in
                             VStack(alignment: .leading, spacing: 4) {
                                 if let q = c.quote, !q.isEmpty { Text("“\(q)”").font(.caption).foregroundStyle(Theme.text2) }

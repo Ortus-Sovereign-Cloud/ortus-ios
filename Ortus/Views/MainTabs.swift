@@ -16,6 +16,10 @@ struct MainTabs: View {
                     .padding(.vertical, 6)
                     .background(Theme.surface)
                     .accessibilityIdentifier("offline")
+                    .onAppear {
+                        let said = model.waiting > 0 ? String(localized: "offline.waiting \(model.waiting)") : String(localized: "offline.banner")
+                        AccessibilityNotification.Announcement(said).post()
+                    }
             }
         TabView(selection: $model.tab) {
             InboxView().tabItem { Label("app.mail", systemImage: "tray") }.tag(0)

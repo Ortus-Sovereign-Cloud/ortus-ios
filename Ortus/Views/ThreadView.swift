@@ -17,7 +17,7 @@ struct ThreadView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     if let first = emails.first {
-                        Text(first.subject).font(.title2.bold()).foregroundStyle(Theme.text)
+                        Text(first.subject).font(.title2.bold()).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
                         Text("thread.count \(emails.count)").font(.subheadline).foregroundStyle(Theme.text2)
                     }
                     ForEach(emails) { e in Message(email: e, answer: { await answer(e, $0) }) }

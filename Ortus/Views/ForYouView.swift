@@ -141,6 +141,7 @@ private struct TaskRow: View {
             .padding(14).background(Theme.surface, in: RoundedRectangle(cornerRadius: 14))
         }
         .buttonStyle(.plain)
-        .accessibilityAddTraits(task.done ? .isSelected : [])
+        // A checkbox to VoiceOver: a toggle, on when the task is done.
+        .accessibilityAddTraits(task.done ? [.isToggle, .isSelected] : .isToggle)
     }
 }

@@ -19,6 +19,8 @@ struct ListStatus: View {
             }
             .listRowBackground(Color.clear)
             .accessibilityIdentifier("listFailed")
+            // VoiceOver says it when it appears, not only when it is reached.
+            .onAppear { AccessibilityNotification.Announcement(failure).post() }
         } else if isEmpty {
             Text(empty).foregroundStyle(Theme.text2)
                 .listRowBackground(Color.clear)
