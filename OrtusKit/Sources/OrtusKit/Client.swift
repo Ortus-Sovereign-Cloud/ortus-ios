@@ -48,6 +48,12 @@ public final class Client: @unchecked Sendable {
     public var token: String?
     let transport: Transport
 
+    private let sealedLock = NSLock()
+    private var sealed = Set<String>()
+    /// End-to-end rooms seen (never unmarked): `say` refuses them.
+    public func markSealed(_ rooms: [String]) { sealedLock.lock(); sealed.formUnion(rooms); sealedLock.unlock() }
+    public func isSealed(_ room: String) -> Bool { sealedLock.lock(); defer { sealedLock.unlock() }; return sealed.contains(room) }
+
     public init(server: URL, token: String? = nil, transport: Transport = URLSessionTransport()) {
         self.server = server
         self.token = token

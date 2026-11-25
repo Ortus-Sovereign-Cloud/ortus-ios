@@ -513,3 +513,33 @@ final class OutboxTests: XCTestCase {
     }
 }
 
+
+/// End-to-end rooms: nothing in the clear leaves the phone for them.
+final class SealedRoomTests: XCTestCase {
+    func testASealedRoomNeverGetsAMessageInTheClear() async throws {
+        let box = Recorded.Box()
+        let rooms = #"{"rooms":[{"id":"r1","name":"plans","kind":"channel","encrypted":true},{"id":"r2","name":"general","kind":"channel"}],"people":{},"me":"@u1:ortus.example"}"#
+        let client = Client(server: URL(string: "https://ortus.example")!, token: "t", transport: Scripted(bodies: [rooms, #"{"id":"$e2"}"#], seen: box))
+        let got = try await client.rooms()
+        XCTAssertEqual("@u1:ortus.example", got.me)
+        do {
+            try await client.say("the plans", in: "r1")
+            XCTFail("a sealed room took a message in the clear")
+        } catch let e as SealedRoom {
+            XCTAssertEqual("r1", e.room)
+        }
+        XCTAssertEqual(1, box.requests.count, "nothing was sent")
+        try await client.say("hello", in: "r2")
+        XCTAssertEqual("https://ortus.example/api/v1/chat/rooms/r2/messages", box.requests.last?.url?.absoluteString)
+    }
+
+    func testASealedMessageGoesToTheLibraryWhole() async throws {
+        let body = #"{"messages":[{"id":"$e1","sender":"@u2:ortus.example","text":"","at":1,"thread":"$e0","sealed":{"algorithm":"m.megolm.v1.aes-sha2","ciphertext":"AAA","device_id":"D1"}}],"people":{}}"#
+        let client = Client(server: URL(string: "https://ortus.example")!, token: "t", transport: Recorded(status: 200, body: body, seen: Recorded.Box()))
+        let m = try await client.messages(in: "r1").messages[0]
+        let j = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(m.sealedJSON().utf8)) as? [String: Any])
+        XCTAssertEqual("$e1", j["id"] as? String)
+        XCTAssertEqual("$e0", j["thread"] as? String)
+        XCTAssertEqual("AAA", (j["sealed"] as? [String: Any])?["ciphertext"] as? String)
+    }
+}

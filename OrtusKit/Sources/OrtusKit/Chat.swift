@@ -35,15 +35,58 @@ public struct Rooms: Decodable {
     }
 }
 
+/// JSON as it came, kept to be handed on whole (a sealed message's body).
+public indirect enum JSONValue: Codable, Equatable {
+    case null, bool(Bool), number(Double), string(String), array([JSONValue]), object([String: JSONValue])
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.singleValueContainer()
+        if c.decodeNil() { self = .null }
+        else if let b = try? c.decode(Bool.self) { self = .bool(b) }
+        else if let n = try? c.decode(Double.self) { self = .number(n) }
+        else if let s = try? c.decode(String.self) { self = .string(s) }
+        else if let a = try? c.decode([JSONValue].self) { self = .array(a) }
+        else { self = .object(try c.decode([String: JSONValue].self)) }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.singleValueContainer()
+        switch self {
+        case .null: try c.encodeNil()
+        case .bool(let b): try c.encode(b)
+        case .number(let n): try c.encode(n)
+        case .string(let s): try c.encode(s)
+        case .array(let a): try c.encode(a)
+        case .object(let o): try c.encode(o)
+        }
+    }
+}
+
 public struct ChatMessage: Decodable, Equatable, Identifiable {
     public let id: String
     public let seq: Int64?
     public let sender: String
+    /// Empty in an end-to-end room: `sealed` holds the message for the phone's keys.
     public let text: String
     public let at: Int64
     public let thread: String?
     public let deleted: Bool?
+    public let sealed: JSONValue?
     public var date: Date { Date(timeIntervalSince1970: Double(at) / 1000) }
+
+    /// The message as the end-to-end library opens it: id, sender, thread and sealed.
+    public func sealedJSON() -> String {
+        var o: [String: JSONValue] = ["id": .string(id), "sender": .string(sender)]
+        if let thread { o["thread"] = .string(thread) }
+        if let sealed { o["sealed"] = sealed }
+        let data = (try? JSONEncoder().encode(JSONValue.object(o))) ?? Data("{}".utf8)
+        return String(decoding: data, as: UTF8.self)
+    }
+}
+
+/// Refused before anything leaves the phone: an end-to-end room's messages are sealed on it.
+public struct SealedRoom: Error, Equatable {
+    public let room: String
 }
 
 public struct Messages: Decodable {
@@ -52,13 +95,19 @@ public struct Messages: Decodable {
 }
 
 extension Client {
-    public func rooms() async throws -> Rooms { try await call("GET", "/chat/rooms") }
+    /// The rooms; the end-to-end ones are remembered, and never get a message in the clear.
+    public func rooms() async throws -> Rooms {
+        let r: Rooms = try await call("GET", "/chat/rooms")
+        markSealed(r.rooms.filter { $0.encrypted == true }.map(\.id))
+        return r
+    }
 
     public func messages(in room: String) async throws -> Messages {
         try await call("GET", "/chat/rooms/\(room)/messages")
     }
 
     public func say(_ text: String, in room: String) async throws {
+        if isSealed(room) { throw SealedRoom(room: room) }
         struct Sent: Decodable { let id: String? }
         // Its client id makes a resend from the outbox one message.
         let _: Sent = try await call("POST", "/chat/rooms/\(room)/messages", json: ["text": text, "client_id": UUID().uuidString])
