@@ -3,7 +3,7 @@
 The app is MIT OR Apache-2.0. Apple's system frameworks (SwiftUI, Foundation, CryptoKit, Security, LocalAuthentication) are part of iOS and not shipped in it. It carries:
 
 - **WebRTC** (BSD-3-Clause), Google's, for native calls: the reviewed binary that `WebRTC/Package.swift` names by checksum (the owner's exception of 22 November 2026).
-- **The end-to-end library** libortus_e2e_ffi (MIT OR Apache-2.0), from ortus-chat `phones/e2e` at bb172b22371a73f31c1b184d6ea956c0dcc9b9bc, and the 182 Rust crates inside it, below. The MPL-2.0 ones are allowed for this library only, unmodified (the owner's decision of 25 November 2026); their source is at crates.io under the versions named.
+- **The end-to-end library** libortus_e2e_ffi (MIT OR Apache-2.0), from ortus-chat `phones/e2e` at the chat commit the pinned Ortus program names, and the 182 Rust crates inside it, below. The MPL-2.0 ones are allowed for this library only, unmodified (the owner's decision of 25 November 2026); their source is at crates.io under the versions named.
 
 `ci/check.sh` fails if another third-party package is added, until its licence is reviewed and listed here.
 

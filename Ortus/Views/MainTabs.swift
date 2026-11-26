@@ -29,6 +29,8 @@ struct MainTabs: View {
             MoreView().tabItem { Label("tab.more", systemImage: "square.grid.2x2") }.tag(4)
         }
         }
+        // Verifications by emoji, wherever one is in the app.
+        .modifier(VerificationsOverlay())
         // The bell's number: on opening and whenever the app comes back.
         .task { await model.refreshUnread() }
         .onChange(of: phase) {

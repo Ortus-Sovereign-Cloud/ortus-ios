@@ -130,6 +130,7 @@ final class EndToEnd: @unchecked Sendable {
             made = try OrtusE2e.open(storeDir: dir.path, passphrase: pass, user: user, device: device, serverName: server, transport: HTTP(client: client))
         }
         library = made
+        wasOpened = true
         return made
     }
 
@@ -168,6 +169,49 @@ final class EndToEnd: @unchecked Sendable {
     /// Seals and sends: the message's id.
     func send(me: String, room: String, text: String, thread: String? = nil) async throws -> String {
         try await run { try self.open(me).send(room: room, text: text, thread: thread) }
+    }
+
+    /// Whether this phone's keys were opened this session (a sealed room was).
+    var isOpen: Bool { wasOpened }
+    private var wasOpened = false
+
+    func recoveryState(me: String) async throws -> RecoveryState {
+        try await run { try self.open(me).recoveryState() }
+    }
+
+    /// Recovery with the recovery key: how many room keys came back.
+    func recover(me: String, key: String) async throws -> UInt32 {
+        try await run {
+            let n = try self.open(me).recover(recoveryKey: key)
+            self.opened = [:]
+            self.refused = []
+            return n
+        }
+    }
+
+    func unverified(me: String, room: String) async throws -> [DeviceRef] {
+        try await run { try self.open(me).unverified(room: room) }
+    }
+
+    /// What came for this device, and how each verification stands (polled while on screen).
+    func verifications(me: String) async throws -> [VerificationView] {
+        try await run { try self.open(me).verifications() }
+    }
+
+    func verifyOwnDevices(me: String) async throws -> String {
+        try await run { try self.open(me).verifyOwnDevices() }
+    }
+
+    func acceptVerification(me: String, id: String) async throws {
+        try await run { try self.open(me).acceptVerification(id: id) }
+    }
+
+    func confirmVerification(me: String, id: String, same: Bool) async throws {
+        try await run { try self.open(me).confirmVerification(id: id, same: same) }
+    }
+
+    func cancelVerification(me: String, id: String) async throws {
+        try await run { try self.open(me).cancelVerification(id: id) }
     }
 
     /// Signing out: the server drops this device, the phone its keys.

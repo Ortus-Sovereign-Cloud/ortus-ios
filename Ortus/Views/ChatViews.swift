@@ -112,6 +112,8 @@ struct ChatRoomView: View {
     @State private var text = ""
     @State private var note: String?
     @State private var calling = false
+    @State private var unverifiedCount = 0
+    @State private var recovering = false
 
     private var sealed: Bool { room.encrypted == true }
 
@@ -142,6 +144,9 @@ struct ChatRoomView: View {
         VStack(spacing: 0) {
             if sealed {
                 Label("chat.sealed", systemImage: "lock.fill").font(.caption).foregroundStyle(Theme.text2).padding(.top, 8)
+                if unverifiedCount > 0 {
+                    Text("⚠ \(String(localized: "chat.unverified \(unverifiedCount)"))").font(.caption).foregroundStyle(.orange).accessibilityIdentifier("unverified")
+                }
             }
             ScrollViewReader { scroller in
                 ScrollView {
@@ -185,6 +190,17 @@ struct ChatRoomView: View {
                         .accessibilityIdentifier("call")
                 }
             }
+            if root == nil && sealed {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("chat.recovery") { recovering = true }.accessibilityIdentifier("recoveryOpen")
+                }
+            }
+        }
+        .sheet(isPresented: $recovering) { RecoverySheet() }
+        // Who is not vouched for: on opening, and after a verification or recovery.
+        .task(id: model.trustChanged) {
+            guard sealed, let me = await me(), let e2e = model.endToEnd() else { return }
+            unverifiedCount = (try? await e2e.unverified(me: me, room: room.id).count) ?? 0
         }
         .fullScreenCover(isPresented: $calling) { CallView(room: room.id, title: title) }
         .task(id: root) {

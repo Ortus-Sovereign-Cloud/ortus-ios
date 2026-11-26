@@ -39,6 +39,8 @@ final class AppModel: ObservableObject {
     }
     /// The person's Matrix id, `me` of the rooms (end-to-end rooms need it).
     var chatMe: String?
+    /// Bumped when a verification or recovery finished: rooms read who is vouched for again.
+    @Published var trustChanged = 0
 
     init() {
         // UI tests (and a fresh install) start clean when asked.
