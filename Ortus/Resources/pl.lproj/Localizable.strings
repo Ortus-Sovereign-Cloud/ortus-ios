@@ -162,5 +162,8 @@
 "chat.locked" = "Wiadomości w tym pokoju są szyfrowane end-to-end. Otwórz go na komputerze, aby czytać i pisać.";
 "chat.cannotOpen" = "Tej wiadomości nie można otworzyć na tym telefonie.";
 "chat.sealed" = "Szyfrowane end-to-end";
+"chat.thread" = "Wątek";
+"chat.replyInThread" = "Odpowiedz w wątku";
+"chat.replies %lld" = "Odpowiedzi: %lld";
 "sheet.close" = "Zamknij";
 "search.gone" = "Już tego nie ma.";

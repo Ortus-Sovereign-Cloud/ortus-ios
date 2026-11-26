@@ -531,6 +531,21 @@ final class SealedRoomTests: XCTestCase {
         XCTAssertEqual(1, box.requests.count, "nothing was sent")
         try await client.say("hello", in: "r2")
         XCTAssertEqual("https://ortus.example/api/v1/chat/rooms/r2/messages", box.requests.last?.url?.absoluteString)
+        do {
+            try await client.say("in its thread", in: "r1", thread: "$e0")
+            XCTFail("a sealed room's thread took a message in the clear")
+        } catch is SealedRoom {}
+        try await client.say("in a thread", in: "r2", thread: "$e9")
+        let sent = try XCTUnwrap(JSONSerialization.jsonObject(with: box.requests.last?.httpBody ?? Data()) as? [String: Any])
+        XCTAssertEqual("$e9", sent["thread"] as? String)
+    }
+
+    func testAThreadIsReadByItsRoot() async throws {
+        let box = Recorded.Box()
+        let client = Client(server: URL(string: "https://ortus.example")!, token: "t", transport: Recorded(status: 200, body: #"{"messages":[{"id":"$e9","sender":"@u2:o","text":"root","at":1,"replies":2}],"people":{}}"#, seen: box))
+        let got = try await client.messages(in: "r2", thread: "$e9")
+        XCTAssertEqual("https://ortus.example/api/v1/chat/rooms/r2/messages?thread=%24e9", box.requests.last?.url?.absoluteString)
+        XCTAssertEqual(2, got.messages[0].replies)
     }
 
     func testASealedMessageGoesToTheLibraryWhole() async throws {

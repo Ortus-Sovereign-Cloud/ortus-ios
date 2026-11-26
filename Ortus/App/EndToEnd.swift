@@ -21,6 +21,8 @@ final class EndToEnd: @unchecked Sendable {
     private var library: OrtusE2e?
     /// What was opened, by message id: opening a message again is not needed.
     private var opened: [String: String] = [:]
+    /// What did not open: tried again only once new room keys came.
+    private var refused: Set<String> = []
 
     init(client: Client) { self.client = client }
 
@@ -142,11 +144,20 @@ final class EndToEnd: @unchecked Sendable {
     func read(me: String, room: String, messages: [ChatMessage]) async throws -> [String: String?] {
         try await run {
             let e2e = try self.open(me)
-            _ = try? e2e.inbox()
+            // Room keys and one-time keys only when something waits to open
+            // (a room on screen is read every few seconds).
+            if messages.contains(where: { $0.sealed != nil && self.opened[$0.id] == nil }), let got = try? e2e.inbox(), got.roomKeys > 0 {
+                self.refused = []
+            }
             var out: [String: String?] = [:]
             for m in messages {
                 if let known = self.opened[m.id] { out[m.id] = known; continue }
-                guard m.sealed != nil, let text = try? e2e.decrypt(room: room, messageJson: m.sealedJSON()).text else { out[m.id] = .some(nil); continue }
+                guard m.sealed != nil, !self.refused.contains(m.id) else { out[m.id] = .some(nil); continue }
+                guard let text = try? e2e.decrypt(room: room, messageJson: m.sealedJSON()).text else {
+                    self.refused.insert(m.id)
+                    out[m.id] = .some(nil)
+                    continue
+                }
                 self.opened[m.id] = text
                 out[m.id] = text
             }
@@ -155,8 +166,8 @@ final class EndToEnd: @unchecked Sendable {
     }
 
     /// Seals and sends: the message's id.
-    func send(me: String, room: String, text: String) async throws -> String {
-        try await run { try self.open(me).send(room: room, text: text, thread: nil) }
+    func send(me: String, room: String, text: String, thread: String? = nil) async throws -> String {
+        try await run { try self.open(me).send(room: room, text: text, thread: thread) }
     }
 
     /// Signing out: the server drops this device, the phone its keys.
@@ -167,6 +178,7 @@ final class EndToEnd: @unchecked Sendable {
             try? self.library?.forget()
             self.library = nil
             self.opened = [:]
+            self.refused = []
             if let dir = try? Self.directory(user) { try? FileManager.default.removeItem(at: dir) }
             Keychain.remove("e2e.device.\(user)")
             Keychain.remove("e2e.passphrase.\(user)")

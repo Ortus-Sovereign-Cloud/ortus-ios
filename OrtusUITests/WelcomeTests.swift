@@ -354,6 +354,15 @@ final class WelcomeTests: XCTestCase {
             return try? peer.decrypt(room: room, messageJson: String(decoding: data, as: UTF8.self)).text
         }
         XCTAssertTrue(texts.contains("Received, thank you"), "the phone's message did not open on the other device: \(texts)")
+
+        // The other device answers in a thread: the open room shows it by
+        // itself (no touch: it looks every few seconds), and the thread opens.
+        _ = try peer.send(room: room, text: "District 5 needs one too", thread: sent)
+        let replies = app.descendants(matching: .any)["thread-\(sent)"].firstMatch
+        let counted = expectation(for: NSPredicate(format: "label CONTAINS '1'"), evaluatedWith: replies)
+        wait(for: [counted], timeout: 30)
+        replies.tap()
+        XCTAssertTrue(app.staticTexts["District 5 needs one too"].waitForExistence(timeout: 20), "the thread, opened; screen:\n\(app.debugDescription)")
         try? peer.forget()
     }
 

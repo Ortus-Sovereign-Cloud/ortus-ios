@@ -163,5 +163,8 @@
 "chat.locked" = "Los mensajes de esta sala están cifrados de extremo a extremo. Ábrala en un ordenador para leer y escribir.";
 "chat.cannotOpen" = "Este mensaje no se puede abrir en este teléfono.";
 "chat.sealed" = "Cifrado de extremo a extremo";
+"chat.thread" = "Hilo";
+"chat.replyInThread" = "Responder en el hilo";
+"chat.replies %lld" = "Respuestas: %lld";
 "sheet.close" = "Cerrar";
 "search.gone" = "Ya no está disponible.";

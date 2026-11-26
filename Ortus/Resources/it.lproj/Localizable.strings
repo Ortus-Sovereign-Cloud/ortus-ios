@@ -163,5 +163,8 @@
 "chat.locked" = "I messaggi di questa stanza sono cifrati end-to-end. La apra su un computer per leggere e scrivere.";
 "chat.cannotOpen" = "Questo messaggio non si può aprire su questo telefono.";
 "chat.sealed" = "Cifrato end-to-end";
+"chat.thread" = "Thread";
+"chat.replyInThread" = "Rispondi nel thread";
+"chat.replies %lld" = "Risposte: %lld";
 "sheet.close" = "Chiudi";
 "search.gone" = "Non è più disponibile.";

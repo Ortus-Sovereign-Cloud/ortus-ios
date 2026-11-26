@@ -72,6 +72,8 @@ public struct ChatMessage: Decodable, Equatable, Identifiable {
     public let thread: String?
     public let deleted: Bool?
     public let sealed: JSONValue?
+    /// How many replies its thread has (a room's messages only).
+    public let replies: Int?
     public var date: Date { Date(timeIntervalSince1970: Double(at) / 1000) }
 
     /// The message as the end-to-end library opens it: id, sender, thread and sealed.
@@ -102,14 +104,18 @@ extension Client {
         return r
     }
 
-    public func messages(in room: String) async throws -> Messages {
-        try await call("GET", "/chat/rooms/\(room)/messages")
+    /// A room's latest messages, or one thread's (its root and replies).
+    public func messages(in room: String, thread: String? = nil) async throws -> Messages {
+        let query = thread.map { "?thread=" + ($0.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? $0) } ?? ""
+        return try await call("GET", "/chat/rooms/\(room)/messages" + query)
     }
 
-    public func say(_ text: String, in room: String) async throws {
+    public func say(_ text: String, in room: String, thread: String? = nil) async throws {
         if isSealed(room) { throw SealedRoom(room: room) }
         struct Sent: Decodable { let id: String? }
         // Its client id makes a resend from the outbox one message.
-        let _: Sent = try await call("POST", "/chat/rooms/\(room)/messages", json: ["text": text, "client_id": UUID().uuidString])
+        var body: [String: Any] = ["text": text, "client_id": UUID().uuidString]
+        if let thread { body["thread"] = thread }
+        let _: Sent = try await call("POST", "/chat/rooms/\(room)/messages", json: body)
     }
 }

@@ -162,5 +162,8 @@
 "chat.locked" = "Nachrichten in diesem Raum sind Ende-zu-Ende-verschlüsselt. Öffnen Sie ihn am Computer, um zu lesen und zu schreiben.";
 "chat.cannotOpen" = "Diese Nachricht lässt sich auf diesem Telefon nicht öffnen.";
 "chat.sealed" = "Ende-zu-Ende-verschlüsselt";
+"chat.thread" = "Thread";
+"chat.replyInThread" = "Im Thread antworten";
+"chat.replies %lld" = "Antworten: %lld";
 "sheet.close" = "Schließen";
 "search.gone" = "Das gibt es nicht mehr.";

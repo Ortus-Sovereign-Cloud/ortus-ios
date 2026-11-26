@@ -86,123 +86,34 @@ struct ChatsView: View {
     }
 }
 
-/// MobileChannel: the messages of a room and a message box.
+
+/// A room (its messages not in a thread).
 struct ChannelView: View {
-    @EnvironmentObject var model: AppModel
     let room: Room
     let title: String
-    @State private var messages: Messages?
-    @State private var text = ""
-    @State private var note: String?
-    @State private var calling = false
-
-    var body: some View {
-        // End-to-end rooms are opened and sealed on the phone (EndToEnd).
-        if room.encrypted == true {
-            SealedChannelView(room: room, title: title)
-        } else {
-            channel
-        }
-    }
-
-    private var channel: some View {
-        VStack(spacing: 0) {
-            ScrollViewReader { scroller in
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 14) {
-                        ForEach(messages?.messages.filter { $0.deleted != true && $0.thread == nil } ?? []) { m in
-                            HStack(alignment: .top, spacing: 10) {
-                                let name = messages?.people[m.sender]?.name ?? m.sender
-                                Text(initials(name)).font(.caption.bold()).foregroundStyle(Theme.background)
-                                    .frame(width: 32, height: 32).background(Theme.accent.opacity(0.85), in: RoundedRectangle(cornerRadius: 8))
-                                VStack(alignment: .leading, spacing: 2) {
-                                    HStack {
-                                        Text(name).font(.subheadline.bold()).foregroundStyle(Theme.text)
-                                        Text(m.date.formatted(date: .omitted, time: .shortened)).font(.caption).foregroundStyle(Theme.text2)
-                                    }
-                                    Text(m.text).foregroundStyle(Theme.text)
-                                }
-                            }
-                            .id(m.id)
-                        }
-                    }
-                    .padding(16)
-                }
-                .onChange(of: messages?.messages.count) {
-                    if let last = messages?.messages.last { scroller.scrollTo(last.id, anchor: .bottom) }
-                }
-            }
-            if let note {
-                Text(note).font(.footnote).foregroundStyle(Theme.text2).padding(.horizontal, 12).accessibilityIdentifier("chatNote")
-            }
-            HStack(spacing: 8) {
-                TextField(String(localized: "chat.message \(title)"), text: $text, axis: .vertical)
-                    .padding(12).background(Theme.surface, in: RoundedRectangle(cornerRadius: 16))
-                    .accessibilityIdentifier("message")
-                Button {
-                    Task { await send() }
-                } label: {
-                    Image(systemName: "arrow.up").font(.headline).frame(width: 44, height: 44)
-                        .background(Theme.accent, in: RoundedRectangle(cornerRadius: 12)).foregroundStyle(Theme.background)
-                }
-                .disabled(text.trimmingCharacters(in: .whitespaces).isEmpty)
-                .accessibilityLabel(Text("thread.send"))
-            }
-            .padding(12)
-        }
-        .background(Theme.background)
-        .navigationTitle(title)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            // A room's call (channels and private rooms; an end-to-end room has none).
-            if room.encrypted != true {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { calling = true } label: { Image(systemName: "video") }
-                        .accessibilityLabel(Text("call.start"))
-                        .accessibilityIdentifier("call")
-                }
-            }
-        }
-        .fullScreenCover(isPresented: $calling) { CallView(room: room.id, title: title) }
-        .task { await load() }
-    }
-
-    private func load() async {
-        guard let client = model.client else { return }
-        let id = room.id
-        try? await quickly({ try await client.messages(in: id) }) { messages = $0 }
-    }
-
-    private func send() async {
-        guard let client = model.client else { return }
-        let said = text
-        text = ""
-        do {
-            try await client.say(said, in: room.id)
-            note = nil
-        } catch let e as APIError where e.code == "queued" {
-            note = String(localized: "offline.queued")
-        } catch {
-            // Not sent: the words come back.
-            text = said
-            note = model.say(error)
-        }
-        await load()
-    }
+    var body: some View { ChatRoomView(room: room, title: title, root: nil) }
 }
 
-/// An end-to-end room: its messages opened on the phone, one that cannot
-/// be opened said so (never its ciphertext), and what is written sealed
-/// here. Without the library or its keys, the room says to use a computer.
-struct SealedChannelView: View {
+/// A room, or one thread of it (`root`: the message it answers): plain
+/// rooms as the server gives them; end-to-end rooms opened and sealed on
+/// the phone (EndToEnd), a message that cannot be opened said so (never
+/// its ciphertext), nothing sent in the clear. New messages are fetched
+/// every few seconds while the screen is on and the app active. Without
+/// the library or its keys, a sealed room says to use a computer.
+struct ChatRoomView: View {
     @EnvironmentObject var model: AppModel
+    @Environment(\.scenePhase) private var scenePhase
     let room: Room
     let title: String
+    let root: String?
     @State private var messages: Messages?
     @State private var texts: [String: String?] = [:]
     @State private var unavailable = false
     @State private var text = ""
     @State private var note: String?
+    @State private var calling = false
+
+    private var sealed: Bool { room.encrypted == true }
 
     var body: some View {
         if unavailable {
@@ -216,38 +127,38 @@ struct SealedChannelView: View {
             .navigationTitle(title)
             .accessibilityIdentifier("locked")
         } else {
-            sealed
+            chat
         }
     }
 
-    private var sealed: some View {
+    /// A thread: its root, then the replies; a room: the messages not in a thread.
+    private var shown: [ChatMessage] {
+        (messages?.messages ?? []).filter { m in
+            m.deleted != true && (root == nil ? m.thread == nil : (m.id == root || m.thread == root))
+        }
+    }
+
+    private var chat: some View {
         VStack(spacing: 0) {
-            Label("chat.sealed", systemImage: "lock.fill").font(.caption).foregroundStyle(Theme.text2).padding(.top, 8)
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 14) {
-                    ForEach(messages?.messages.filter { $0.deleted != true && $0.thread == nil } ?? []) { m in
-                        let name = messages?.people[m.sender]?.name ?? m.sender
-                        VStack(alignment: .leading, spacing: 2) {
-                            HStack {
-                                Text(name).font(.subheadline.bold()).foregroundStyle(Theme.text)
-                                Text(m.date.formatted(date: .omitted, time: .shortened)).font(.caption).foregroundStyle(Theme.text2)
-                            }
-                            if let shown = texts[m.id] ?? nil {
-                                Text(shown).foregroundStyle(Theme.text).accessibilityIdentifier("opened")
-                            } else {
-                                Text("chat.cannotOpen").font(.subheadline).foregroundStyle(Theme.text2).accessibilityIdentifier("cannotOpen")
-                            }
-                        }
-                        .id(m.id)
+            if sealed {
+                Label("chat.sealed", systemImage: "lock.fill").font(.caption).foregroundStyle(Theme.text2).padding(.top, 8)
+            }
+            ScrollViewReader { scroller in
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 14) {
+                        ForEach(shown) { m in row(m).id(m.id) }
                     }
+                    .padding(16)
                 }
-                .padding(16)
+                .onChange(of: shown.count) {
+                    if let last = shown.last { scroller.scrollTo(last.id, anchor: .bottom) }
+                }
             }
             if let note {
                 Text(note).font(.footnote).foregroundStyle(Theme.text2).padding(.horizontal, 12).accessibilityIdentifier("chatNote")
             }
             HStack(spacing: 8) {
-                TextField(String(localized: "chat.message \(title)"), text: $text, axis: .vertical)
+                TextField(root == nil ? String(localized: "chat.message \(title)") : String(localized: "chat.replyInThread"), text: $text, axis: .vertical)
                     .padding(12).background(Theme.surface, in: RoundedRectangle(cornerRadius: 16))
                     .accessibilityIdentifier("message")
                 Button {
@@ -263,9 +174,57 @@ struct SealedChannelView: View {
             .padding(12)
         }
         .background(Theme.background)
-        .navigationTitle(title)
+        .navigationTitle(root == nil ? title : String(localized: "chat.thread"))
         .navigationBarTitleDisplayMode(.inline)
-        .task { await load() }
+        .toolbar {
+            // A room's call (channels and private rooms; an end-to-end room has none).
+            if root == nil && !sealed {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { calling = true } label: { Image(systemName: "video") }
+                        .accessibilityLabel(Text("call.start"))
+                        .accessibilityIdentifier("call")
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $calling) { CallView(room: room.id, title: title) }
+        .task(id: root) {
+            // While on screen: now, then every few seconds when the app is in front.
+            while !Task.isCancelled {
+                if scenePhase == .active { await load() }
+                try? await Task.sleep(for: .seconds(5))
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func row(_ m: ChatMessage) -> some View {
+        let name = messages?.people[m.sender]?.name ?? m.sender
+        let shownText: String? = sealed ? (texts[m.id] ?? nil) : m.text
+        HStack(alignment: .top, spacing: 10) {
+            Text(initials(name)).font(.caption.bold()).foregroundStyle(Theme.background)
+                .frame(width: 32, height: 32).background(Theme.accent.opacity(0.85), in: RoundedRectangle(cornerRadius: 8))
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                HStack {
+                    Text(name).font(.subheadline.bold()).foregroundStyle(Theme.text)
+                    Text(m.date.formatted(date: .omitted, time: .shortened)).font(.caption).foregroundStyle(Theme.text2)
+                }
+                if let shownText {
+                    Text(shownText).foregroundStyle(Theme.text).accessibilityIdentifier("opened")
+                } else {
+                    Text("chat.cannotOpen").font(.subheadline).foregroundStyle(Theme.text2).accessibilityIdentifier("cannotOpen")
+                }
+                if root == nil {
+                    let n = m.replies ?? 0
+                    NavigationLink {
+                        ChatRoomView(room: room, title: title, root: m.id)
+                    } label: {
+                        Text(n > 0 ? String(localized: "chat.replies \(n)") : String(localized: "chat.replyInThread")).font(.footnote)
+                    }
+                    .accessibilityIdentifier("thread-\(m.id)")
+                }
+            }
+        }
     }
 
     private func me() async -> String? {
@@ -276,28 +235,42 @@ struct SealedChannelView: View {
     }
 
     private func load() async {
-        guard let client = model.client, let e2e = model.endToEnd() else { return }
+        guard let client = model.client else { return }
+        let id = room.id
+        let thread = root
+        if !sealed {
+            try? await quickly({ try await client.messages(in: id, thread: thread) }) { messages = $0 }
+            return
+        }
+        guard let e2e = model.endToEnd() else { return }
         guard let me = await me() else { unavailable = true; return }
         do {
-            let got = try await client.messages(in: room.id)
-            texts = try await e2e.read(me: me, room: room.id, messages: got.messages)
+            let got = try await client.messages(in: id, thread: thread)
+            texts = try await e2e.read(me: me, room: id, messages: got.messages)
             messages = got
         } catch where EndToEnd.unavailable(error) {
             unavailable = true
         } catch {
-            note = model.say(error)
+            if messages == nil { note = model.say(error) }
         }
     }
 
     private func send() async {
-        guard let e2e = model.endToEnd(), let me = await me() else { return }
         let said = text
         text = ""
         note = nil
         do {
-            _ = try await e2e.send(me: me, room: room.id, text: said)
+            if sealed {
+                guard let e2e = model.endToEnd(), let me = await me() else { text = said; return }
+                _ = try await e2e.send(me: me, room: room.id, text: said, thread: root)
+            } else {
+                guard let client = model.client else { text = said; return }
+                try await client.say(said, in: room.id, thread: root)
+            }
+        } catch let e as APIError where e.code == "queued" {
+            note = String(localized: "offline.queued")
         } catch {
-            // Not sent (never in the clear): the words come back.
+            // Not sent (in a sealed room, never in the clear): the words come back.
             text = said
             note = model.say(error)
         }
