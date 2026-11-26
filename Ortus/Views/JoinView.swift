@@ -1,4 +1,6 @@
+import CoreImage
 import SwiftUI
+import Vision
 import VisionKit
 import OrtusKit
 
@@ -207,6 +209,48 @@ struct CodeScanner: UIViewControllerRepresentable {
                 done = true
                 scanner.stopScanning()
                 found(text)
+            }
+        }
+    }
+}
+
+/// The camera, reading another device's verification code: its data
+/// codewords (the code holds binary data, which a string would mangle).
+struct VerificationCodeScanner: UIViewControllerRepresentable {
+    let found: (Data) -> Void
+
+    func makeUIViewController(context: Context) -> DataScannerViewController {
+        let scanner = DataScannerViewController(
+            recognizedDataTypes: [.barcode(symbologies: [.qr])],
+            qualityLevel: .balanced,
+            isHighlightingEnabled: true
+        )
+        scanner.delegate = context.coordinator
+        return scanner
+    }
+
+    func updateUIViewController(_ scanner: DataScannerViewController, context: Context) {
+        if !scanner.isScanning { try? scanner.startScanning() }
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator(found: found) }
+
+    @MainActor
+    final class Coordinator: NSObject, DataScannerViewControllerDelegate {
+        let found: (Data) -> Void
+        private var done = false
+
+        init(found: @escaping (Data) -> Void) { self.found = found }
+
+        /// The first QR code read: the library says whether it is a verification code.
+        func dataScanner(_ scanner: DataScannerViewController, didAdd added: [RecognizedItem], allItems: [RecognizedItem]) {
+            for item in added {
+                guard !done, case .barcode(let code) = item,
+                      let payload = (code.observation.barcodeDescriptor as? CIQRCodeDescriptor)?.errorCorrectedPayload,
+                      !payload.isEmpty else { continue }
+                done = true
+                scanner.stopScanning()
+                found(payload)
             }
         }
     }

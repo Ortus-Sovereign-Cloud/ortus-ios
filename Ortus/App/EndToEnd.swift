@@ -189,6 +189,12 @@ final class EndToEnd: @unchecked Sendable {
         }
     }
 
+    /// Recovery set up from this phone (nobody set it up yet): the recovery
+    /// key, shown to the person once.
+    func setUpRecovery(me: String) async throws -> String {
+        try await run { try self.open(me).setUpRecovery() }
+    }
+
     func unverified(me: String, room: String) async throws -> [DeviceRef] {
         try await run { try self.open(me).unverified(room: room) }
     }
@@ -200,6 +206,31 @@ final class EndToEnd: @unchecked Sendable {
 
     func verifyOwnDevices(me: String) async throws -> String {
         try await run { try self.open(me).verifyOwnDevices() }
+    }
+
+    /// Asks one device (another person's, or one's own) to verify: its id.
+    func verifyDevice(me: String, user: String, device: String) async throws -> String {
+        try await run { try self.open(me).verifyDevice(user: user, device: device) }
+    }
+
+    /// Emoji, chosen over a QR code.
+    func startEmoji(me: String, id: String) async throws {
+        try await run { try self.open(me).startEmoji(id: id) }
+    }
+
+    /// The other device's code as the camera read it (its data codewords).
+    func scanQr(me: String, id: String, scanned: Data) async throws {
+        try await run { try self.open(me).scanQr(id: id, scanned: scanned) }
+    }
+
+    /// This phone's code, for the other device to scan.
+    func showQr(me: String, id: String) async throws -> QrImage {
+        try await run { try self.open(me).showQr(id: id) }
+    }
+
+    /// Whether the other device says it scanned this phone's code.
+    func confirmScanned(me: String, id: String, yes: Bool) async throws {
+        try await run { try self.open(me).confirmScanned(id: id, yes: yes) }
     }
 
     func acceptVerification(me: String, id: String) async throws {

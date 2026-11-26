@@ -328,9 +328,11 @@ final class WelcomeTests: XCTestCase {
         // Opening the room publishes this phone's keys.
         XCTAssertTrue(app.textFields["message"].waitForExistence(timeout: 30), "the sealed room; screen:\n\(app.debugDescription)")
         XCTAssertFalse(app.otherElements["locked"].exists, "the phone could not make its keys")
-        // Recovery: not set up yet, so it says where it is set up.
+        // Recovery: not set up yet, so the phone sets it up and shows the key once.
         app.buttons["recoveryOpen"].tap()
-        XCTAssertTrue(app.staticTexts.containing(NSPredicate(format: "label CONTAINS 'Recovery is set up on a computer'")).firstMatch.waitForExistence(timeout: 20), "the recovery sheet; screen:\n\(app.debugDescription)")
+        XCTAssertTrue(app.buttons["recoverySetUp"].waitForExistence(timeout: 20), "the recovery sheet; screen:\n\(app.debugDescription)")
+        app.buttons["recoverySetUp"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["recoveryKeyShown"].firstMatch.waitForExistence(timeout: 40), "the recovery key; screen:\n\(app.debugDescription)")
         app.buttons["Close"].firstMatch.tap()
         // The room is open once the server lists the phone's device.
         let listed = expectation(for: NSPredicate { _, _ in Self.api("GET", "/chat/rooms/\(room)/devices", session: owner).1.contains("\"PHONE") }, evaluatedWith: nil)

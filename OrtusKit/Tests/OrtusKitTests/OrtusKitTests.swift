@@ -575,3 +575,35 @@ final class WebAddressTests: XCTestCase {
         XCTAssertEqual("https://ortus.example/people", url?.absoluteString)
     }
 }
+
+/// What the verification screens draw and say.
+final class VerificationTests: XCTestCase {
+    func testTheQuietZone() throws {
+        let grid = try XCTUnwrap(QRGrid(width: 2, modules: [true, false, false, true]))
+        XCTAssertEqual(10, grid.width)
+        XCTAssertEqual(100, grid.modules.count)
+        XCTAssertEqual(2, grid.modules.filter { $0 }.count)
+        XCTAssertTrue(grid.dark(4, 4))
+        XCTAssertFalse(grid.dark(4, 5))
+        XCTAssertFalse(grid.dark(5, 4))
+        XCTAssertTrue(grid.dark(5, 5))
+        // The margin is light all round.
+        for i in 0..<10 {
+            XCTAssertFalse(grid.dark(0, i) || grid.dark(i, 0) || grid.dark(9, i) || grid.dark(i, 9))
+        }
+        XCTAssertEqual(4, QRGrid(width: 2, modules: [true, true, true, true], quiet: 1)?.width)
+    }
+
+    func testNotASquare() {
+        XCTAssertNil(QRGrid(width: 3, modules: [true, false]))
+        XCTAssertNil(QRGrid(width: 0, modules: []))
+    }
+
+    func testWhoADeviceBelongsTo() throws {
+        let json = #"{"messages":[],"people":{"@taras:ministry.example":{"name":"Taras"},"olena":{"name":"Olena"}}}"#
+        let m = try JSONDecoder().decode(Messages.self, from: Data(json.utf8))
+        XCTAssertEqual("Taras", m.name(of: "@taras:ministry.example"))
+        XCTAssertEqual("Olena", m.name(of: "@olena:ministry.example"))
+        XCTAssertNil(m.name(of: "@nobody:ministry.example"))
+    }
+}

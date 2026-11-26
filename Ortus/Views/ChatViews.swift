@@ -1,3 +1,4 @@
+import OrtusE2E
 import OrtusKit
 import SwiftUI
 
@@ -112,7 +113,8 @@ struct ChatRoomView: View {
     @State private var text = ""
     @State private var note: String?
     @State private var calling = false
-    @State private var unverifiedCount = 0
+    @State private var unverifiedDevices: [DeviceRef] = []
+    @State private var showingUnverified = false
     @State private var recovering = false
 
     private var sealed: Bool { room.encrypted == true }
@@ -144,8 +146,14 @@ struct ChatRoomView: View {
         VStack(spacing: 0) {
             if sealed {
                 Label("chat.sealed", systemImage: "lock.fill").font(.caption).foregroundStyle(Theme.text2).padding(.top, 8)
-                if unverifiedCount > 0 {
-                    Text("⚠ \(String(localized: "chat.unverified \(unverifiedCount)"))").font(.caption).foregroundStyle(.orange).accessibilityIdentifier("unverified")
+                if !unverifiedDevices.isEmpty {
+                    // Tapped: the devices, each to verify.
+                    Button { showingUnverified = true } label: {
+                        Text("⚠ \(String(localized: "chat.unverified \(unverifiedDevices.count)"))").font(.caption).foregroundStyle(.orange)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityHint(Text("chat.unverifiedHint"))
+                    .accessibilityIdentifier("unverified")
                 }
             }
             ScrollViewReader { scroller in
@@ -197,10 +205,11 @@ struct ChatRoomView: View {
             }
         }
         .sheet(isPresented: $recovering) { RecoverySheet() }
+        .sheet(isPresented: $showingUnverified) { UnverifiedSheet(devices: unverifiedDevices, messages: messages) }
         // Who is not vouched for: on opening, and after a verification or recovery.
         .task(id: model.trustChanged) {
             guard sealed, let me = await me(), let e2e = model.endToEnd() else { return }
-            unverifiedCount = (try? await e2e.unverified(me: me, room: room.id).count) ?? 0
+            unverifiedDevices = (try? await e2e.unverified(me: me, room: room.id)) ?? []
         }
         .fullScreenCover(isPresented: $calling) { CallView(room: room.id, title: title) }
         .task(id: root) {
