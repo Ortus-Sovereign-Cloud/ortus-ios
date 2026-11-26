@@ -76,7 +76,10 @@ struct PlaceLink<Label: View>: View {
 
     var body: some View {
         if case .web = place {
-            Button { web = model.client.flatMap { place.webURL(on: $0.server) }.map(WebAddress.init) } label: { label() }
+            Button {
+                guard let client = model.client else { return }
+                Task { web = await place.webAddress(with: client).map(WebAddress.init) }
+            } label: { label() }
                 .foregroundStyle(Theme.text)
                 .sheet(item: $web) { SafariView(url: $0.url).ignoresSafeArea() }
         } else {

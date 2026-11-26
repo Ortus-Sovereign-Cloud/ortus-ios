@@ -69,6 +69,16 @@ public enum Place: Hashable, Sendable {
 
     /// The page on the installation, for a place the phone has no screen
     /// for: only a path on it (never another site a result might name).
+    /// The page, signed in: an address with a one-time ticket (it works
+    /// once, within a minute, after the person's yes on the page); the
+    /// plain page when no ticket can be had.
+    public func webAddress(with client: Client) async -> URL? {
+        guard let plain = webURL(on: client.server), case let .web(path) = self else { return nil }
+        struct Made: Decodable { let url: String }
+        guard let made: Made = try? await client.call("POST", "/me/web-ticket", json: ["next": path]), let url = URL(string: made.url) else { return plain }
+        return url
+    }
+
     public func webURL(on server: URL) -> URL? {
         guard case let .web(path) = self, path.hasPrefix("/"), !path.hasPrefix("//"), !path.contains("\\") else { return nil }
         return URL(string: server.absoluteString + path)

@@ -558,3 +558,20 @@ final class SealedRoomTests: XCTestCase {
         XCTAssertEqual("AAA", (j["sealed"] as? [String: Any])?["ciphertext"] as? String)
     }
 }
+
+/// A web page from the app: signed in with a one-time ticket, else the plain page.
+final class WebAddressTests: XCTestCase {
+    func testATicketWhenTheServerGivesOne() async throws {
+        let box = Recorded.Box()
+        let client = Client(server: URL(string: "https://ortus.example")!, token: "t", transport: Recorded(status: 200, body: #"{"url":"https://ortus.example/session/web#t=ab12&next=/people"}"#, seen: box))
+        let url = await Place.web("/people").webAddress(with: client)
+        XCTAssertEqual("https://ortus.example/session/web#t=ab12&next=/people", url?.absoluteString)
+        XCTAssertEqual("https://ortus.example/api/v1/me/web-ticket", box.requests.last?.url?.absoluteString)
+    }
+
+    func testThePlainPageWithoutOne() async throws {
+        let client = Client(server: URL(string: "https://ortus.example")!, token: "t", transport: Recorded(status: 404, body: "{}", seen: Recorded.Box()))
+        let url = await Place.web("/people").webAddress(with: client)
+        XCTAssertEqual("https://ortus.example/people", url?.absoluteString)
+    }
+}
