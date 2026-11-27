@@ -25,14 +25,39 @@ public struct QRGrid: Equatable, Sendable {
     public func dark(_ row: Int, _ column: Int) -> Bool { modules[row * width + column] }
 }
 
+/// A person's name by their Matrix id (`@user:server`, as the end-to-end
+/// library names them) or their bare id, in what the server said of people;
+/// nil when unknown.
+public func personName(_ user: String, in people: [String: Person]) -> String? {
+    if let p = people[user] { return p.name }
+    let bare = user.hasPrefix("@") ? String(user.dropFirst()) : user
+    if let p = people[bare] { return p.name }
+    if let colon = bare.firstIndex(of: ":"), let p = people[String(bare[..<colon])] { return p.name }
+    return nil
+}
+
 extension Messages {
-    /// A person's name by their Matrix id (`@user:server`, as the
-    /// end-to-end library names them) or their bare id; nil when unknown.
-    public func name(of user: String) -> String? {
-        if let p = people[user] { return p.name }
-        let bare = user.hasPrefix("@") ? String(user.dropFirst()) : user
-        if let p = people[bare] { return p.name }
-        if let colon = bare.firstIndex(of: ":"), let p = people[String(bare[..<colon])] { return p.name }
-        return nil
+    /// A person's name by their Matrix id or their bare id; nil when unknown.
+    public func name(of user: String) -> String? { personName(user, in: people) }
+}
+
+/// Who a verification is with, as its sheet says it: another person (by
+/// name when known, always by id) or the person themself, on which device.
+public struct VerificationParty: Equatable, Sendable {
+    /// The other person's name, when known (nil for oneself).
+    public let name: String?
+    /// Their Matrix id.
+    public let user: String
+    /// The other device, once the library knows it.
+    public let device: String?
+    /// The person's own other device.
+    public let isMe: Bool
+
+    public init(user: String, device: String?, me: String?, people: [String: Person]) {
+        self.user = user
+        self.device = device.flatMap { $0.isEmpty ? nil : $0 }
+        let bare = { (id: String) in id.hasPrefix("@") ? String(id.dropFirst()) : id }
+        isMe = me.map { bare($0) == bare(user) } ?? false
+        name = isMe ? nil : personName(user, in: people)
     }
 }

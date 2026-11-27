@@ -36,6 +36,7 @@ struct RecoverySheet: View {
                     Text(madeKey)
                         .font(.body.monospaced())
                         .textSelection(.enabled)
+                        .privacySensitive()
                         .accessibilityIdentifier("recoveryKeyShown")
                     Button {
                         copy(madeKey)
@@ -61,6 +62,8 @@ struct RecoverySheet: View {
                         TextField(String(localized: "chat.recoveryKey"), text: $key)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
+                            .keyboardType(.asciiCapable)
+                            .privacySensitive()
                             .accessibilityIdentifier("recoveryKey")
                         Button("chat.recoveryEnter") { Task { await recover() } }
                             .disabled(busy || key.trimmingCharacters(in: .whitespaces).isEmpty)
@@ -253,6 +256,8 @@ private struct VerificationSheet: View {
         ScrollView {
             VStack(spacing: 16) {
                 Text("chat.verifyTitle").font(.headline).accessibilityAddTraits(.isHeader)
+                // Who asks, on every step: the person (or oneself) and the device.
+                VerificationWho(party: VerificationParty(user: v.user, device: v.device, me: model.chatMe, people: model.chatPeople))
                 switch state {
                 case "incoming":
                     Text("chat.verifyIncoming")
@@ -396,6 +401,31 @@ private struct VerificationSheet: View {
         } catch {
             note = model.say(error)
         }
+    }
+}
+
+/// Who a verification is with: another person by name (when known) and
+/// id, or "this is you"; and the device.
+private struct VerificationWho: View {
+    let party: VerificationParty
+
+    var body: some View {
+        VStack(spacing: 2) {
+            if party.isMe {
+                Text(party.device.map { String(localized: "chat.verifyYouDevice \($0)") } ?? String(localized: "chat.verifyYou"))
+            } else {
+                Text(String(localized: "chat.verifyWith \(party.name ?? party.user)"))
+                if party.name != nil {
+                    Text(party.user).font(.caption).foregroundStyle(.secondary)
+                }
+                if let device = party.device {
+                    Text(String(localized: "chat.device \(device)")).font(.caption).foregroundStyle(.secondary)
+                }
+            }
+        }
+        .multilineTextAlignment(.center)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("verifyWho")
     }
 }
 

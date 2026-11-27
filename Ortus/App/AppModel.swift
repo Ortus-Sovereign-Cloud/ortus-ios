@@ -39,6 +39,9 @@ final class AppModel: ObservableObject {
     }
     /// The person's Matrix id, `me` of the rooms (end-to-end rooms need it).
     var chatMe: String?
+    /// People the chat has named so far, by id: who a verification is with.
+    var chatPeople: [String: Person] = [:]
+    func know(people: [String: Person]) { chatPeople.merge(people) { _, new in new } }
     /// Bumped when a verification or recovery finished: rooms read who is vouched for again.
     @Published var trustChanged = 0
 
@@ -369,6 +372,7 @@ final class AppModel: ObservableObject {
         if me == nil, let client { me = try? await client.rooms().me }
         await endToEnd()?.forget(me: me)
         chatMe = nil
+        chatPeople = [:]
         if let client, let token = client.token { await end(session: token, on: client.server) }
         ended()
     }

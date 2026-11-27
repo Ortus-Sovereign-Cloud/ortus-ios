@@ -189,6 +189,9 @@
 "chat.verifyDifferent" = "Nie zgadzają się";
 "chat.verifyDone" = "Zweryfikowano.";
 "chat.verifyCancelled" = "Weryfikacja przerwana.";
+"chat.verifyWith %@" = "Weryfikacja z: %@";
+"chat.verifyYou" = "To Ty, na innym Twoim urządzeniu";
+"chat.verifyYouDevice %@" = "To Ty, urządzenie %@";
 "chat.unverifiedHint" = "Pokazuje urządzenia do weryfikacji";
 "chat.unverifiedTitle" = "Niezweryfikowane urządzenia";
 "chat.unverifiedLead" = "Nikt jeszcze nie poręczył za te urządzenia. Zweryfikuj urządzenie razem z jego właścicielem, obok siebie lub w rozmowie.";

@@ -79,7 +79,7 @@ struct ChatsView: View {
     private func load() async {
         guard let client = model.client else { return }
         do {
-            try await quickly({ try await client.rooms() }) { data = $0; if let me = $0.me { model.chatMe = me } }
+            try await quickly({ try await client.rooms() }) { data = $0; model.know(people: $0.people); if let me = $0.me { model.chatMe = me } }
             failure = nil
         } catch {
             failure = model.listFailure(error, showing: !(data?.rooms.isEmpty ?? true))
@@ -273,6 +273,7 @@ struct ChatRoomView: View {
             let got = try await client.messages(in: id, thread: thread)
             texts = try await e2e.read(me: me, room: id, messages: got.messages)
             messages = got
+            model.know(people: got.people)
         } catch where EndToEnd.unavailable(error) {
             unavailable = true
         } catch {

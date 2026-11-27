@@ -189,6 +189,9 @@
 "chat.verifyDifferent" = "غير متطابقة";
 "chat.verifyDone" = "تم التوثيق.";
 "chat.verifyCancelled" = "توقف التوثيق.";
+"chat.verifyWith %@" = "التحقق مع %@";
+"chat.verifyYou" = "هذا أنت، على جهاز آخر من أجهزتك";
+"chat.verifyYouDevice %@" = "هذا أنت، الجهاز %@";
 "chat.unverifiedHint" = "يعرض الأجهزة لتوثيقها";
 "chat.unverifiedTitle" = "أجهزة غير موثّقة";
 "chat.unverifiedLead" = "لم يشهد أحد لهذه الأجهزة بعد. وثّق جهازًا مع صاحبه، جنبًا إلى جنب أو في مكالمة.";

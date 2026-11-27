@@ -190,6 +190,9 @@
 "chat.verifyDifferent" = "Non corrispondono";
 "chat.verifyDone" = "Verificato.";
 "chat.verifyCancelled" = "Verifica interrotta.";
+"chat.verifyWith %@" = "Verifica con %@";
+"chat.verifyYou" = "È Lei, su un altro dei Suoi dispositivi";
+"chat.verifyYouDevice %@" = "È Lei, dispositivo %@";
 "chat.unverifiedHint" = "Mostra i dispositivi da verificare";
 "chat.unverifiedTitle" = "Dispositivi non verificati";
 "chat.unverifiedLead" = "Nessuno ha ancora garantito per questi dispositivi. Ne verifichi uno insieme al suo proprietario, di persona o durante una chiamata.";

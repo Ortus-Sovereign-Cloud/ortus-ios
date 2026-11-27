@@ -189,6 +189,9 @@
 "chat.verifyDifferent" = "They don't match";
 "chat.verifyDone" = "Verified.";
 "chat.verifyCancelled" = "Verification stopped.";
+"chat.verifyWith %@" = "Verifying with %@";
+"chat.verifyYou" = "This is you, on another of your devices";
+"chat.verifyYouDevice %@" = "This is you, device %@";
 "chat.unverifiedHint" = "Shows the devices, to verify them";
 "chat.unverifiedTitle" = "Unverified devices";
 "chat.unverifiedLead" = "Nobody has vouched for these devices yet. Verify one together with its owner, side by side or on a call.";

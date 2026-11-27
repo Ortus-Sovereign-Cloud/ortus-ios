@@ -606,4 +606,27 @@ final class VerificationTests: XCTestCase {
         XCTAssertEqual("Olena", m.name(of: "@olena:ministry.example"))
         XCTAssertNil(m.name(of: "@nobody:ministry.example"))
     }
+
+    func testWhoAVerificationIsWith() throws {
+        let json = #"{"messages":[],"people":{"@taras:ministry.example":{"name":"Taras"},"olena":{"name":"Olena"}}}"#
+        let people = try JSONDecoder().decode(Messages.self, from: Data(json.utf8)).people
+        let me = "@olena:ministry.example"
+        // Another person: by name, and always by id and device.
+        let taras = VerificationParty(user: "@taras:ministry.example", device: "TARASPHONE", me: me, people: people)
+        XCTAssertEqual("Taras", taras.name)
+        XCTAssertEqual("@taras:ministry.example", taras.user)
+        XCTAssertEqual("TARASPHONE", taras.device)
+        XCTAssertFalse(taras.isMe)
+        // Someone not known: the id alone; no device yet.
+        let nobody = VerificationParty(user: "@nobody:ministry.example", device: nil, me: me, people: people)
+        XCTAssertNil(nobody.name)
+        XCTAssertNil(nobody.device)
+        XCTAssertFalse(nobody.isMe)
+        // One's own other device, also when one id is bare.
+        let mine = VerificationParty(user: "@olena:ministry.example", device: "LAPTOP", me: "olena:ministry.example", people: people)
+        XCTAssertTrue(mine.isMe)
+        XCTAssertNil(mine.name)
+        XCTAssertEqual("LAPTOP", mine.device)
+        XCTAssertNil(VerificationParty(user: "@olena:ministry.example", device: "", me: me, people: people).device)
+    }
 }

@@ -189,6 +189,9 @@
 "chat.verifyDifferent" = "Не збігаються";
 "chat.verifyDone" = "Перевірено.";
 "chat.verifyCancelled" = "Перевірку зупинено.";
+"chat.verifyWith %@" = "Перевірка з: %@";
+"chat.verifyYou" = "Це ви, на іншому вашому пристрої";
+"chat.verifyYouDevice %@" = "Це ви, пристрій %@";
 "chat.unverifiedHint" = "Показує пристрої, щоб їх перевірити";
 "chat.unverifiedTitle" = "Неперевірені пристрої";
 "chat.unverifiedLead" = "За ці пристрої ще ніхто не поручився. Перевірте пристрій разом із його власником, поруч або під час дзвінка.";

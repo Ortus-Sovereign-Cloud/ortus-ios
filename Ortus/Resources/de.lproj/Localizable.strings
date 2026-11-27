@@ -189,6 +189,9 @@
 "chat.verifyDifferent" = "Sie stimmen nicht überein";
 "chat.verifyDone" = "Verifiziert.";
 "chat.verifyCancelled" = "Verifizierung abgebrochen.";
+"chat.verifyWith %@" = "Verifizierung mit %@";
+"chat.verifyYou" = "Das sind Sie, auf einem anderen Ihrer Geräte";
+"chat.verifyYouDevice %@" = "Das sind Sie, Gerät %@";
 "chat.unverifiedHint" = "Zeigt die Geräte, um sie zu verifizieren";
 "chat.unverifiedTitle" = "Nicht verifizierte Geräte";
 "chat.unverifiedLead" = "Für diese Geräte hat noch niemand gebürgt. Verifizieren Sie ein Gerät gemeinsam mit seinem Besitzer, nebeneinander oder in einem Anruf.";
