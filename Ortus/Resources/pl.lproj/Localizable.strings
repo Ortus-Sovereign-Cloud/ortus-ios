@@ -177,6 +177,14 @@
 "chat.recoveryRestored %lld" = "Odzyskano: %lld kluczy pokojów.";
 "chat.recoveryWrong" = "To nie jest Twój klucz odzyskiwania.";
 "chat.recoveryHere" = "Odzyskiwanie jest skonfigurowane, a ten telefon potwierdzony.";
+"chat.fromBackup" = "Z kopii zapasowej: nie udało się potwierdzić nadawcy.";
+"chat.recoveryEscrowInfo %@ %@ %@" = "Twoja organizacja może odzyskać Twoją historię. Klucz depozytowy %1$@, ustawiony przez: %2$@ (%3$@).";
+"chat.escrowSignerYou" = "Ty";
+"chat.escrowSignerVerified" = "zweryfikowany przez Ciebie";
+"chat.escrowSignerUnverified" = "niezweryfikowany przez Ciebie";
+"chat.recoveryEscrowChanged" = "Klucz depozytowy organizacji zmienił się od Twojego ostatniego ustawienia odzyskiwania.";
+"chat.recoveryEscrowUnsigned" = "Klucz depozytowy organizacji nie jest podpisany przez administratora: poproś o utworzenie go ponownie.";
+"chat.recoveryEscrowNotShown" = "Klucz depozytowy organizacji nie jest tym, który Ci pokazano: sprawdź go ponownie.";
 "chat.verifyMine" = "Zweryfikuj moje drugie urządzenie";
 "chat.unverified %lld" = "Niezweryfikowane urządzenia: %lld";
 "chat.verifyTitle" = "Weryfikacja urządzenia";

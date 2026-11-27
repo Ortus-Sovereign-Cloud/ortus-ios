@@ -177,6 +177,14 @@
 "chat.recoveryRestored %lld" = "Récupéré : %lld clés de salon.";
 "chat.recoveryWrong" = "Ce n’est pas votre clé de récupération.";
 "chat.recoveryHere" = "La récupération est configurée et ce téléphone est confirmé.";
+"chat.fromBackup" = "Depuis la sauvegarde : l'expéditeur n'a pas pu être confirmé.";
+"chat.recoveryEscrowInfo %@ %@ %@" = "Votre organisation peut récupérer votre historique. Clé de séquestre %1$@, définie par %2$@ (%3$@).";
+"chat.escrowSignerYou" = "vous";
+"chat.escrowSignerVerified" = "vérifié par vous";
+"chat.escrowSignerUnverified" = "non vérifié par vous";
+"chat.recoveryEscrowChanged" = "La clé de séquestre de l’organisation a changé depuis votre dernière mise en place de la récupération.";
+"chat.recoveryEscrowUnsigned" = "La clé de séquestre de l’organisation n’est pas signée par un administrateur : demandez-lui de la refaire.";
+"chat.recoveryEscrowNotShown" = "La clé de séquestre de l’organisation n’est pas celle qui vous a été montrée : regardez-la à nouveau.";
 "chat.verifyMine" = "Vérifier mon autre appareil";
 "chat.unverified %lld" = "Appareils non vérifiés : %lld";
 "chat.verifyTitle" = "Vérifier un appareil";

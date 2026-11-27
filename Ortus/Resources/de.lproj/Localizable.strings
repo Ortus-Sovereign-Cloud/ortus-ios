@@ -177,6 +177,14 @@
 "chat.recoveryRestored %lld" = "Wiederhergestellt: %lld Raumschlüssel.";
 "chat.recoveryWrong" = "Das ist nicht Ihr Wiederherstellungsschlüssel.";
 "chat.recoveryHere" = "Die Wiederherstellung ist eingerichtet, und dieses Telefon ist bestätigt.";
+"chat.fromBackup" = "Aus der Sicherung: Der Absender konnte nicht bestätigt werden.";
+"chat.recoveryEscrowInfo %@ %@ %@" = "Ihre Organisation kann Ihren Verlauf wiederherstellen. Treuhandschlüssel %1$@, gesetzt von %2$@ (%3$@).";
+"chat.escrowSignerYou" = "Ihnen";
+"chat.escrowSignerVerified" = "von Ihnen verifiziert";
+"chat.escrowSignerUnverified" = "nicht von Ihnen verifiziert";
+"chat.recoveryEscrowChanged" = "Der Treuhandschlüssel der Organisation hat sich seit Ihrer letzten Einrichtung der Wiederherstellung geändert.";
+"chat.recoveryEscrowUnsigned" = "Der Treuhandschlüssel der Organisation ist nicht von einer Administratorin signiert: Bitten Sie darum, ihn neu zu erstellen.";
+"chat.recoveryEscrowNotShown" = "Der Treuhandschlüssel der Organisation ist nicht der, der Ihnen gezeigt wurde: Sehen Sie ihn sich erneut an.";
 "chat.verifyMine" = "Mein anderes Gerät verifizieren";
 "chat.unverified %lld" = "Nicht verifizierte Geräte: %lld";
 "chat.verifyTitle" = "Gerät verifizieren";

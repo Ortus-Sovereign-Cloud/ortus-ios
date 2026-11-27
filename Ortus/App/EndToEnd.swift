@@ -19,8 +19,11 @@ final class EndToEnd: @unchecked Sendable {
     private let client: Client
     private let queue = DispatchQueue(label: "cc.ortus.e2e")
     private var library: OrtusE2e?
-    /// What was opened, by message id: opening a message again is not needed.
-    private var opened: [String: String] = [:]
+    /// What was opened, by message id: opening a message again is not
+    /// needed, except one whose room key came from the backup (its sender
+    /// could not be confirmed): opened again when new room keys come, as the
+    /// sender's own key may confirm it then.
+    private var opened: [String: Opened] = [:]
     /// What did not open: tried again only once new room keys came.
     private var refused: Set<String> = []
 
@@ -140,27 +143,30 @@ final class EndToEnd: @unchecked Sendable {
         }
     }
 
-    /// Each message's text, or nil when it cannot be opened (a room key that
-    /// has not come, a sender refused). Room keys waiting are taken in first.
-    func read(me: String, room: String, messages: [ChatMessage]) async throws -> [String: String?] {
+    /// Each message opened (its text, and whether its room key came from the
+    /// backup), or nil when it cannot be opened (a room key that has not
+    /// come, a sender refused). Room keys waiting are taken in first.
+    func read(me: String, room: String, messages: [ChatMessage]) async throws -> [String: Opened?] {
         try await run {
             let e2e = try self.open(me)
-            // Room keys and one-time keys only when something waits to open
-            // (a room on screen is read every few seconds).
-            if messages.contains(where: { $0.sealed != nil && self.opened[$0.id] == nil }), let got = try? e2e.inbox(), got.roomKeys > 0 {
+            // Room keys and one-time keys only when something waits to open,
+            // or waits for its sender to be confirmed (a room on screen is
+            // read every few seconds).
+            if messages.contains(where: { $0.sealed != nil && self.opened[$0.id]?.fromBackup != false }), let got = try? e2e.inbox(), got.roomKeys > 0 {
                 self.refused = []
+                self.opened = self.opened.filter { !$0.value.fromBackup }
             }
-            var out: [String: String?] = [:]
+            var out: [String: Opened?] = [:]
             for m in messages {
                 if let known = self.opened[m.id] { out[m.id] = known; continue }
                 guard m.sealed != nil, !self.refused.contains(m.id) else { out[m.id] = .some(nil); continue }
-                guard let text = try? e2e.decrypt(room: room, messageJson: m.sealedJSON()).text else {
+                guard let opened = try? e2e.decrypt(room: room, messageJson: m.sealedJSON()) else {
                     self.refused.insert(m.id)
                     out[m.id] = .some(nil)
                     continue
                 }
-                self.opened[m.id] = text
-                out[m.id] = text
+                self.opened[m.id] = opened
+                out[m.id] = opened
             }
             return out
         }
@@ -189,10 +195,19 @@ final class EndToEnd: @unchecked Sendable {
         }
     }
 
+    /// The organisation's escrow key, shown before recovery is set up: nil
+    /// when there is none; E2eError.Invalid when no administrator signed it
+    /// (set-up is refused).
+    func escrowInfo(me: String) async throws -> EscrowInfo? {
+        try await run { try self.open(me).escrowInfo() }
+    }
+
     /// Recovery set up from this phone (nobody set it up yet): the recovery
-    /// key, shown to the person once.
-    func setUpRecovery(me: String) async throws -> String {
-        try await run { try self.open(me).setUpRecovery() }
+    /// key, shown to the person once. `acceptedEscrowKey` is the escrow key
+    /// the person was shown (`escrowInfo`); with an escrow, another one or
+    /// none is refused.
+    func setUpRecovery(me: String, acceptedEscrowKey: String?) async throws -> String {
+        try await run { try self.open(me).setUpRecovery(acceptedEscrowKey: acceptedEscrowKey) }
     }
 
     func unverified(me: String, room: String) async throws -> [DeviceRef] {

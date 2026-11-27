@@ -177,6 +177,14 @@
 "chat.recoveryRestored %lld" = "Recovered: %lld room keys back.";
 "chat.recoveryWrong" = "That is not your recovery key.";
 "chat.recoveryHere" = "Recovery is set up, and this phone is vouched for.";
+"chat.fromBackup" = "From the backup: the sender could not be confirmed.";
+"chat.recoveryEscrowInfo %@ %@ %@" = "Your organisation can recover your history. Escrow key %1$@, set by %2$@ (%3$@).";
+"chat.escrowSignerYou" = "you";
+"chat.escrowSignerVerified" = "verified by you";
+"chat.escrowSignerUnverified" = "not verified by you";
+"chat.recoveryEscrowChanged" = "The organisation's escrow key changed since you last set up recovery.";
+"chat.recoveryEscrowUnsigned" = "The organisation's escrow key is not signed by an administrator: ask them to make it again.";
+"chat.recoveryEscrowNotShown" = "The organisation's escrow key is not the one you were shown: look at it again.";
 "chat.verifyMine" = "Verify my other device";
 "chat.unverified %lld" = "%lld unverified devices";
 "chat.verifyTitle" = "Verify a device";

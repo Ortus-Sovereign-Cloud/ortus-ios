@@ -178,6 +178,14 @@
 "chat.recoveryRestored %lld" = "Recuperate: %lld chiavi di stanza.";
 "chat.recoveryWrong" = "Questa non è la sua chiave di recupero.";
 "chat.recoveryHere" = "Il recupero è configurato e questo telefono è confermato.";
+"chat.fromBackup" = "Dal backup: non è stato possibile confermare il mittente.";
+"chat.recoveryEscrowInfo %@ %@ %@" = "La Sua organizzazione può recuperare la Sua cronologia. Chiave di deposito %1$@, impostata da %2$@ (%3$@).";
+"chat.escrowSignerYou" = "Lei";
+"chat.escrowSignerVerified" = "verificato da Lei";
+"chat.escrowSignerUnverified" = "non verificato da Lei";
+"chat.recoveryEscrowChanged" = "La chiave di deposito dell’organizzazione è cambiata dall’ultima volta che ha impostato il recupero.";
+"chat.recoveryEscrowUnsigned" = "La chiave di deposito dell’organizzazione non è firmata da un amministratore: chieda di crearla di nuovo.";
+"chat.recoveryEscrowNotShown" = "La chiave di deposito dell’organizzazione non è quella che Le è stata mostrata: la guardi di nuovo.";
 "chat.verifyMine" = "Verifica il mio altro dispositivo";
 "chat.unverified %lld" = "Dispositivi non verificati: %lld";
 "chat.verifyTitle" = "Verifica un dispositivo";

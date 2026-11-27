@@ -61,3 +61,27 @@ public struct VerificationParty: Equatable, Sendable {
         name = isMe ? nil : personName(user, in: people)
     }
 }
+
+/// Who set the organisation's escrow key, as recovery set-up says it (the
+/// web's words): the person themself ("you"), else their name when known,
+/// else their id; and whether the person verified them.
+public struct EscrowSigner: Equatable, Sendable {
+    public enum Status: Equatable, Sendable { case you, verified, unverified }
+    /// The person themself set it.
+    public let isMe: Bool
+    /// Their name when known, else their Matrix id.
+    public let name: String
+    public let status: Status
+
+    /// `status` as the end-to-end library says it: you, verified or unverified.
+    public init(signer: String, status: String, me: String?, people: [String: Person]) {
+        let party = VerificationParty(user: signer, device: nil, me: me, people: people)
+        isMe = party.isMe
+        name = party.name ?? signer
+        switch status {
+        case "you": self.status = .you
+        case "verified": self.status = .verified
+        default: self.status = .unverified
+        }
+    }
+}

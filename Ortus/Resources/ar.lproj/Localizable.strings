@@ -177,6 +177,14 @@
 "chat.recoveryRestored %lld" = "تم الاسترداد: %lld من مفاتيح الغرف.";
 "chat.recoveryWrong" = "هذا ليس مفتاح الاسترداد الخاص بك.";
 "chat.recoveryHere" = "الاسترداد مضبوط، وهذا الهاتف موثّق.";
+"chat.fromBackup" = "من النسخة الاحتياطية: تعذّر تأكيد المرسل.";
+"chat.recoveryEscrowInfo %@ %@ %@" = "تستطيع مؤسستك استعادة سجلك. مفتاح الضمان %1$@، ضبطه %2$@ (%3$@).";
+"chat.escrowSignerYou" = "أنت";
+"chat.escrowSignerVerified" = "تحققت منه";
+"chat.escrowSignerUnverified" = "لم تتحقق منه";
+"chat.recoveryEscrowChanged" = "تغيّر مفتاح الضمان الخاص بالمؤسسة منذ آخر مرة أعددت فيها الاستعادة.";
+"chat.recoveryEscrowUnsigned" = "مفتاح الضمان الخاص بالمؤسسة غير موقّع من مسؤول: اطلب منه إنشاءه من جديد.";
+"chat.recoveryEscrowNotShown" = "مفتاح الضمان الخاص بالمؤسسة ليس المفتاح الذي عُرض عليك: انظر إليه مرة أخرى.";
 "chat.verifyMine" = "توثيق جهازي الآخر";
 "chat.unverified %lld" = "أجهزة غير موثّقة: %lld";
 "chat.verifyTitle" = "توثيق جهاز";

@@ -629,4 +629,23 @@ final class VerificationTests: XCTestCase {
         XCTAssertEqual("LAPTOP", mine.device)
         XCTAssertNil(VerificationParty(user: "@olena:ministry.example", device: "", me: me, people: people).device)
     }
+
+    func testWhoSetTheEscrowKey() throws {
+        let json = #"{"messages":[],"people":{"@taras:ministry.example":{"name":"Taras"},"olena":{"name":"Olena"}}}"#
+        let people = try JSONDecoder().decode(Messages.self, from: Data(json.utf8)).people
+        let me = "@olena:ministry.example"
+        let taras = EscrowSigner(signer: "@taras:ministry.example", status: "verified", me: me, people: people)
+        XCTAssertEqual("Taras", taras.name)
+        XCTAssertEqual(.verified, taras.status)
+        XCTAssertFalse(taras.isMe)
+        // Someone not known: by id.
+        let nobody = EscrowSigner(signer: "@nobody:ministry.example", status: "unverified", me: me, people: people)
+        XCTAssertEqual("@nobody:ministry.example", nobody.name)
+        XCTAssertEqual(.unverified, nobody.status)
+        let mine = EscrowSigner(signer: me, status: "you", me: me, people: people)
+        XCTAssertTrue(mine.isMe)
+        XCTAssertEqual(.you, mine.status)
+        // A status this phone does not know is not taken as verified.
+        XCTAssertEqual(.unverified, EscrowSigner(signer: "@taras:ministry.example", status: "trusted", me: me, people: people).status)
+    }
 }

@@ -178,6 +178,14 @@
 "chat.recoveryRestored %lld" = "Recuperado: %lld claves de sala.";
 "chat.recoveryWrong" = "Esa no es su clave de recuperación.";
 "chat.recoveryHere" = "La recuperación está configurada y este teléfono, confirmado.";
+"chat.fromBackup" = "De la copia de seguridad: no se pudo confirmar el remitente.";
+"chat.recoveryEscrowInfo %@ %@ %@" = "Su organización puede recuperar su historial. Clave de custodia %1$@, definida por %2$@ (%3$@).";
+"chat.escrowSignerYou" = "usted";
+"chat.escrowSignerVerified" = "verificado por usted";
+"chat.escrowSignerUnverified" = "no verificado por usted";
+"chat.recoveryEscrowChanged" = "La clave de custodia de la organización cambió desde la última vez que configuró la recuperación.";
+"chat.recoveryEscrowUnsigned" = "La clave de custodia de la organización no está firmada por un administrador: pídale que la vuelva a crear.";
+"chat.recoveryEscrowNotShown" = "La clave de custodia de la organización no es la que se le mostró: vuelva a mirarla.";
 "chat.verifyMine" = "Verificar mi otro dispositivo";
 "chat.unverified %lld" = "Dispositivos sin verificar: %lld";
 "chat.verifyTitle" = "Verificar un dispositivo";

@@ -108,7 +108,7 @@ struct ChatRoomView: View {
     let title: String
     let root: String?
     @State private var messages: Messages?
-    @State private var texts: [String: String?] = [:]
+    @State private var texts: [String: Opened?] = [:]
     @State private var unavailable = false
     @State private var text = ""
     @State private var note: String?
@@ -224,7 +224,7 @@ struct ChatRoomView: View {
     @ViewBuilder
     private func row(_ m: ChatMessage) -> some View {
         let name = messages?.people[m.sender]?.name ?? m.sender
-        let shownText: String? = sealed ? (texts[m.id] ?? nil) : m.text
+        let shownText: String? = sealed ? (texts[m.id] ?? nil)?.text : m.text
         HStack(alignment: .top, spacing: 10) {
             Text(initials(name)).font(.caption.bold()).foregroundStyle(Theme.background)
                 .frame(width: 32, height: 32).background(Theme.accent.opacity(0.85), in: RoundedRectangle(cornerRadius: 8))
@@ -238,6 +238,10 @@ struct ChatRoomView: View {
                     Text(shownText).foregroundStyle(Theme.text).accessibilityIdentifier("opened")
                 } else {
                     Text("chat.cannotOpen").font(.subheadline).foregroundStyle(Theme.text2).accessibilityIdentifier("cannotOpen")
+                }
+                // Its room key came from the backup, not from the sender.
+                if sealed, (texts[m.id] ?? nil)?.fromBackup == true {
+                    Text("chat.fromBackup").font(.caption).foregroundStyle(Theme.text2).accessibilityIdentifier("fromBackup")
                 }
                 if root == nil {
                     let n = m.replies ?? 0

@@ -177,6 +177,14 @@
 "chat.recoveryRestored %lld" = "Відновлено ключів кімнат: %lld.";
 "chat.recoveryWrong" = "Це не ваш ключ відновлення.";
 "chat.recoveryHere" = "Відновлення налаштоване, і цей телефон засвідчено.";
+"chat.fromBackup" = "З резервної копії: відправника не вдалося підтвердити.";
+"chat.recoveryEscrowInfo %@ %@ %@" = "Ваша організація може відновити вашу історію. Депозитний ключ %1$@, задав: %2$@ (%3$@).";
+"chat.escrowSignerYou" = "ви";
+"chat.escrowSignerVerified" = "перевірено вами";
+"chat.escrowSignerUnverified" = "не перевірено вами";
+"chat.recoveryEscrowChanged" = "Депозитний ключ організації змінився відтоді, як ви востаннє налаштовували відновлення.";
+"chat.recoveryEscrowUnsigned" = "Депозитний ключ організації не підписаний адміністратором: попросіть створити його знову.";
+"chat.recoveryEscrowNotShown" = "Депозитний ключ організації не той, що вам показали: перегляньте його ще раз.";
 "chat.verifyMine" = "Перевірити мій інший пристрій";
 "chat.unverified %lld" = "Неперевірених пристроїв: %lld";
 "chat.verifyTitle" = "Перевірка пристрою";

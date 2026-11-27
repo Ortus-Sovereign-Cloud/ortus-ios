@@ -15,8 +15,15 @@ let sasEmoji = [
     "🔨", "☎️", "🏁", "🚂", "🚲", "✈️", "🚀", "🏆", "⚽", "🎸", "🎺", "🔔", "⚓", "🎧", "📁", "📌",
 ]
 
-/// Recovery: set up here (the key shown once) or on a computer; with it set
-/// up, the recovery key brings this phone's history and vouches for it;
+/// The end-to-end library's refusals of an escrow key (its words, said
+/// here in the person's language).
+let escrowUnsigned = "The organisation's escrow key is not signed by an administrator: ask them to make it again."
+let escrowNotAccepted = "The organisation's escrow key is not the one you were shown: look at it again."
+
+/// Recovery: set up here (the key shown once, after the organisation's
+/// escrow key that can recover the person's history too: its fingerprint,
+/// who set it and whether the person verified them) or on a computer; with
+/// it set up, the recovery key brings this phone's history and vouches for it;
 /// recovered, it can verify the person's other device.
 struct RecoverySheet: View {
     @EnvironmentObject var model: AppModel
@@ -27,6 +34,11 @@ struct RecoverySheet: View {
     @State private var busy = false
     /// The recovery key just made here: shown this once.
     @State private var madeKey: String?
+    /// The organisation's escrow key, as shown to the person: set-up seals
+    /// the recovery key to this one only. Set-up is offered once it is
+    /// known (none, or a signed one), never after an error.
+    @State private var escrow: EscrowInfo?
+    @State private var escrowKnown = false
 
     var body: some View {
         NavigationStack {
@@ -54,9 +66,17 @@ struct RecoverySheet: View {
                 } else if let state {
                     if !state.set {
                         Text("chat.recoverySetUpLead")
-                        Button("chat.recoverySetUp") { Task { await setUp() } }
-                            .disabled(busy)
-                            .accessibilityIdentifier("recoverySetUp")
+                        if let escrow {
+                            Text(escrowLine(escrow)).accessibilityIdentifier("recoveryEscrow")
+                            if escrow.changed {
+                                Text("chat.recoveryEscrowChanged").accessibilityIdentifier("recoveryEscrowChanged")
+                            }
+                        }
+                        if escrowKnown {
+                            Button("chat.recoverySetUp") { Task { await setUp() } }
+                                .disabled(busy)
+                                .accessibilityIdentifier("recoverySetUp")
+                        }
                     } else if !state.here {
                         Text("chat.recoveryEnterLead")
                         TextField(String(localized: "chat.recoveryKey"), text: $key)
@@ -97,6 +117,44 @@ struct RecoverySheet: View {
     private func reload() async {
         guard let me = model.chatMe else { return }
         state = try? await model.endToEnd()?.recoveryState(me: me)
+        if state?.set == false { await loadEscrow() }
+    }
+
+    /// The escrow to show before set-up (none, or why set-up is refused).
+    private func loadEscrow() async {
+        escrow = nil
+        escrowKnown = false
+        guard let me = model.chatMe, let e2e = model.endToEnd() else { return }
+        do {
+            escrow = try await e2e.escrowInfo(me: me)
+            escrowKnown = true
+        } catch {
+            note = escrowError(error)
+        }
+    }
+
+    /// "Escrow key …, set by … (…)", in the web's words.
+    private func escrowLine(_ e: EscrowInfo) -> String {
+        let signer = EscrowSigner(signer: e.signer, status: e.signerStatus, me: model.chatMe, people: model.chatPeople)
+        let you = String(localized: "chat.escrowSignerYou")
+        let status: String
+        switch signer.status {
+        case .you: status = you
+        case .verified: status = String(localized: "chat.escrowSignerVerified")
+        case .unverified: status = String(localized: "chat.escrowSignerUnverified")
+        }
+        let name = signer.isMe ? you : signer.name
+        return String(localized: "chat.recoveryEscrowInfo \(e.fingerprint) \(name) \(status)")
+    }
+
+    /// Set-up's refusals of the escrow, in the person's language.
+    private func escrowError(_ error: Error) -> String {
+        if case E2eError.Invalid(let detail) = error {
+            if detail == escrowUnsigned { return String(localized: "chat.recoveryEscrowUnsigned") }
+            if detail == escrowNotAccepted { return String(localized: "chat.recoveryEscrowNotShown") }
+            return detail
+        }
+        return model.say(error)
     }
 
     /// Recovery from this phone: the key, shown once.
@@ -105,11 +163,14 @@ struct RecoverySheet: View {
         busy = true
         defer { busy = false }
         do {
-            madeKey = try await e2e.setUpRecovery(me: me)
+            madeKey = try await e2e.setUpRecovery(me: me, acceptedEscrowKey: escrow?.key)
             note = nil
             model.trustChanged += 1
         } catch {
-            note = model.say(error)
+            let said = escrowError(error)
+            // The escrow changed meanwhile: the one set-up would use now is shown.
+            if case E2eError.Invalid(let detail) = error, detail == escrowNotAccepted { await loadEscrow() }
+            note = said
         }
     }
 
