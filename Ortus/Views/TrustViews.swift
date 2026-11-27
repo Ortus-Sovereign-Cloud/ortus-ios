@@ -323,7 +323,7 @@ private struct VerificationSheet: View {
                 case "incoming":
                     Text("chat.verifyIncoming")
                     HStack {
-                        Button("chat.verifyDecline") { close() }.buttonStyle(.bordered)
+                        Button("chat.verifyDecline") { close() }.buttonStyle(.bordered).accessibilityIdentifier("verifyDecline")
                         Button("chat.verifyAccept") { act { try await $0.acceptVerification(me: me, id: v.id) } }
                             .buttonStyle(.borderedProminent).accessibilityIdentifier("verifyAccept")
                     }

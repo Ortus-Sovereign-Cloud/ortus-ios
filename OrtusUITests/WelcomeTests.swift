@@ -174,8 +174,7 @@ final class WelcomeTests: XCTestCase {
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
         if springboard.buttons["Open"].waitForExistence(timeout: 5) { springboard.buttons["Open"].tap() }
         // The link names its installation; the person says yes.
-        XCTAssertTrue(app.buttons["confirmLink"].waitForExistence(timeout: 20), "the link's installation to confirm")
-        app.buttons["confirmLink"].tap()
+        confirmLink(app)
         XCTAssertTrue(app.buttons["makeKey"].waitForExistence(timeout: 30),
                       app.staticTexts["error"].exists ? app.staticTexts["error"].label : "not joined; screen:\n\(app.debugDescription)\nsystem:\n\(springboard.debugDescription)")
     }
@@ -219,8 +218,7 @@ final class WelcomeTests: XCTestCase {
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
         if springboard.buttons["Open"].waitForExistence(timeout: 5) { springboard.buttons["Open"].tap() }
         // The link names its installation; the person says yes.
-        XCTAssertTrue(app.buttons["confirmLink"].waitForExistence(timeout: 20), "the link's installation to confirm")
-        app.buttons["confirmLink"].tap()
+        confirmLink(app)
         XCTAssertTrue(app.buttons["makeKey"].waitForExistence(timeout: 30),
                       app.staticTexts["error"].exists ? app.staticTexts["error"].label : "not signed in; screen:\n\(app.debugDescription)")
         attach(app, "phone-link")
@@ -316,8 +314,7 @@ final class WelcomeTests: XCTestCase {
         XCUIDevice.shared.system.open(open.url!)
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
         if springboard.buttons["Open"].waitForExistence(timeout: 5) { springboard.buttons["Open"].tap() }
-        XCTAssertTrue(app.buttons["confirmLink"].waitForExistence(timeout: 20), "the link's installation to confirm")
-        app.buttons["confirmLink"].tap()
+        confirmLink(app)
         XCTAssertTrue(app.buttons["makeKey"].waitForExistence(timeout: 30), "not signed in; screen:\n\(app.debugDescription)")
         app.buttons["makeKey"].tap()
         XCTAssertTrue(app.tabBars.buttons["Chat"].waitForExistence(timeout: 20))
@@ -331,8 +328,17 @@ final class WelcomeTests: XCTestCase {
         // Recovery: not set up yet, so the phone sets it up and shows the key once.
         app.buttons["recoveryOpen"].tap()
         XCTAssertTrue(app.buttons["recoverySetUp"].waitForExistence(timeout: 20), "the recovery sheet; screen:\n\(app.debugDescription)")
+        // This organisation has no escrow key: set-up names none. (A signed
+        // one needs an administrator's browser to sign it with their master
+        // key, which the test server's setup cannot do.)
+        XCTAssertFalse(app.descendants(matching: .any)["recoveryEscrow"].firstMatch.exists, "an escrow key named where there is none; screen:\n\(app.debugDescription)")
         app.buttons["recoverySetUp"].tap()
-        XCTAssertTrue(app.descendants(matching: .any)["recoveryKeyShown"].firstMatch.waitForExistence(timeout: 40), "the recovery key; screen:\n\(app.debugDescription)")
+        let shownKey = app.descendants(matching: .any)["recoveryKeyShown"].firstMatch
+        XCTAssertTrue(shownKey.waitForExistence(timeout: 40), "the recovery key; screen:\n\(app.debugDescription)")
+        // Saved: the key is not shown again; recovery is set up, with this phone vouched for.
+        app.buttons["recoverySaved"].tap()
+        XCTAssertTrue(app.buttons["verifyMine"].waitForExistence(timeout: 20), "recovery set up on this phone; screen:\n\(app.debugDescription)")
+        XCTAssertFalse(shownKey.exists, "the recovery key shown again")
         app.buttons["Close"].firstMatch.tap()
         // The room is open once the server lists the phone's device.
         let listed = expectation(for: NSPredicate { _, _ in Self.api("GET", "/chat/rooms/\(room)/devices", session: owner).1.contains("\"PHONE") }, evaluatedWith: nil)
@@ -369,6 +375,17 @@ final class WelcomeTests: XCTestCase {
         wait(for: [counted], timeout: 30)
         replies.tap()
         XCTAssertTrue(app.staticTexts["District 5 needs one too"].waitForExistence(timeout: 20), "the thread, opened; screen:\n\(app.debugDescription)")
+
+        // The other device asks to verify: the phone says who asks (the
+        // person themself, that device), wherever the phone is.
+        let devices = Self.api("GET", "/chat/rooms/\(room)/devices", session: owner).1
+        let phoneDevice = try XCTUnwrap(devices.range(of: #""PHONE[A-Za-z0-9_-]*""#, options: .regularExpression).map { String(devices[$0].dropFirst().dropLast()) }, "the phone's device id: \(devices)")
+        _ = try peer.verifyDevice(user: me, device: phoneDevice)
+        let who = app.descendants(matching: .any)["verifyWho"].firstMatch
+        XCTAssertTrue(who.waitForExistence(timeout: 30), "the incoming verification, with who asks; screen:\n\(app.debugDescription)")
+        XCTAssertTrue(who.label.contains("TESTPEER"), "who asks: \(who.label)")
+        attach(app, "verify-who")
+        app.buttons["verifyDecline"].tap()
         try? peer.forget()
     }
 
@@ -552,6 +569,20 @@ final class WelcomeTests: XCTestCase {
             }
             app.terminate()
         }
+    }
+
+    /// The link names its installation; the person says yes. A tap the
+    /// simulator drops under load (the question still there long after)
+    /// is made again: a taken one removes the question, so none is taken twice.
+    private func confirmLink(_ app: XCUIApplication) {
+        let confirm = app.buttons["confirmLink"]
+        XCTAssertTrue(confirm.waitForExistence(timeout: 20), "the link's installation to confirm")
+        let gone = NSPredicate(format: "exists == false")
+        for _ in 0..<3 where confirm.exists {
+            if confirm.isHittable { confirm.tap() }
+            _ = XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: gone, object: confirm)], timeout: 10)
+        }
+        XCTAssertFalse(confirm.exists, "the link's installation still asks; screen:\n\(app.debugDescription)")
     }
 
     /// Taps the element with this identifier, whatever kind it is, scrolling
