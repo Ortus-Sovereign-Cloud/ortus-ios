@@ -38,7 +38,8 @@ final class NativeCall: NSObject, ObservableObject {
     private var audioTrack: RTCAudioTrack?
     private var session: String?
     private var info: CallInfo?
-    private var videos: [String: RTCVideoTrack] = [:]
+    /// Each other session's video tracks, by the sender's mid (camera and screen).
+    private var videos: [String: [String: RTCVideoTrack]] = [:]
     private let joiner = CallParts.Joiner()
     private var reporting: Task<Void, Never>?
 
@@ -153,7 +154,11 @@ final class NativeCall: NSObject, ObservableObject {
         var all = (info?.sessions.map(\.session) ?? []) + [extra].compactMap { $0 } + Array(videos.keys)
         var seen = Set<String>()
         all = all.filter { $0 != me && seen.insert($0).inserted }
-        remotes = all.map { Remote(id: $0, name: info?.name(of: $0) ?? "…", video: videos[$0]) }
+        remotes = all.map { s in
+            let mine = videos[s] ?? [:]
+            let camera = info.map { $0.camera(of: s, mids: mine.keys) } ?? CallInfo.first(mine.keys)
+            return Remote(id: s, name: info?.name(of: s) ?? "…", video: camera.flatMap { mine[$0] })
+        }
     }
 
     func toggleMute() {
@@ -243,7 +248,7 @@ extension NativeCall: RTCPeerConnectionDelegate {
         guard let who = mediaStreams.first?.streamId else { return }
         let track = rtpReceiver.track as? RTCVideoTrack
         Task { @MainActor in
-            if let track { self.videos[who] = track }
+            if let track { self.videos[who, default: [:]][track.trackId] = track }
             self.refresh(who)
         }
     }

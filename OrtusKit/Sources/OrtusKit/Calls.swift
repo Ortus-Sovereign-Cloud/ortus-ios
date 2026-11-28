@@ -20,6 +20,12 @@ public struct CallSession: Decodable, Equatable, Sendable {
     public let user: String
     public let muted: Bool?
     public let camera: Bool?
+    /// The mid of the video they share, when they share one.
+    public let screen: String?
+
+    public init(session: String, user: String, muted: Bool? = nil, camera: Bool? = nil, screen: String? = nil) {
+        (self.session, self.user, self.muted, self.camera, self.screen) = (session, user, muted, camera, screen)
+    }
 }
 
 public struct CallInfo: Decodable, Equatable, Sendable {
@@ -32,6 +38,19 @@ public struct CallInfo: Decodable, Equatable, Sendable {
     /// The name of whoever a session (a remote stream's id) belongs to.
     public func name(of session: String) -> String? {
         sessions.first { $0.session == session }.flatMap { people[$0.user]?.name }
+    }
+
+    /// Of a session's video tracks (by the sender's mid, as the node names
+    /// them), the camera's: never the screen's, and else the first mid
+    /// (every client adds its camera before its screen).
+    public func camera(of session: String, mids: some Collection<String>) -> String? {
+        let screen = sessions.first { $0.session == session }?.screen
+        return Self.first(mids.filter { $0 != screen })
+    }
+
+    /// The lowest mid, by number.
+    public static func first(_ mids: some Collection<String>) -> String? {
+        mids.min { (Int($0) ?? .max, $0) < (Int($1) ?? .max, $1) }
     }
 }
 

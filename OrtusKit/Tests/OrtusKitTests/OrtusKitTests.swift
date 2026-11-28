@@ -5,6 +5,17 @@ import FoundationNetworking
 #endif
 
 final class EncodingTests: XCTestCase {
+    func testTheCameraIsNeverTheScreen() throws {
+        let body = #"{"id":"c","room":"r","sessions":[{"session":"s1","user":"u1"},{"session":"s2","user":"u2","screen":"2"}],"people":{}}"#
+        let call = try JSONDecoder().decode(CallInfo.self, from: Data(body.utf8))
+        // A browser sends its camera (mid 1) and its screen (mid 2), shared or not.
+        XCTAssertEqual("1", call.camera(of: "s1", mids: ["2", "1"]))
+        XCTAssertEqual("1", call.camera(of: "s2", mids: ["2", "1"]))
+        XCTAssertEqual("10", call.camera(of: "s1", mids: ["10", "9x"]))
+        XCTAssertNil(call.camera(of: "s2", mids: ["2"]))
+        XCTAssertNil(call.camera(of: "s1", mids: [String]()))
+    }
+
     func testSHA256() {
         XCTAssertEqual(SHA256.hash(Data("abc".utf8)).map { String(format: "%02x", $0) }.joined(),
                        "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad")

@@ -128,7 +128,8 @@ private struct Tile: View {
     var body: some View {
         ZStack(alignment: track == nil ? .center : .bottomLeading) {
             Theme.surface2
-            if let track { Video(track: track, mirror: mirror, pip: pip) }
+            // A new track (the camera after the screen's) needs a new renderer.
+            if let track { Video(track: track, mirror: mirror, pip: pip).id(ObjectIdentifier(track)) }
             if let name { Text(name).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.text).padding(8) }
         }
         .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -141,7 +142,10 @@ private struct Video: UIViewRepresentable {
     /// This tile's video goes on in a small window when the app is left.
     let pip: Bool
 
-    final class Coordinator { var pip: AVPictureInPictureController? }
+    final class Coordinator {
+        var pip: AVPictureInPictureController?
+        var track: RTCVideoTrack?
+    }
     func makeCoordinator() -> Coordinator { Coordinator() }
 
     func makeUIView(context: Context) -> RTCMTLVideoView {
@@ -149,6 +153,7 @@ private struct Video: UIViewRepresentable {
         v.videoContentMode = .scaleAspectFill
         if mirror { v.transform = CGAffineTransform(scaleX: -1, y: 1) }
         track.add(v)
+        context.coordinator.track = track
         if pip, AVPictureInPictureController.isPictureInPictureSupported() {
             let small = AVPictureInPictureVideoCallViewController()
             small.preferredContentSize = CGSize(width: 360, height: 480)
@@ -170,5 +175,6 @@ private struct Video: UIViewRepresentable {
     static func dismantleUIView(_ view: RTCMTLVideoView, coordinator: Coordinator) {
         coordinator.pip?.stopPictureInPicture()
         coordinator.pip = nil
+        coordinator.track?.remove(view)
     }
 }
